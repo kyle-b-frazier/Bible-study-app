@@ -112,7 +112,8 @@
   }
 
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0; overflow-x:hidden; max-width:100%;}
+  /* clip (not hidden) so html/body don't become scroll containers, which silently breaks position:sticky */
+  html,body{margin:0;padding:0; overflow-x:hidden; overflow-x:clip; max-width:100%;}
   body{
     background: var(--bg);
     color: var(--text);
@@ -912,6 +913,7 @@
   .mdrawer-ic svg{width:15px; height:15px;}
   @media (max-width: 900px){
     .mobile-only, .btn.icon.mobile-only{display:inline-flex;}
+    .mobile-drawer-row{top:55px;} /* header is taller here: it carries the 36px icon buttons */
     .rail{display:none !important;}
     .lesson-toolbar{display:none !important;}
     .main-wrap{margin-left:0 !important;}
@@ -996,6 +998,60 @@
   .chip-ai:hover{box-shadow:var(--shadow-xs);}
   .chip-ai.status-stale{background:var(--danger-soft); color:var(--danger); border-color:rgba(162,75,62,.3);}
   .chip-ai.status-fresh{background:var(--accent-soft); color:var(--accent); border-color:transparent;}
+  /* ================= Word-style editing surface ================= */
+  :root{ --canvas:#E6E6E2; }
+  html[data-theme="dark"]{ --canvas:#111315; }
+  main{background:var(--canvas); max-width:none; padding-top:0;}
+  .word-ribbon{
+    position:sticky; top:43px; z-index:15; display:flex; align-items:center; flex-wrap:wrap; gap:4px;
+    margin:0 -30px 22px; padding:6px 24px; background:var(--surface); border-bottom:1px solid var(--border);
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .rb-grp{display:flex; align-items:center; gap:2px; padding:0 8px; border-right:1px solid var(--border);}
+  .rb-grp:first-child{padding-left:0;}
+  .rb-grp:last-child{border-right:none;}
+  .rb-btn{height:30px; min-width:30px; padding:0 6px; border:1px solid transparent; border-radius:4px; background:transparent; color:var(--text); font:inherit; font-size:.92rem; display:inline-flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;}
+  .rb-btn:hover:not(:disabled){background:var(--bg); border-color:var(--border);}
+  .rb-btn.active{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+  .rb-btn:disabled{opacity:.35; cursor:default;}
+  .rb-btn.rb-text{font-size:.8rem; font-weight:600; padding:0 9px;}
+  .rb-label{font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); margin-right:4px;}
+  .rb-select{height:30px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--text); font:inherit; font-size:.82rem; padding:0 6px;}
+  .rb-style{width:150px;}
+  .rb-select:disabled{opacity:.45;}
+  .rb-color-wrap{position:relative;}
+  .rb-color-a{font-weight:700; line-height:1; display:block;}
+  #rbColorBtn{flex-direction:column; gap:1px;}
+  .rb-color-bar{display:block; width:16px; height:3px; border-radius:1px; background:var(--text);}
+  .rb-color-menu{display:none; position:absolute; top:34px; left:0; z-index:30; background:var(--surface); border:1px solid var(--border); border-radius:6px; box-shadow:var(--shadow-md); padding:8px; gap:6px;}
+  .rb-color-menu.open{display:flex;}
+  .rb-swatch{width:22px; height:22px; border-radius:4px; border:1px solid var(--border); cursor:pointer; padding:0;}
+  .rb-swatch.default{background:linear-gradient(135deg, #fff 45%, #A24B3E 46%, #A24B3E 54%, #fff 55%);}
+  .ws-view{display:flex; align-items:center;}
+  .ws-view .segmented{padding:1px;}
+  .ws-view .segmented button{font-size:.7rem; padding:2px 8px;}
+  /* The page: a sheet of letter paper on a grey desk */
+  #panel-outline #mainTree.doc-view,
+  body.outline-style-classic #panel-outline #mainTree{
+    max-width:816px; min-height:1056px; padding:84px 92px 110px; border:none; border-radius:2px;
+    box-shadow:0 1px 3px rgba(0,0,0,.12), 0 6px 20px rgba(0,0,0,.07);
+  }
+  .word-status{
+    position:sticky; bottom:0; z-index:15; display:flex; align-items:center; gap:18px; padding:5px 20px;
+    background:var(--surface-2); border-top:1px solid var(--border); font-size:.74rem; color:var(--text-dim);
+  }
+  .word-status > span{white-space:nowrap;}
+  .word-status .ws-hint{margin-left:auto; color:var(--text-faint);}
+  @media (max-width: 900px){
+    main{padding-left:16px; padding-right:16px;}
+    .word-ribbon{position:static; margin:0 -16px 14px; padding:6px 12px; flex-wrap:nowrap; overflow-x:auto;}
+    .word-status{gap:12px; padding:5px 12px;}
+    .ws-view{margin-left:auto;}
+    #wsPage, #wsVerses{display:none;} /* page count is only meaningful at desktop page width */
+    #panel-outline #mainTree.doc-view,
+    body.outline-style-classic #panel-outline #mainTree{min-height:0; padding:28px 20px 60px;}
+    .word-status .ws-hint{display:none;}
+  }
   /* First-visit welcome + sample lesson label */
   .sample-badge{font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8C6A2E; background:#FCEFD1; border-radius:20px; padding:3px 10px; white-space:nowrap;}
   .welcome-card{display:flex; gap:20px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin:4px auto 6px; width:calc(100% - 48px); max-width:1392px; padding:18px 22px; background:var(--accent-soft); border:1px solid var(--border); border-radius:var(--radius);}
@@ -1259,8 +1315,6 @@
       <span id="storageWarning" class="storage-warning" style="display:none;" title="Changes aren't persisting automatically in this session.">⚠ not auto-saving</span>
       <span id="savedIndicator" class="saved-indicator"></span>
       <div class="lesson-toolbar">
-        <button class="btn icon" id="btnUndo" title="Undo last change (⌘Z)" disabled></button>
-        <button class="btn icon" id="btnRedo" title="Redo (⌘⇧Z)" disabled></button>
         <button class="btn icon" id="btnTags" title="Edit tags" style="position:relative;">
           <span class="tb-badge" id="tagsBadge" style="display:none;"></span>
         </button>
@@ -1327,20 +1381,65 @@
     <main>
   <!-- OUTLINE (the single primary working view) -->
   <section id="panel-outline">
-    <div class="outline-toolbar no-print">
-      <button class="btn brass" id="btnNewSection">+ New Section</button>
-      <span class="view-level-wrap" title="Quickly collapse the outline down to just section titles, or down to section + subsection titles">
-        <span class="hint" style="margin:0;">View:</span>
-        <div class="segmented" id="outlineViewSegmented">
-          <button data-level="all" class="active">All</button>
-          <button data-level="sections">Sections only</button>
-          <button data-level="subsections">Subsections only</button>
+    <div class="outline-toolbar word-ribbon no-print" id="wordRibbon" role="toolbar" aria-label="Formatting">
+      <div class="rb-grp">
+        <button class="rb-btn" id="btnUndo" title="Undo (Ctrl+Z)" disabled></button>
+        <button class="rb-btn" id="btnRedo" title="Redo (Ctrl+Shift+Z)" disabled></button>
+      </div>
+      <div class="rb-grp">
+        <select class="rb-select rb-style" id="rbStyle" title="Style of the current line">
+          <option value="heading">Section Heading</option>
+          <option value="statement">Statement</option>
+          <option value="question">Question</option>
+          <option value="application">Application</option>
+          <option value="teachernote">Teacher's Note</option>
+          <option value="verse" disabled>Verse</option>
+          <option value="photo" disabled>Photo</option>
+        </select>
+        <select class="rb-select rb-size" id="rbSize" title="Text size">
+          <option value="small">Small</option>
+          <option value="normal">Normal</option>
+          <option value="large">Large</option>
+          <option value="xlarge">X-Large</option>
+        </select>
+      </div>
+      <div class="rb-grp">
+        <button class="rb-btn rb-fmt" data-rb-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+        <button class="rb-btn rb-fmt" data-rb-fmt="italic" title="Italic (Ctrl+I)"><i style="font-family:Georgia,serif;">I</i></button>
+        <button class="rb-btn rb-fmt" data-rb-fmt="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+        <div class="rb-color-wrap">
+          <button class="rb-btn" id="rbColorBtn" title="Text color" aria-haspopup="true"><span class="rb-color-a">A</span><span class="rb-color-bar" id="rbColorBar"></span></button>
+          <div class="rb-color-menu" id="rbColorMenu"></div>
         </div>
-      </span>
+      </div>
+      <div class="rb-grp">
+        <button class="rb-btn" id="rbOutdent" title="Move out a level (Shift+Tab)"></button>
+        <button class="rb-btn" id="rbIndent" title="Move in a level (Tab)"></button>
+      </div>
+      <div class="rb-grp rb-insert">
+        <span class="rb-label">Insert</span>
+        <button class="rb-btn rb-text" id="btnNewSection" title="Add a new section">Section</button>
+        <button class="rb-btn rb-text" id="rbInsertVerse" title="Look up a verse and insert it below the current line">Verse</button>
+        <button class="rb-btn rb-text" id="rbInsertPhoto" title="Insert a photo below the current line">Photo</button>
+        <button class="rb-btn rb-text" id="rbInsertBrainstorm" title="Pull an idea in from Brainstorm">From Brainstorm</button>
+      </div>
     </div>
     <div class="outline-tree" id="mainTree"></div>
   </section>
     </main>
+    <div class="word-status no-print" id="wordStatus">
+      <span id="wsPage">Page 1 of 1</span>
+      <span id="wsWords">0 words</span>
+      <span id="wsVerses">0 verses</span>
+      <span class="ws-hint">Enter for a new line · Tab to indent · right-click a line for more</span>
+      <span class="view-level-wrap ws-view" title="Quickly collapse the outline down to just section titles, or down to section + subsection titles">
+        <div class="segmented" id="outlineViewSegmented">
+          <button data-level="all" class="active">All</button>
+          <button data-level="sections">Sections</button>
+          <button data-level="subsections">Subsections</button>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 
@@ -1909,6 +2008,7 @@ function icon(name, size){
   let aiSummaryLoading = false;
   let aiSummaryError = '';
   let pendingVerseParentId = null;
+  let pendingVerseAfterId = null;
   let pendingPhotoNodeId = null;
   let pendingBrainstormParentId = null;
   const photoCache = {}; // photoRef -> data URL, kept in memory so rendering stays synchronous
@@ -3870,7 +3970,11 @@ function icon(name, size){
     { keys: '⌘/Ctrl K', label: 'Open command palette / search' },
     { keys: '⌘/Ctrl Z', label: 'Undo' },
     { keys: '⌘/Ctrl Shift Z', label: 'Redo' },
-    { keys: 'Enter', label: 'Save a line and start the next (in Section titles)' },
+    { keys: 'Enter', label: 'Start a new line (splits the line at the cursor)' },
+    { keys: 'Enter on an empty line', label: 'Step back out a level' },
+    { keys: 'Backspace at line start', label: 'Delete an empty line, or join with the line above' },
+    { keys: '↑ / ↓', label: 'Move between lines' },
+    { keys: '⌘/Ctrl B / I / U', label: 'Bold, italic, underline the current line' },
     { keys: 'Tab', label: 'Indent the current line into the section above it' },
     { keys: 'Shift Tab', label: 'Outdent the current line back out a level' },
     { keys: '+', label: 'Open a menu to add any kind of item after the current line' },
@@ -4518,11 +4622,15 @@ function icon(name, size){
       const msg = emptyMessages[lesson.id ? (lesson.id.charCodeAt(1)||0) % emptyMessages.length : 0];
       container.innerHTML = `<div class="empty-state">${icon('heading',20)}<div style="margin-top:8px;">${escapeHtml(msg)}</div></div>`;
       renderTimingControls();
+      updateRibbonState();
+      updateWordStatus();
       return;
     }
     container.innerHTML = renderNodesEditable(lesson.outline, 0);
     autosizeVisibleTextareas(container);
     renderTimingControls();
+    updateRibbonState();
+    updateWordStatus();
   }
 
   let brainstormFilter = 'all';
@@ -5329,7 +5437,14 @@ ${sourceLines.join('\n')}`;
     renderBookGrid();
     document.getElementById('verseModalOverlay').classList.add('open');
   }
-  function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; }
+  function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; }
+  // When the ribbon's Insert > Verse opened the modal, move the new verse to sit right after the line the cursor was on.
+  function placeVerseAfterCursor(newId){
+    const afterId = pendingVerseAfterId;
+    if(!afterId || afterId === newId || !findContext(afterId)) return;
+    const node = removeNodeById(newId);
+    if(node) insertRelative(afterId, node, 'after');
+  }
   async function jumpToCrossRef(nodeId, refStr){
     const inBrainstorm = (lesson.brainstorm||[]).some(n=>n.id===nodeId);
     let parentId = 'brainstorm';
@@ -5368,6 +5483,7 @@ ${sourceLines.join('\n')}`;
     if(!ref || !text){ await appAlert('Add both a reference and the verse text.'); return; }
     pushUndo();
     const newId = addVerseNode(pendingVerseParentId, {ref: ref, text: text});
+    placeVerseAfterCursor(newId);
     await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList();
     triggerCrossRefSuggestions(newId);
   }
@@ -5376,6 +5492,7 @@ ${sourceLines.join('\n')}`;
     if(!result){ await appAlert('Select at least one verse first.'); return; }
     pushUndo();
     const newId = addVerseNode(pendingVerseParentId, {ref: result.ref, text: result.text});
+    placeVerseAfterCursor(newId);
     await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList();
     triggerCrossRefSuggestions(newId);
   }
@@ -6801,6 +6918,8 @@ ${sourceLines.join('\n')}`;
   mainTree.addEventListener('focusin', (e)=>{
     const ta = e.target.closest && e.target.closest('textarea.node-text[data-id]');
     if(ta) lastFocusedNodeId = ta.dataset.id;
+    else { const row = e.target.closest && e.target.closest('.node[data-id]'); if(row) lastFocusedNodeId = row.dataset.id; }
+    updateRibbonState();
   });
   function openQuickAddMenuAt(afterId){
     const menu = document.getElementById('nodeContextMenu');
@@ -6957,10 +7076,12 @@ ${sourceLines.join('\n')}`;
       updateNodeField(t.dataset.id, t.dataset.field, t.value);
       if(t.tagName==='TEXTAREA'){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
       scheduleAutosave();
+      scheduleWordStatus();
     }
   });
   mainTree.addEventListener('change', async (e)=>{
     const t = e.target;
+    if(!t.isConnected) return; // stale event from a box that a re-render just replaced
     if(t.matches('.fmt-size')){
       const ctx = findContext(t.dataset.id);
       if(ctx){
@@ -7019,34 +7140,268 @@ ${sourceLines.join('\n')}`;
       return;
     }
 
+    if((e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
+      e.preventDefault();
+      await toggleNodeFormat(id, {b:'bold', i:'italic', u:'underline'}[e.key.toLowerCase()]);
+      return;
+    }
+
+    const caretAtStart = t.selectionStart === 0 && t.selectionEnd === 0;
+    const caretAtEnd = t.selectionStart === t.value.length && t.selectionEnd === t.value.length;
+
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
       pushUndo();
       ctx.node.text = t.value;
 
+      // Section heading: Enter starts the section's first line, like typing under a heading in Word.
       if(ctx.node.kind === 'heading'){
-        await saveLesson();
         const newChild = makeNode('statement');
         ctx.node.children = ctx.node.children || [];
-        ctx.node.children.push(newChild);
+        ctx.node.children.unshift(newChild);
+        ctx.node.collapsed = false;
         await saveLesson();
         renderTree();
-        requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`textarea[data-id="${newChild.id}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+        focusNodeText(newChild.id, 0);
         return;
       }
 
       if(FLOW_KINDS.includes(ctx.node.kind)){
-        const auto = autoClassifyKind(t.value);
+        // Enter on an empty indented line steps back out a level (Word list behaviour).
+        if(!t.value.trim() && ctx.parentNode){
+          await outdentNode(id);
+          focusNodeText(id, 0);
+          return;
+        }
+        // Otherwise split at the cursor: text after it moves to a new line below.
+        const before = t.value.slice(0, t.selectionStart);
+        const after = t.value.slice(t.selectionEnd);
+        ctx.node.text = before;
+        // Sync the old box too: the browser fires a late 'change' from it while the tree re-renders.
+        t.value = before;
+        const auto = autoClassifyKind(before);
         if(auto && !ctx.node.kindManual) ctx.node.kind = auto;
+        const newNode = makeNode('statement');
+        newNode.text = after;
+        const autoNew = autoClassifyKind(after);
+        if(autoNew) newNode.kind = autoNew;
+        newNode.style = Object.assign({}, ensureStyle(ctx.node));
+        ctx.arr.splice(ctx.idx + 1, 0, newNode);
         await saveLesson();
         renderTree();
+        focusNodeText(newNode.id, 0);
         return;
       }
 
       await saveLesson();
       t.blur();
+      return;
+    }
+
+    // Backspace at the very start of a line: delete an empty line, or merge into the line above.
+    if(e.key === 'Backspace' && caretAtStart){
+      const isEmpty = !t.value.length;
+      const leafOrEmptySection = FLOW_KINDS.includes(ctx.node.kind) || (ctx.node.kind === 'heading' && !(ctx.node.children && ctx.node.children.length));
+      if(isEmpty && leafOrEmptySection){
+        const prev = adjacentNodeText(t, -1);
+        if(!prev) return;
+        e.preventDefault();
+        pushUndo();
+        removeNodeById(id);
+        await saveLesson();
+        renderTree();
+        focusNodeText(prev.dataset.id, 'end');
+        return;
+      }
+      const prevSib = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
+      if(!isEmpty && FLOW_KINDS.includes(ctx.node.kind) && prevSib && FLOW_KINDS.includes(prevSib.kind)){
+        e.preventDefault();
+        pushUndo();
+        const joinAt = (prevSib.text || '').length;
+        prevSib.text = (prevSib.text || '') + t.value;
+        removeNodeById(id);
+        await saveLesson();
+        renderTree();
+        focusNodeText(prevSib.id, joinAt);
+      }
+      return;
+    }
+
+    // Up/Down arrows walk between lines like one continuous document.
+    if((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey){
+      const lh = parseFloat(getComputedStyle(t).lineHeight) || 24;
+      const singleLine = t.scrollHeight <= lh * 1.6 + 6;
+      const goingUp = e.key === 'ArrowUp';
+      if(singleLine || (goingUp ? caretAtStart : caretAtEnd)){
+        const target = adjacentNodeText(t, goingUp ? -1 : 1);
+        if(target){
+          e.preventDefault();
+          const col = Math.min(t.selectionStart, target.value.length);
+          target.focus();
+          try{ target.setSelectionRange(col, col); }catch(err){}
+        }
+      }
+      return;
     }
   });
+
+  // ---------------- Word-style ribbon + status bar ----------------
+  function visibleNodeTexts(){
+    return Array.from(mainTree.querySelectorAll('textarea.node-text[data-field="text"]')).filter(x=>x.offsetParent !== null);
+  }
+  function adjacentNodeText(fromEl, dir){
+    const all = visibleNodeTexts();
+    const i = all.indexOf(fromEl);
+    return i < 0 ? null : (all[i + dir] || null);
+  }
+  function focusNodeText(nodeId, caret){
+    requestAnimationFrame(()=>{
+      const ta = mainTree.querySelector(`textarea.node-text[data-field="text"][data-id="${nodeId}"]`);
+      if(!ta) return;
+      editSessionActive = true;
+      ta.focus();
+      const pos = caret === 'end' ? ta.value.length : Math.min(caret || 0, ta.value.length);
+      try{ ta.setSelectionRange(pos, pos); }catch(err){}
+      lastFocusedNodeId = nodeId;
+      updateRibbonState();
+    });
+  }
+  function currentRibbonNode(){
+    return lastFocusedNodeId ? (findContext(lastFocusedNodeId) || null) : null;
+  }
+  function isFormattableNode(node){ return !!node && (node.kind === 'heading' || FLOW_KINDS.includes(node.kind)); }
+  async function toggleNodeFormat(id, key){
+    const ctx = findContext(id);
+    if(!ctx || !isFormattableNode(ctx.node)) return;
+    pushUndo();
+    const style = ensureStyle(ctx.node);
+    style[key] = !style[key];
+    applyStyleObjToEl(mainTree.querySelector(`textarea.node-text.full-only[data-id="${id}"]`), style);
+    await saveLesson();
+    updateRibbonState();
+  }
+  async function setNodeStyleField(id, key, value){
+    const ctx = findContext(id);
+    if(!ctx || !isFormattableNode(ctx.node)) return;
+    pushUndo();
+    const style = ensureStyle(ctx.node);
+    style[key] = value;
+    applyStyleObjToEl(mainTree.querySelector(`textarea.node-text.full-only[data-id="${id}"]`), style);
+    await saveLesson();
+    updateRibbonState();
+  }
+  async function changeNodeKind(id, kind){
+    const ctx = findContext(id);
+    if(!ctx || ctx.node.kind === kind) return;
+    const node = ctx.node;
+    if(node.kind === 'heading' && node.children && node.children.length){
+      showToast('Move or delete the lines inside this section before changing its style.', true);
+      updateRibbonState();
+      return;
+    }
+    pushUndo();
+    if(kind === 'heading'){
+      node.children = []; node.collapsed = false; node.minutes = null;
+    } else if(node.kind === 'heading'){
+      delete node.children; delete node.collapsed; delete node.minutes;
+    }
+    node.kind = kind;
+    node.kindManual = true;
+    await saveLesson();
+    renderTree();
+    focusNodeText(id, 'end');
+  }
+  function updateRibbonState(){
+    const ribbon = document.getElementById('wordRibbon');
+    if(!ribbon || !lesson) return;
+    const ctx = currentRibbonNode();
+    const node = ctx ? ctx.node : null;
+    const formattable = isFormattableNode(node);
+    const style = formattable ? ensureStyle(node) : {};
+    const styleSel = document.getElementById('rbStyle');
+    styleSel.disabled = !node || node.kind === 'verse' || node.kind === 'photo';
+    styleSel.value = node ? node.kind : 'statement';
+    const sizeSel = document.getElementById('rbSize');
+    sizeSel.disabled = !formattable;
+    sizeSel.value = style.size || 'normal';
+    ribbon.querySelectorAll('[data-rb-fmt]').forEach(b=>{ b.disabled = !formattable; b.classList.toggle('active', !!style[b.dataset.rbFmt]); });
+    document.getElementById('rbColorBtn').disabled = !formattable;
+    document.getElementById('rbColorBar').style.background = style.color || 'var(--text)';
+    document.getElementById('rbIndent').disabled = !node;
+    document.getElementById('rbOutdent').disabled = !(ctx && ctx.parentNode);
+  }
+  let wordStatusTimer = null;
+  function scheduleWordStatus(){ clearTimeout(wordStatusTimer); wordStatusTimer = setTimeout(updateWordStatus, 400); }
+  function updateWordStatus(){
+    if(!lesson) return;
+    let words = 0, verses = 0;
+    const count = str => ((str || '').trim().match(/\S+/g) || []).length;
+    (function walk(nodes){
+      (nodes || []).forEach(n=>{
+        if(n.kind === 'verse'){ verses++; words += count(n.text); }
+        else if(n.kind === 'photo'){ words += count(n.caption); }
+        else words += count(n.text);
+        if(n.children) walk(n.children);
+      });
+    })(lesson.outline);
+    const tree = document.getElementById('mainTree');
+    const pageH = Math.max(1, (tree.offsetWidth || 816) * 11 / 8.5);
+    const pages = Math.max(1, Math.ceil(tree.offsetHeight / pageH));
+    const rect = tree.getBoundingClientRect();
+    const current = Math.min(pages, Math.max(1, Math.floor((window.innerHeight * 0.4 - rect.top) / pageH) + 1));
+    document.getElementById('wsPage').textContent = `Page ${current} of ${pages}`;
+    document.getElementById('wsWords').textContent = `${words.toLocaleString()} word${words===1?'':'s'}`;
+    document.getElementById('wsVerses').textContent = `${verses} verse${verses===1?'':'s'}`;
+  }
+  let wordStatusScrollRaf = null;
+  window.addEventListener('scroll', ()=>{ cancelAnimationFrame(wordStatusScrollRaf); wordStatusScrollRaf = requestAnimationFrame(updateWordStatus); }, {passive:true});
+
+  (function wireRibbon(){
+    const ribbon = document.getElementById('wordRibbon');
+    document.getElementById('rbIndent').innerHTML = icon('indent', 16);
+    document.getElementById('rbOutdent').innerHTML = icon('outdent', 16);
+    document.getElementById('rbColorMenu').innerHTML = FORMAT_COLORS.map(c=>
+      `<button class="rb-swatch ${c.value?'':'default'}" data-rb-color="${c.value}" title="${c.name}" style="${c.value?`background:${c.value};`:''}"></button>`).join('');
+    // Keep the cursor in the document when clicking ribbon buttons (selects still need focus).
+    ribbon.addEventListener('mousedown', (e)=>{ if(e.target.closest('button')) e.preventDefault(); });
+    ribbon.addEventListener('click', async (e)=>{
+      const fmt = e.target.closest('[data-rb-fmt]');
+      if(fmt){ if(!fmt.disabled && lastFocusedNodeId) await toggleNodeFormat(lastFocusedNodeId, fmt.dataset.rbFmt); return; }
+      if(e.target.closest('#rbColorBtn')){ document.getElementById('rbColorMenu').classList.toggle('open'); return; }
+      const sw = e.target.closest('[data-rb-color]');
+      if(sw){ document.getElementById('rbColorMenu').classList.remove('open'); if(lastFocusedNodeId) await setNodeStyleField(lastFocusedNodeId, 'color', sw.dataset.rbColor); return; }
+      if(e.target.closest('#rbIndent')){ if(lastFocusedNodeId){ const id = lastFocusedNodeId; await indentNode(id); focusNodeText(id, 'end'); } return; }
+      if(e.target.closest('#rbOutdent')){ if(lastFocusedNodeId){ const id = lastFocusedNodeId; await outdentNode(id); focusNodeText(id, 'end'); } return; }
+      if(e.target.closest('#rbInsertVerse')){
+        const ctx = currentRibbonNode();
+        const parentId = !ctx ? 'root' : (ctx.node.kind === 'heading' ? ctx.node.id : (ctx.parentNode ? ctx.parentNode.id : 'root'));
+        await openVerseModal(parentId);
+        pendingVerseAfterId = (ctx && ctx.node.kind !== 'heading') ? ctx.node.id : null;
+        return;
+      }
+      if(e.target.closest('#rbInsertPhoto')){
+        const ctx = currentRibbonNode();
+        pushUndo();
+        const newId = (ctx && ctx.node.kind === 'heading') ? addNode('photo', ctx.node.id) : addNodeAfter('photo', ctx ? ctx.node.id : null);
+        await saveLesson();
+        renderTree();
+        pendingPhotoNodeId = newId; photoFileInput.value = ''; photoFileInput.click();
+        return;
+      }
+      if(e.target.closest('#rbInsertBrainstorm')){
+        const ctx = currentRibbonNode();
+        if(!lesson.brainstorm || !lesson.brainstorm.length || !ctx){ toggleBrainstormDrawer(true); return; }
+        openBrainstormPicker(ctx.node.id, ctx.node.kind === 'heading' ? 'child' : 'after');
+        return;
+      }
+    });
+    ribbon.addEventListener('change', async (e)=>{
+      if(!lastFocusedNodeId) return;
+      if(e.target.id === 'rbStyle') await changeNodeKind(lastFocusedNodeId, e.target.value);
+      else if(e.target.id === 'rbSize'){ await setNodeStyleField(lastFocusedNodeId, 'size', e.target.value); focusNodeText(lastFocusedNodeId, 'end'); }
+    });
+    document.addEventListener('click', (e)=>{ if(!e.target.closest('.rb-color-wrap')) document.getElementById('rbColorMenu').classList.remove('open'); });
+  })();
 
   mainTree.addEventListener('dragstart', (e)=>{
     const handle = e.target.closest('.drag-handle'); if(!handle){ e.preventDefault(); return; }
