@@ -405,7 +405,7 @@
   #mainTree.doc-view .node[data-kind="teachernote"] > .node-row textarea.node-text{font-size:0.9rem; color:#7A6F5C;}
   #mainTree.doc-view .node[data-kind="teachernote"] > .node-row::before{content:"Teacher's Note"; display:block; font-family:'Inter',sans-serif; font-size:0.66rem; text-transform:uppercase; letter-spacing:.06em; color:#B7AE98; margin-bottom:2px;}
   #mainTree.doc-view .node[data-kind="verse"] > .node-row{border-left:2px solid #C9BFA0 !important; padding-left:14px;}
-  #mainTree.doc-view .verse-ref-chip{font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; color:#8C6A2F; letter-spacing:.03em;}
+  #mainTree.doc-view .verse-ref-chip{font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; color:#8C6A2F; letter-spacing:.03em; background:transparent; padding:0;}
   #mainTree.doc-view .node[data-kind="verse"] textarea.node-text.full-only{font-style:italic; color:#4A4636;}
   #mainTree.doc-view .drag-handle,
   #mainTree.doc-view button[data-action="toggle-collapse"],
@@ -464,7 +464,7 @@
   body.outline-style-classic #mainTree .node[data-kind="application"] > .node-row textarea.node-text{font-style:normal; color:var(--text);}
   /* Verse: subtle block-quote cue */
   body.outline-style-classic #mainTree .node[data-kind="verse"] > .node-row{border-left:2px solid var(--border) !important; padding-left:14px;}
-  body.outline-style-classic #mainTree .node[data-kind="verse"] .verse-ref-chip{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:0.72rem; font-weight:700; color:var(--text-dim); letter-spacing:.02em;}
+  body.outline-style-classic #mainTree .node[data-kind="verse"] .verse-ref-chip{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:0.72rem; font-weight:700; color:var(--text-dim); letter-spacing:.02em; background:transparent; padding:0;}
   body.outline-style-classic #mainTree .node[data-kind="verse"] textarea.node-text.full-only{font-style:italic; color:var(--text);}
   /* Photo: small inline thumbnail instead of a large block */
   body.outline-style-classic #mainTree .node-photo{max-width:120px; max-height:90px; object-fit:cover;}
@@ -898,7 +898,7 @@
      three buttons (Sign In, Preferences, and the toggle) and the rest of the screen
      goes to the lesson itself. */
   .mobile-header-actions{display:flex; align-items:center; gap:6px; margin-left:auto;}
-  .mobile-only{display:none;}
+  .mobile-only, .btn.icon.mobile-only{display:none;}
   .mobile-drawer-row{display:none; flex-wrap:wrap; gap:6px; padding:10px 14px; background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:41px; z-index:24;}
   .mobile-drawer-row.open{display:flex;}
   .mdrawer-grp{display:flex; flex-wrap:wrap; gap:6px; padding-right:8px; margin-right:8px; border-right:1px solid var(--border);}
@@ -911,13 +911,10 @@
   .mdrawer-ic{display:flex; align-items:center;}
   .mdrawer-ic svg{width:15px; height:15px;}
   @media (max-width: 900px){
-    .mobile-only{display:inline-flex;}
+    .mobile-only, .btn.icon.mobile-only{display:inline-flex;}
     .rail{display:none !important;}
     .lesson-toolbar{display:none !important;}
-    .action-row{display:none !important;}
-    .chip-row{display:none !important;}
     .main-wrap{margin-left:0 !important;}
-    textarea.lesson-title{font-size:1.15rem; min-width:0;}
   }
 
   .app-shell{display:flex; min-height:calc(100vh - 41px);}
@@ -999,6 +996,32 @@
   .chip-ai:hover{box-shadow:var(--shadow-xs);}
   .chip-ai.status-stale{background:var(--danger-soft); color:var(--danger); border-color:rgba(162,75,62,.3);}
   .chip-ai.status-fresh{background:var(--accent-soft); color:var(--accent); border-color:transparent;}
+  /* First-visit welcome + sample lesson label */
+  .sample-badge{font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8C6A2E; background:#FCEFD1; border-radius:20px; padding:3px 10px; white-space:nowrap;}
+  .welcome-card{display:flex; gap:20px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin:4px auto 6px; width:calc(100% - 48px); max-width:1392px; padding:18px 22px; background:var(--accent-soft); border:1px solid var(--border); border-radius:var(--radius);}
+  .welcome-card h2{font-size:1.05rem; font-weight:800; margin:0 0 6px; color:var(--text);}
+  .welcome-card p{margin:0 0 6px; font-size:.88rem; color:var(--text); line-height:1.5;}
+  .welcome-steps{margin:4px 0 8px; padding-left:20px; font-size:.88rem; line-height:1.6; color:var(--text);}
+  .welcome-card .welcome-note{font-size:.8rem; color:var(--text-dim); margin:0;}
+  .welcome-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  @media (max-width: 900px){ .welcome-card{width:calc(100% - 32px); padding:14px 16px;} }
+  /* Phones/small tablets: keep the three main steps on screen as a compact row
+     (they used to be hidden in the drawer), and let the lesson title wrap fully. */
+  @media (max-width: 900px){
+    .action-row{flex-wrap:nowrap; gap:6px; padding:12px 16px 0;}
+    .action-card{flex:1 1 0; min-width:0; max-width:none; padding:8px 10px; gap:8px;}
+    .action-card .ic{width:26px; height:26px;}
+    .action-card .t{font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .action-card .count-pill{padding:1px 6px; font-size:.66rem;}
+    .chip-row{padding:10px 16px 6px;}
+    .lesson-bar{padding:12px 16px; row-gap:6px;}
+    .lesson-bar textarea.lesson-title{flex:1 1 100%; font-size:1.2rem; min-width:0; max-height:none;}
+  }
+  @media (max-width: 420px){
+    .action-card{justify-content:center;}
+    .action-card .ic, .action-card .count-pill{display:none;}
+    .action-card .txt{flex:0 1 auto;}
+  }
   .chip-ic{display:flex; align-items:center;}
 
   /* ================= Lessons browser: tree + gallery modes ================= */
@@ -1179,11 +1202,6 @@
     <button class="mdrawer-btn" id="mBtnLoad"><span class="mdrawer-ic"></span><span>Load</span></button>
   </div>
   <div class="mdrawer-grp">
-    <button class="mdrawer-btn" id="mBtnBrainstorm"><span class="mdrawer-ic"></span><span>Brainstorm</span></button>
-    <button class="mdrawer-btn" id="mBtnScripture"><span class="mdrawer-ic"></span><span>Scripture</span></button>
-    <button class="mdrawer-btn" id="mBtnPublish"><span class="mdrawer-ic"></span><span>Publish</span></button>
-  </div>
-  <div class="mdrawer-grp">
     <button class="mdrawer-btn" id="mBtnUndo" disabled><span class="mdrawer-ic"></span><span>Undo</span></button>
     <button class="mdrawer-btn" id="mBtnRedo" disabled><span class="mdrawer-ic"></span><span>Redo</span></button>
     <button class="mdrawer-btn" id="mBtnTags"><span class="mdrawer-ic"></span><span>Tags</span></button>
@@ -1192,7 +1210,7 @@
   <div class="mdrawer-grp">
     <button class="mdrawer-btn" id="mBtnExportPdf"><span class="mdrawer-ic"></span><span>Print / PDF</span></button>
     <button class="mdrawer-btn" id="mBtnExportSlides"><span class="mdrawer-ic"></span><span>Export Slides</span></button>
-    <button class="mdrawer-btn" id="mBtnExportJson"><span class="mdrawer-ic"></span><span>Save File</span></button>
+    <button class="mdrawer-btn" id="mBtnExportJson"><span class="mdrawer-ic"></span><span>Save a Copy</span></button>
   </div>
   <div class="mdrawer-grp">
     <button class="mdrawer-btn" id="mBtnTheme"><span class="mdrawer-ic"></span><span>Dark Mode</span></button>
@@ -1237,6 +1255,7 @@
   <div class="main-wrap">
     <div class="lesson-bar no-print">
       <textarea class="lesson-title" id="lessonTitleInput" placeholder="Untitled Lesson" rows="1"></textarea>
+      <span class="sample-badge" id="sampleBadge" style="display:none;" title="This is a built-in example. Edit it freely, or start your own lesson.">Sample lesson</span>
       <span id="storageWarning" class="storage-warning" style="display:none;" title="Changes aren't persisting automatically in this session.">⚠ not auto-saving</span>
       <span id="savedIndicator" class="saved-indicator"></span>
       <div class="lesson-toolbar">
@@ -1250,14 +1269,13 @@
           <div class="add-menu" id="exportMenu">
             <button data-action="export-pdf">Print / Export PDF</button>
             <button data-action="export-slides">Export to Slides (.pptx)</button>
-            <button data-action="export-json">Save Lesson as File (.json)</button>
+            <button data-action="export-json">Save a Copy to Your Computer (.json)</button>
           </div>
         </div>
         <div class="tb-div"></div>
         <button class="btn icon" id="btnTeam" title="Team lessons" style="position:relative;">
           <span class="tb-dot" id="teamDot" style="display:none;"></span>
         </button>
-        <button class="btn brass" id="btnSaveLocal" title="Save straight to a file on your computer">Save</button>
       </div>
     </div>
 
@@ -1287,6 +1305,23 @@
         <span class="chip-ic"></span>
         <span>AI Summary</span>
       </button>
+    </div>
+
+    <div class="welcome-card no-print" id="welcomeCard" style="display:none;" role="region" aria-labelledby="welcomeTitle">
+      <div class="welcome-text">
+        <h2 id="welcomeTitle">Welcome to Bible Lesson Builder</h2>
+        <p>You're looking at a <b>sample lesson</b> on 2 Peter 2. Every lesson comes together in three steps:</p>
+        <ol class="welcome-steps">
+          <li><b>Brainstorm</b> — jot down ideas, questions and illustrations as they come.</li>
+          <li><b>Scripture</b> — look up verses and pull them into your outline.</li>
+          <li><b>Publish</b> — print a handout, export slides, or present from this screen.</li>
+        </ol>
+        <p class="welcome-note">Your work saves automatically in this browser. Sign in to keep it in sync across devices.</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn brass" id="welcomeStartBtn">Start my own lesson</button>
+        <button class="btn ghost" id="welcomeDismissBtn">Explore the sample</button>
+      </div>
     </div>
 
     <main>
@@ -1812,6 +1847,7 @@ function icon(name, size){
     'menu': '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>',
     'folder': '<path d="M4 6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>',
     'book-open': '<path d="M3 5a2 2 0 0 1 2-2h4a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H3z"/><path d="M21 5a2 2 0 0 0-2-2h-4a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H21z"/>',
+    'user': '<path d="M19 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-5A4.5 4.5 0 0 0 5 18.5V20"/><circle cx="12" cy="7.5" r="3.75"/>',
     'users': '<path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="9" cy="8" r="3.5"/><path d="M19 20v-1.5a3.5 3.5 0 0 0-2.5-3.36"/><path d="M14.5 4.14a3.5 3.5 0 0 1 0 6.72"/>',
     'lightbulb': '<path d="M9 17h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-3.8 11.8c.6.44 1 1.1 1 1.9v.3h5.6v-.3c0-.8.4-1.46 1-1.9A6.5 6.5 0 0 0 12 3z"/>',
     'undo-2': '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
@@ -1927,11 +1963,9 @@ function icon(name, size){
   }
 
   // ---------------- Saved indicator (quiet autosave feedback) ----------------
-  let savedIndicatorTimer = null;
   function flashSavedIndicator(state){
     const el = document.getElementById('savedIndicator');
     if(!el) return;
-    clearTimeout(savedIndicatorTimer);
     if(state === 'saving'){
       el.innerHTML = icon('cloud-check', 13) + ' Saving…';
       el.className = 'saved-indicator show';
@@ -1942,9 +1976,9 @@ function icon(name, size){
       el.className = 'saved-indicator show error';
       return;
     }
-    el.innerHTML = icon('cloud-check', 13) + ' Saved';
+    el.innerHTML = icon('cloud-check', 13) + (currentUser ? ' Saved' : ' Saved on this device');
+    el.title = currentUser ? 'Changes save automatically and sync to your account.' : 'Changes save automatically in this browser. Sign in to sync across devices.';
     el.className = 'saved-indicator show';
-    savedIndicatorTimer = setTimeout(()=>{ el.classList.remove('show'); }, 1600);
   }
 
   // ---------------- In-app dialog (replaces native alert/prompt/confirm) ----------------
@@ -4111,6 +4145,8 @@ function icon(name, size){
     if(mAuthBtn) mAuthBtn.title = currentUser ? `Signed in as ${currentUser.displayName || currentUser.email}` : 'Sign in with Google';
     const acctBody = document.getElementById('prefsAccountBody');
     if(acctBody){ renderPrefsAccountSection(); renderPrefsDataSection(); }
+    const savedEl = document.getElementById('savedIndicator');
+    if(savedEl && savedEl.classList.contains('show') && !savedEl.classList.contains('error') && !/Saving/.test(savedEl.textContent)) flashSavedIndicator('saved');
   }
 
   // ---------------- Bible book/chapter data ----------------
@@ -4260,6 +4296,19 @@ function icon(name, size){
     renderSeriesStrip();
     updateActionCardsAndChips();
     refreshLessonsBrowserIfOpen();
+    renderWelcome();
+  }
+  function welcomeDismissed(){ try{ return localStorage.getItem(lsKey('welcome-dismissed')) === '1'; }catch(e){ return false; } }
+  function dismissWelcome(){
+    try{ localStorage.setItem(lsKey('welcome-dismissed'), '1'); }catch(e){}
+    renderWelcome();
+  }
+  function renderWelcome(){
+    const isSample = !!lesson && lesson.id === EXAMPLE_LESSON_ID;
+    const badge = document.getElementById('sampleBadge');
+    if(badge) badge.style.display = isSample ? '' : 'none';
+    const card = document.getElementById('welcomeCard');
+    if(card) card.style.display = (isSample && !welcomeDismissed()) ? 'flex' : 'none';
   }
   function updatePreviewModeClass(){
     document.getElementById('previewSurface').className = 'preview-surface detail-' + previewDetailMode;
@@ -4403,7 +4452,7 @@ function icon(name, size){
     // Rail buttons: icon goes in the .rail-ic span, the .rail-lbl text stays as written in markup.
     const railIcons = {
       railSearchBtn:'search', railLessonsBtn:'folder', railNewLessonBtn:'plus', railLoadBtn:'upload',
-      railAuthBtn:'users', railPrefsBtn:'settings',
+      railAuthBtn:'user', railPrefsBtn:'settings',
       railThemeBtn: (document.documentElement.getAttribute('data-theme')==='dark') ? 'sun' : 'moon',
       railShortcutsBtn:'keyboard'
     };
@@ -4416,7 +4465,7 @@ function icon(name, size){
     if(expandIc) expandIc.innerHTML = icon('chevron-right', 18);
 
     // Mobile header buttons
-    const mHeaderIcons = { mBtnAuth:'users', mBtnPrefs:'settings', mBtnMenuToggle:'menu' };
+    const mHeaderIcons = { mBtnAuth:'user', mBtnPrefs:'settings', mBtnMenuToggle:'menu' };
     Object.keys(mHeaderIcons).forEach(id=>{
       const el = document.getElementById(id);
       if(el) el.innerHTML = icon(mHeaderIcons[id]);
@@ -4424,7 +4473,6 @@ function icon(name, size){
     // Mobile drawer buttons: icon goes in the .mdrawer-ic span, label text stays as written in markup.
     const mDrawerIcons = {
       mBtnSearch:'search', mBtnLessons:'folder', mBtnNewLesson:'plus', mBtnLoad:'upload',
-      mBtnBrainstorm:'lightbulb', mBtnScripture:'cross', mBtnPublish:'presentation',
       mBtnUndo:'undo-2', mBtnRedo:'redo-2', mBtnTags:'tag', mBtnTeam:'users',
       mBtnExportPdf:'download', mBtnExportSlides:'download', mBtnExportJson:'download',
       mBtnTheme: (document.documentElement.getAttribute('data-theme')==='dark') ? 'sun' : 'moon',
@@ -6091,6 +6139,8 @@ ${sourceLines.join('\n')}`;
   document.getElementById('railSearchBtn').addEventListener('click', openPalette);
   document.getElementById('railLessonsBtn').addEventListener('click', openFolderModal);
   document.getElementById('railNewLessonBtn').addEventListener('click', createNewLesson);
+  document.getElementById('welcomeStartBtn').addEventListener('click', async ()=>{ await createNewLesson(); if(lesson && lesson.id !== EXAMPLE_LESSON_ID) dismissWelcome(); });
+  document.getElementById('welcomeDismissBtn').addEventListener('click', dismissWelcome);
   document.getElementById('railLoadBtn').addEventListener('click', ()=> document.getElementById('lessonFileInput').click());
   document.getElementById('railThemeBtn').addEventListener('click', toggleTheme);
   document.getElementById('railShortcutsBtn').addEventListener('click', openShortcutsModal);
@@ -6110,16 +6160,13 @@ ${sourceLines.join('\n')}`;
   document.getElementById('mBtnLessons').addEventListener('click', ()=>{ toggleMobileDrawer(false); openFolderModal(); });
   document.getElementById('mBtnNewLesson').addEventListener('click', ()=>{ toggleMobileDrawer(false); createNewLesson(); });
   document.getElementById('mBtnLoad').addEventListener('click', ()=>{ toggleMobileDrawer(false); document.getElementById('lessonFileInput').click(); });
-  document.getElementById('mBtnBrainstorm').addEventListener('click', ()=>{ toggleMobileDrawer(false); toggleBrainstormDrawer(); });
-  document.getElementById('mBtnScripture').addEventListener('click', ()=>{ toggleMobileDrawer(false); openScriptureModal(); });
-  document.getElementById('mBtnPublish').addEventListener('click', ()=>{ toggleMobileDrawer(false); openPublishChooser(); });
   document.getElementById('mBtnUndo').addEventListener('click', ()=> performUndo());
   document.getElementById('mBtnRedo').addEventListener('click', ()=> performRedo());
   document.getElementById('mBtnTags').addEventListener('click', ()=>{ toggleMobileDrawer(false); openTagsModal(); });
   document.getElementById('mBtnTeam').addEventListener('click', ()=>{ toggleMobileDrawer(false); openTeamModal(); });
   document.getElementById('mBtnExportPdf').addEventListener('click', ()=>{ toggleMobileDrawer(false); printLessonPdf(); });
   document.getElementById('mBtnExportSlides').addEventListener('click', ()=>{ toggleMobileDrawer(false); exportToSlides(); });
-  document.getElementById('mBtnExportJson').addEventListener('click', ()=>{ toggleMobileDrawer(false); saveLessonToFile(); });
+  document.getElementById('mBtnExportJson').addEventListener('click', ()=>{ toggleMobileDrawer(false); saveToLocalFile(); });
   document.getElementById('mBtnTheme').addEventListener('click', toggleTheme);
   document.getElementById('mBtnShortcuts').addEventListener('click', ()=>{ toggleMobileDrawer(false); openShortcutsModal(); });
   document.addEventListener('click', (e)=>{
@@ -6133,6 +6180,11 @@ ${sourceLines.join('\n')}`;
     let saved = null;
     try{ saved = localStorage.getItem(lsKey('rail-expanded')); }catch(e){}
     if(saved === '1') toggleRailExpanded(true);
+    else if(saved === null && window.innerWidth >= 1280){
+      // No preference yet: start wide screens with labels showing, without saving that as a choice.
+      document.getElementById('appRail').classList.add('expanded');
+      document.getElementById('railExpandToggle').title = 'Collapse sidebar';
+    }
   })();
   wirePanelResize('drawerResizeHandle', document.getElementById('brainstormDrawer'), { min:280, max:640, default:360, storeKey:'drawer-width', grow:'left' });
 
@@ -6599,13 +6651,12 @@ ${sourceLines.join('\n')}`;
     document.getElementById('exportMenu').classList.remove('open');
     if(btn.dataset.action === 'export-pdf') printLessonPdf();
     else if(btn.dataset.action === 'export-slides') exportToSlides();
-    else if(btn.dataset.action === 'export-json') saveLessonToFile();
+    else if(btn.dataset.action === 'export-json') saveToLocalFile();
   });
   document.getElementById('publishModeSegmented').addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-mode]'); if(!btn) return;
     setPublishViewMode(btn.dataset.mode);
   });
-  document.getElementById('btnSaveLocal').addEventListener('click', saveToLocalFile);
 
   document.getElementById('btnNewSection').addEventListener('click', async ()=>{
     pushUndo();
