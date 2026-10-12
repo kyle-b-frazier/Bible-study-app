@@ -344,10 +344,6 @@
   textarea.node-text.flow-text:hover, textarea.node-text.flow-text:focus{border-bottom-color: var(--border) !important; background:var(--bg) !important;}
 
   .verse-ref-chip{font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.78rem; background: var(--accent); color:#fff; padding:2px 8px; border-radius:var(--radius-lg); display:inline-block; margin-bottom:var(--space-2);}
-  .xref-chips{display:flex; flex-wrap:wrap; gap:var(--space-3); margin-top:var(--space-3);}
-  .xref-chip{font-family:'JetBrains Mono', monospace; font-size:0.72rem; background:var(--surface); color: var(--accent-hover); border:1px solid var(--border); border-radius:var(--radius-lg); padding:3px 9px; transition:background .12s ease, border-color .12s ease;}
-  .xref-chip:hover{border-color: var(--accent);}
-  .xref-label{font-size:0.68rem; color: var(--text-faint); font-style:italic; margin-top:var(--space-2); display:block;}
   .time-badge{font-family:'JetBrains Mono', monospace; font-size:0.72rem; background: var(--accent-soft); color: var(--accent-hover); border:1px solid transparent; border-radius:var(--radius-lg); padding:2px 9px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; font-variant-numeric:tabular-nums;}
   input.minutes-input{width:52px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px 5px; font-size:0.78rem; background:var(--surface); color:var(--text);}
 
@@ -364,7 +360,6 @@
   .node-photo{display:block; border-radius:var(--radius-md); margin-bottom:var(--space-3); border:1px solid var(--border);}
   #mainTree .node-photo{max-width:360px; max-height:360px; object-fit:contain;}
   #previewSurface.detail-full .node-photo{max-width:360px; max-height:360px; object-fit:contain;}
-  #previewSurface.detail-outline .node-photo{max-width:110px;}
   input.photo-caption{width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 9px; font-size:0.82rem; background:var(--surface); color:var(--text-dim);}
 
   .node-controls{display:flex; gap:var(--space-2); padding-top:6px; flex-wrap:wrap; align-items:center;}
@@ -782,10 +777,6 @@
   .p-node[data-kind="verse"] .p-text{ font-family: var(--pk-verse-font, var(--pub-body-font)); color: var(--pk-verse-color, var(--ms-ink)); font-size: calc(var(--pk-verse-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-verse-italic, italic); font-weight: var(--pk-verse-bold, 400); }
   .p-node[data-kind="verse"] > .p-node-row{ background: var(--pk-verse-bg, transparent); border-radius: var(--radius-sm); }
 
-  #previewSurface.detail-outline .p-text{font-size:0.9rem;}
-  #previewSurface.detail-outline .p-node-row{padding:3px 0;}
-  #previewSurface.detail-outline .p-children{margin-left:var(--space-8);}
-  #previewSurface.detail-outline .p-node[data-kind="photo"] .p-text{font-style:italic; color:var(--text-dim);}
 
   /* ---------------- Outline Style: Classic Outline — Field Notes / Publish output ----------------
      Mirrors the editor's Classic Outline treatment: plain bulleted lines for Statement/
@@ -811,19 +802,6 @@
   body.outline-style-classic .p-node[data-kind="teachernote"] .p-text{font-style:italic; color:var(--text-dim);}
   body.outline-style-classic .p-node[data-kind="teachernote"] .p-text::before{content:"Note — "; font-weight:600; color:var(--text-faint);}
 
-  .ai-summary-block{font-family: var(--pub-body-font, 'IBM Plex Serif', 'Source Serif 4', Georgia, serif); font-size:0.98rem; line-height: var(--pub-line-height, 1.6);}
-  .ai-summary-block h3{font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-size:1.0rem; text-transform:none; letter-spacing:0; font-weight:600; border-bottom:1px solid var(--ms-line); padding:3px 0 8px; margin:20px 0 10px; color:var(--ms-ink);}
-  .ai-summary-block h3:first-child{margin-top:0;}
-  .ai-summary-block p{margin:0 0 8px;}
-  .ai-summary-block ul{margin:0 0 10px; padding-left:22px;}
-  .ai-summary-block li{margin:3px 0;}
-  .ai-summary-block .ai-q{font-style:normal; margin:6px 0;}
-  .ai-summary-block .ai-q::before{content:"Q "; font-family:'Space Grotesk', 'Inter', sans-serif; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-gold); margin-right:var(--space-2);}
-  .ai-summary-state{padding:40px; text-align:center; color:var(--text-dim); font-family:'Inter', sans-serif;}
-  .ai-summary-state .btn{margin-top:14px;}
-  #aiSummaryBar{justify-content:space-between; align-items:center;}
-  #aiSummaryStatus{color:var(--text-dim); font-family:'Inter', sans-serif;}
-  #aiSummaryStatus.stale{color:var(--ms-gold);}
 
   /* ================= In-app dialog (replaces native alert/prompt/confirm) ================= */
   .app-dialog{max-width:420px; padding:var(--space-9);}
@@ -981,7 +959,7 @@
   .action-card .t{font-weight:700; font-size:.88rem; color:var(--text);}
   .action-card .count-pill{background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:2px 9px; font-size:.72rem; font-weight:700; color:var(--text-dim); flex-shrink:0;}
 
-  /* ================= Chip row: Time / AI Summary ================= */
+  /* ================= Chip row: Time ================= */
   .chip-row{display:flex; gap:8px; padding:12px 24px 18px; width:100%; max-width:1440px; margin:0 auto; flex-wrap:wrap;}
   .chip-time{
     display:flex; align-items:center; gap:7px; background:var(--surface); border:1px solid var(--border); border-radius:20px;
@@ -990,14 +968,10 @@
   }
   .chip-time:hover{border-color:var(--accent); background:var(--accent-soft); color:var(--accent);}
   .chip-time b{font-weight:700;}
-  .chip-ai{
     display:flex; align-items:center; gap:7px; border:1px solid var(--border); border-radius:20px; padding:6px 14px 6px 12px;
     font-size:.8rem; font-weight:700; cursor:pointer; font-family:inherit; background:var(--surface-2); color:var(--text-dim);
     transition:box-shadow var(--dur-fast), background var(--dur-fast);
   }
-  .chip-ai:hover{box-shadow:var(--shadow-xs);}
-  .chip-ai.status-stale{background:var(--danger-soft); color:var(--danger); border-color:rgba(162,75,62,.3);}
-  .chip-ai.status-fresh{background:var(--accent-soft); color:var(--accent); border-color:transparent;}
   /* ================= Word-style editing surface ================= */
   :root{ --canvas:#E6E6E2; }
   html[data-theme="dark"]{ --canvas:#111315; }
@@ -1355,10 +1329,6 @@
         <span class="chip-ic"></span>
         <b id="timingChipLabel">Set time</b>
       </button>
-      <button class="chip-ai" id="btnActionAiSummary">
-        <span class="chip-ic"></span>
-        <span>AI Summary</span>
-      </button>
     </div>
 
     <div class="welcome-card no-print" id="welcomeCard" style="display:none;" role="region" aria-labelledby="welcomeTitle">
@@ -1491,19 +1461,11 @@
     <div class="modal preview-modal publish-shell">
       <div class="publish-topbar no-print">
         <button class="btn icon" id="xClosePreview" title="Close (Esc)"></button>
-        <div class="segmented" id="previewDetailSegmented">
-          <button data-detail="full" class="active">Lesson</button>
-          <button data-detail="outline">AI Summary</button>
-        </div>
         <div class="segmented" id="publishModeSegmented">
           <button data-mode="pageflip" class="active" title="Turn one page at a time">Page-flip</button>
           <button data-mode="scroll" title="Scroll continuously">Scroll</button>
         </div>
         <button class="btn icon" id="btnTogglePresenter" title="Present (hide these controls)"></button>
-        <div class="publish-ai-status no-print" id="aiSummaryBar" style="display:none;">
-          <span class="hint" id="aiSummaryStatus" style="margin:0;"></span>
-          <button class="btn small" id="btnRegenerateAiSummary">Regenerate</button>
-        </div>
       </div>
       <div class="publish-body" id="publishBody">
         <div class="book-viewport" id="bookViewport">
@@ -1861,7 +1823,6 @@
           <h4>Content details</h4>
           <div class="prefs-row"><label><input type="checkbox" id="advShowKicker"> Show tags line above the title</label></div>
           <div class="prefs-row"><label><input type="checkbox" id="advShowTimeBadges"> Show section time badges</label></div>
-          <div class="prefs-row"><label><input type="checkbox" id="advShowCrossRefs"> Show AI-suggested cross-references under verses</label></div>
         </div>
 
         <div class="prefs-section">
@@ -1887,10 +1848,6 @@
       <button class="publish-choice" data-choice="handout">
         <b>Handout</b>
         <span>Sections, subsections, and verse references — for the class to take home.</span>
-      </button>
-      <button class="publish-choice" data-choice="ai">
-        <b>AI Summary</b>
-        <span>A condensed, Gemini-generated outline.</span>
       </button>
       <button class="publish-choice" data-choice="custom">
         <b>Custom</b>
@@ -2002,11 +1959,9 @@ function icon(name, size){
 
   // ---------------- State ----------------
   let lesson = null;
-  let previewDetailMode = 'full'; // 'full' ("Lesson") | 'outline' ("AI Summary") — Publish content mode
+  let previewDetailMode = 'full'; // Publish content mode (only the full lesson now)
   let publishViewMode = 'pageflip'; // 'pageflip' | 'scroll' — how the Publish guide view is navigated
   let activePublishFilter = null; // set by the Publish chooser (Full/Handout/Custom); null = show everything unfiltered
-  let aiSummaryLoading = false;
-  let aiSummaryError = '';
   let pendingVerseParentId = null;
   let pendingVerseAfterId = null;
   let pendingPhotoNodeId = null;
@@ -2598,7 +2553,7 @@ function icon(name, size){
         // Advanced (opened via Preferences → Publish Style → Advanced...)
         headingFont:'spacegrotesk', bodyFont:'plexserif', lineHeight:'normal', margins:'comfortable',
         pageBreakMode:'continuous', uppercaseHeadings:false,
-        showTimeBadges:true, showCrossRefs:true, showKicker:true,
+        showTimeBadges:true, showKicker:true,
         // Page-level color overrides — empty string = use the preset's default
         page: { background:'', textColor:'', lineColor:'' },
         // Per-element-kind overrides — empty font/color/background = inherit
@@ -2663,7 +2618,6 @@ function icon(name, size){
       const clone = Object.assign({}, node);
       if(node.kind === 'verse' && filter.verseMode === 'refs'){
         clone.text = '';
-        clone.crossRefs = [];
       }
       if(node.children && node.children.length){
         clone.children = filterNodesForPublish(node.children, depth+1, filter);
@@ -2805,7 +2759,6 @@ function icon(name, size){
     setSel('advPageBreakMode', s.pageBreakMode || 'continuous');
     setChk('advShowKicker', s.showKicker !== false);
     setChk('advShowTimeBadges', s.showTimeBadges !== false);
-    setChk('advShowCrossRefs', s.showCrossRefs !== false);
     renderAdvPageSection();
     renderAdvKindStyles();
   }
@@ -2891,7 +2844,7 @@ function icon(name, size){
     const ok = await appConfirm('Reset all Advanced Output Settings — typography, layout, page colors, and every element style — back to their defaults? Your preset, text size, and accent color (in the basic Publish Style section) are untouched.');
     if(!ok) return;
     const defaults = defaultPublishPrefs().style;
-    ['headingFont','bodyFont','lineHeight','margins','pageBreakMode','uppercaseHeadings','showTimeBadges','showCrossRefs','showKicker'].forEach(k=>{
+    ['headingFont','bodyFont','lineHeight','margins','pageBreakMode','uppercaseHeadings','showTimeBadges','showKicker'].forEach(k=>{
       publishPrefs.style[k] = defaults[k];
     });
     publishPrefs.style.page = defaults.page;
@@ -2946,21 +2899,12 @@ function icon(name, size){
     });
   }
 
-  // ---------------- Publish chooser: Full / Handout / AI Summary / Custom ----------------
+  // ---------------- Publish chooser: Full / Handout / Custom ----------------
   function openPublishChooser(){ document.getElementById('publishChooserOverlay').classList.add('open'); }
   function closePublishChooser(){ document.getElementById('publishChooserOverlay').classList.remove('open'); }
   function goPublish(choice){
     closePublishChooser();
-    if(choice === 'ai'){
-      previewDetailMode = 'outline';
-      document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.detail==='outline'));
-      updatePreviewModeClass();
-      activePublishFilter = null;
-      openPreviewModal();
-      return;
-    }
     previewDetailMode = 'full';
-    document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.detail==='full'));
     updatePreviewModeClass();
     if(choice === 'full'){
       activePublishFilter = JSON.parse(JSON.stringify(publishPrefs.full));
@@ -2997,7 +2941,6 @@ function icon(name, size){
     activePublishFilter.style = publishPrefs.style;
     closeCustomPublishModal();
     previewDetailMode = 'full';
-    document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.detail==='full'));
     updatePreviewModeClass();
     openPreviewModal();
   }
@@ -3034,7 +2977,7 @@ function icon(name, size){
     if(!l.brainstorm) l.brainstorm = [];
     if(!l.tags) l.tags = [];
     if(l.folderId === undefined) l.folderId = null;
-    if(l.aiSummary === undefined) l.aiSummary = null; // { text, hash, generatedAt }
+    delete l.aiSummary; // leftover from the removed AI Summary feature
     return l;
   }
 
@@ -3049,7 +2992,7 @@ function icon(name, size){
     const node = { id: id, kind: kind, text: text || '', kindManual: false, createdAt: Date.now(),
       style: { bold:false, italic:false, underline:false, size:'normal', color:'' } };
     if(kind === 'heading'){ node.children = []; node.collapsed = false; node.minutes = null; }
-    if(kind === 'verse'){ node.ref = ''; node.crossRefs = []; node.crossRefsFor = ''; }
+    if(kind === 'verse'){ node.ref = ''; }
     if(kind === 'photo'){ node.photoRef = ''; node.caption = ''; }
     return Object.assign(node, extra || {});
   }
@@ -3058,7 +3001,7 @@ function icon(name, size){
     return [
       exNode('ex-h1', 'heading', 'Introduction: A Warning from Peter', { minutes: 5, children: [
         exNode('ex-h1-s1', 'statement', "Peter has just finished grounding the church in the reliability of Scripture (chapter 1) — now he pivots to a hard warning: false teachers are coming, just as false prophets once troubled Israel."),
-        exNode('ex-h1-v1', 'verse', "But there were false prophets also among the people, even as there shall be false teachers among you, who privily shall bring in damnable heresies, even denying the Lord that bought them, and bring upon themselves swift destruction.", { ref:'2 Peter 2:1 (KJV)', crossRefs:['Jude 1:4','Matthew 24:11','1 Timothy 4:1'], crossRefsFor:'2 Peter 2:1 (KJV)' }),
+        exNode('ex-h1-v1', 'verse', "But there were false prophets also among the people, even as there shall be false teachers among you, who privily shall bring in damnable heresies, even denying the Lord that bought them, and bring upon themselves swift destruction.", { ref:'2 Peter 2:1 (KJV)' }),
         exNode('ex-h1-q1', 'question', "Why do you think Peter roots his warning about the future in Israel's past experience with false prophets?"),
         exNode('ex-h1-tn1', 'teachernote', "Context: 2 Peter closely parallels the book of Jude. If time allows, compare Jude 4-19 side by side with this chapter.")
       ]}),
@@ -3210,7 +3153,6 @@ function icon(name, size){
     updateLiveShareSubscription();
     await safeSet('last-lesson-id', lesson.id, false);
     previewDetailMode = 'full';
-    document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.detail==='full'));
     renderShell();
   }
   async function openLesson(id){
@@ -3285,7 +3227,7 @@ function icon(name, size){
     const node = { id: uid(), kind: kind, text: '', kindManual: false, createdAt: Date.now(),
       style: { bold:false, italic:false, underline:false, size:'normal', color:'' } };
     if(kind === 'heading'){ node.children = []; node.collapsed = false; node.minutes = null; }
-    if(kind === 'verse'){ node.ref = ''; node.crossRefs = []; node.crossRefsFor = ''; }
+    if(kind === 'verse'){ node.ref = ''; }
     if(kind === 'photo'){ node.photoRef = ''; node.caption = ''; }
     return node;
   }
@@ -3762,15 +3704,6 @@ function icon(name, size){
     if(sPill) sPill.textContent = scriptureCount();
     const teamDot = document.getElementById('teamDot');
     if(teamDot) teamDot.style.display = (lesson.teamShared || lesson.sharedDocId) ? 'block' : 'none';
-
-    const aiChip = document.getElementById('btnActionAiSummary');
-    if(aiChip){
-      aiChip.classList.remove('status-stale', 'status-fresh');
-      if(lesson.aiSummary){
-        const stale = lesson.aiSummary.hash !== currentLessonHash();
-        aiChip.classList.add(stale ? 'status-stale' : 'status-fresh');
-      }
-    }
   }
 
   // ---------------- Series strip (shown under header when this lesson belongs to a folder) ----------------
@@ -4008,10 +3941,8 @@ function icon(name, size){
       <div class="skel-block">${bar('45%')}${bar('75%')}</div>`;
   }
 
-  // ---------------- ESV API key (embedded) ----------------
+  // ---------------- ESV API key (embedded; the only outside service besides Firebase) ----------------
   const ESV_API_KEY = "708887f6661b542781f8922994e8f213e1aef0d9";
-  const GEMINI_API_KEY = "PASTE_YOUR_GEMINI_API_KEY_HERE";
-  const GEMINI_MODEL = "gemini-3.5-flash";
 
   // ---------------- Firebase (Google sign-in + cloud sync) ----------------
   // Scaffolded and ready to go, but intentionally inert: paste your real project's
@@ -4416,8 +4347,6 @@ function icon(name, size){
   }
   function updatePreviewModeClass(){
     document.getElementById('previewSurface').className = 'preview-surface detail-' + previewDetailMode;
-    const bar = document.getElementById('aiSummaryBar');
-    if(bar) bar.style.display = (previewDetailMode === 'outline') ? 'flex' : 'none';
   }
 
   // ---------------- Brainstorm drawer ----------------
@@ -4495,8 +4424,7 @@ function icon(name, size){
     // Only auto-resume if it's plausible the phone just came back from sleep, not
     // an old session from a different day left lying around.
     if(Date.now() - (saved.ts||0) > 4 * 60 * 60 * 1000) { clearPublishSession(); return; }
-    previewDetailMode = saved.detail === 'outline' ? 'outline' : 'full';
-    document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.detail===previewDetailMode));
+    previewDetailMode = 'full';
     publishViewMode = saved.mode === 'scroll' ? 'scroll' : 'pageflip';
     document.querySelectorAll('#publishModeSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.mode===publishViewMode));
     openPreviewModal();
@@ -4511,7 +4439,6 @@ function icon(name, size){
       ['btnUndo', 'undo-2', ''],
       ['btnRedo', 'redo-2', ''],
       ['btnImportSeries', 'upload', 'Import Series'],
-      ['btnRegenerateAiSummary', 'refresh-cw', 'Regenerate'],
       ['btnBookNext', 'arrow-right', ''],
       ['btnCloseDrawer', 'x', ''],
       ['xClosePreview', 'x', ''], ['xCloseVerse', 'x', ''], ['xClosePicker', 'x', ''],
@@ -4599,8 +4526,6 @@ function icon(name, size){
     // Chip row
     const timeIc = document.querySelector('#btnActionTiming .chip-ic');
     if(timeIc) timeIc.innerHTML = icon('clock', 14);
-    const aiIc = document.querySelector('#btnActionAiSummary .chip-ic');
-    if(aiIc) aiIc.innerHTML = icon('refresh-cw', 14);
   }
 
 
@@ -4669,8 +4594,7 @@ function icon(name, size){
     let content = '';
     if(isVerse){
       content = `<span class="verse-ref-chip">${escapeHtml(node.ref||'Reference')}</span>
-        <textarea class="node-text" readonly>${escapeHtml(node.text)}</textarea>
-        ${xrefChipsHtml(node)}`;
+        <textarea class="node-text" readonly>${escapeHtml(node.text)}</textarea>`;
     } else if(isPhoto){
       if(node.photoRef){
         const dataUrl = photoCache[node.photoRef];
@@ -4711,8 +4635,7 @@ function icon(name, size){
       let mainContent = '';
       if(isVerse){
         mainContent = `<span class="verse-ref-chip">${escapeHtml(node.ref||'Reference')}</span>
-          <textarea class="node-text full-only" readonly>${escapeHtml(node.text)}</textarea>
-          ${xrefChipsHtml(node)}`;
+          <textarea class="node-text full-only" readonly>${escapeHtml(node.text)}</textarea>`;
       } else if(isPhoto){
         if(node.photoRef){
           const dataUrl = photoCache[node.photoRef];
@@ -4782,13 +4705,6 @@ function icon(name, size){
     if(kind==='statement') return 'Statement or teaching point... (press Enter for a new line)';
     if(kind==='application') return 'How should this change how we live this week?';
     if(kind==='teachernote') return "Private note to yourself — won't show on the audience handout...";
-    return '';
-  }
-  function xrefChipsHtml(node){
-    if(node.crossRefsLoading) return `<div class="xref-label">Finding related passages…</div>`;
-    if(node.crossRefs && node.crossRefs.length){
-      return `<div class="xref-chips">${node.crossRefs.map(r=>`<button type="button" class="xref-chip" data-action="jump-to-xref" data-id="${node.id}" data-ref="${escapeHtml(r)}">+ ${escapeHtml(r)}</button>`).join('')}</div><span class="xref-label">AI-suggested related passages — double-check they fit before using.</span>`;
-    }
     return '';
   }
 
@@ -4910,10 +4826,6 @@ function icon(name, size){
     const kicker = tags.length ? tags.join(' · ') : 'Bible Lesson Builder';
     const kickerHtml = pubStyle.showKicker !== false ? `<div class="ms-kicker">${escapeHtml(kicker)}</div>` : '';
     const band = `<div class="ms-band">${kickerHtml}<h1>${escapeHtml(lesson.title || 'Untitled Lesson')}</h1></div>`;
-    if(previewDetailMode === 'outline'){
-      renderAiSummaryPane(band);
-      return;
-    }
     const nodes = activePublishFilter ? filterNodesForPublish(lesson.outline || [], 0, activePublishFilter) : (lesson.outline || []);
     if(!nodes.length){
       setBookSinglePage(band, '<div class="empty-state">Nothing to show with the current Publish settings.</div>');
@@ -4943,9 +4855,6 @@ function icon(name, size){
     let body = '';
     if(node.kind==='verse'){
       body = `<span class="p-verse-ref">${escapeHtml(node.ref||'')}</span><span style="${styleCss}">${escapeHtml(node.text)}</span>`;
-      if(pubStyle.showCrossRefs !== false && node.crossRefs && node.crossRefs.length){
-        body += `<div class="xref-label">Related passages worth checking: ${node.crossRefs.map(r=>escapeHtml(r)).join(', ')}</div>`;
-      }
     } else if(node.kind==='photo'){
       const dataUrl = node.photoRef ? photoCache[node.photoRef] : null;
       body = dataUrl
@@ -5251,148 +5160,6 @@ function icon(name, size){
     if(root) root.innerHTML = '';
   });
 
-  // ---------------- AI Summary (Gemini) ----------------
-  function buildLessonPlainText(nodes, depth){
-    depth = depth || 0;
-    let lines = [];
-    (nodes || []).forEach(n=>{
-      if(n.kind === 'teachernote') return;
-      const indent = '  '.repeat(depth);
-      if(n.kind === 'heading') lines.push(`${indent}SECTION: ${n.text || '(untitled section)'}`);
-      else if(n.kind === 'verse') lines.push(`${indent}VERSE ${n.ref || ''}: ${n.text || ''}`);
-      else if(n.kind === 'question') lines.push(`${indent}QUESTION: ${n.text || ''}`);
-      else if(n.kind === 'application') lines.push(`${indent}APPLICATION: ${n.text || ''}`);
-      else if(n.kind === 'photo') lines.push(`${indent}PHOTO: ${n.caption || '(photo)'}`);
-      else lines.push(`${indent}${n.text || ''}`);
-      if(n.children && n.children.length) lines = lines.concat(buildLessonPlainText(n.children, depth + 1));
-    });
-    return lines;
-  }
-  function simpleHash(str){
-    let hash = 0;
-    for(let i=0; i<str.length; i++){ hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
-    return hash;
-  }
-  function currentLessonHash(){
-    return simpleHash(buildLessonPlainText(lesson.outline).join('\n') + '|' + (lesson.title || ''));
-  }
-  function renderAiSummaryHtml(text){
-    const lines = (text || '').split(/\r?\n/);
-    let html = ''; let inList = false;
-    const closeList = ()=>{ if(inList){ html += '</ul>'; inList = false; } };
-    lines.forEach(raw=>{
-      const line = raw.trim();
-      if(!line){ closeList(); return; }
-      if(/^#{1,3}\s+/.test(line)){
-        closeList();
-        html += `<h3>${escapeHtml(line.replace(/^#{1,3}\s+/, ''))}</h3>`;
-      } else if(/^[-•*]\s+/.test(line)){
-        if(!inList){ html += '<ul>'; inList = true; }
-        html += `<li>${escapeHtml(line.replace(/^[-•*]\s+/, ''))}</li>`;
-      } else if(/^Q[:.]\s*/i.test(line)){
-        closeList();
-        html += `<p class="ai-q">${escapeHtml(line.replace(/^Q[:.]\s*/i, ''))}</p>`;
-      } else {
-        closeList();
-        html += `<p>${escapeHtml(line)}</p>`;
-      }
-    });
-    closeList();
-    return html || '<div class="empty-state">No summary yet.</div>';
-  }
-  function renderAiSummaryPane(band){
-    const status = document.getElementById('aiSummaryStatus');
-    status.classList.remove('stale');
-    if(aiSummaryLoading){
-      status.textContent = 'Generating with Gemini…';
-      setBookSinglePage(band, '<div class="ai-summary-state">Generating your AI summary…</div>');
-      return;
-    }
-    if(aiSummaryError){
-      status.textContent = 'Generation failed.';
-      setBookSinglePage(band, `<div class="ai-summary-state">${escapeHtml(aiSummaryError)}<br><button class="btn brass" id="btnRetryAiSummary">Try again</button></div>`);
-      const retryBtn = document.getElementById('btnRetryAiSummary');
-      if(retryBtn) retryBtn.addEventListener('click', ()=> generateAiSummary(true));
-      return;
-    }
-    const hash = currentLessonHash();
-    if(!lesson.aiSummary){
-      status.textContent = 'Not generated yet.';
-      setBookSinglePage(band, '<div class="ai-summary-state">No AI summary yet for this lesson.<br><button class="btn brass" id="btnGenAiSummary">Generate AI Summary</button></div>');
-      const genBtn = document.getElementById('btnGenAiSummary');
-      if(genBtn) genBtn.addEventListener('click', ()=> generateAiSummary(true));
-      return;
-    }
-    const stale = lesson.aiSummary.hash !== hash;
-    status.textContent = stale ? 'Lesson changed — refreshing summary…' : ('Generated ' + new Date(lesson.aiSummary.generatedAt).toLocaleString());
-    status.classList.toggle('stale', stale);
-    const parsed = document.createElement('div');
-    parsed.innerHTML = renderAiSummaryHtml(lesson.aiSummary.text);
-    const blocks = Array.from(parsed.children).map(el=>el.outerHTML);
-    if(blocks.length){
-      paginateAndSetBook(band, blocks, 'ai-summary-block');
-    } else {
-      setBookSinglePage(band, '<div class="empty-state">No summary yet.</div>', 'ai-summary-block');
-    }
-    if(stale) generateAiSummary(false);
-  }
-  async function generateAiSummary(force){
-    if(!lesson) return;
-    const hash = currentLessonHash();
-    if(!force && lesson.aiSummary && lesson.aiSummary.hash === hash) return;
-    if(!GEMINI_API_KEY || GEMINI_API_KEY === 'PASTE_YOUR_GEMINI_API_KEY_HERE'){
-      aiSummaryError = 'No Gemini API key set. Get a free key at aistudio.google.com/apikey and paste it into GEMINI_API_KEY near the top of the file.';
-      renderPreview();
-      return;
-    }
-    const sourceLines = buildLessonPlainText(lesson.outline);
-    if(!sourceLines.length){
-      aiSummaryError = "Add some content to the Lesson first — there's nothing to summarize yet.";
-      renderPreview();
-      return;
-    }
-    aiSummaryLoading = true;
-    aiSummaryError = '';
-    renderPreview();
-    const prompt = `You are helping a Bible teacher turn their full lesson notes into a compact, well-organized outline for a printed audience handout.
-
-Below is the full lesson, section by section. SECTION = a heading, VERSE = a scripture reference with its text, QUESTION = a discussion question, APPLICATION = an application point, PHOTO = a captioned image placeholder. The teacher's private notes have already been removed.
-
-Produce a condensed outline for a one-page class handout, using exactly this plain-text format:
-- Start each major section with "## " followed by the section name.
-- Use "- " before each brief bullet point (key statements, applications, ideas).
-- Use "Q: " before each discussion question.
-- For verses, give just the plain reference on its own bullet unless the exact wording is essential to the point.
-- Keep it tight — a handout, not a manuscript. Trim wordy statements to their core idea.
-- Output ONLY the outline in that format. No preamble, no commentary, no sign-off.
-
-LESSON:
-${sourceLines.join('\n')}`;
-    try{
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      });
-      if(!res.ok){
-        const errBody = await res.text().catch(()=>'');
-        throw new Error(`Gemini API returned ${res.status}${errBody ? ' — ' + errBody.slice(0,200) : ''}`);
-      }
-      const data = await res.json();
-      const candidate = (data.candidates && data.candidates[0]) || null;
-      const textOut = (candidate && candidate.content && candidate.content.parts)
-        ? candidate.content.parts.map(p=>p.text || '').join('').trim() : '';
-      if(!textOut) throw new Error('Gemini returned an empty response.');
-      lesson.aiSummary = { text: textOut, hash: currentLessonHash(), generatedAt: Date.now() };
-      await saveLesson();
-    }catch(e){
-      console.error(e);
-      aiSummaryError = "Couldn't reach Gemini — " + (e && e.message ? e.message : 'check your connection and API key.');
-    }
-    aiSummaryLoading = false;
-    renderPreview();
-  }
-
   // ---------------- Scripture modal (every verse currently in the lesson) ----------------
   function collectAllVerseNodes(){
     const out = [];
@@ -5445,23 +5212,6 @@ ${sourceLines.join('\n')}`;
     const node = removeNodeById(newId);
     if(node) insertRelative(afterId, node, 'after');
   }
-  async function jumpToCrossRef(nodeId, refStr){
-    const inBrainstorm = (lesson.brainstorm||[]).some(n=>n.id===nodeId);
-    let parentId = 'brainstorm';
-    if(!inBrainstorm){
-      const ctx = findContext(nodeId);
-      parentId = (ctx && ctx.parentNode) ? ctx.parentNode.id : 'root';
-    }
-    await openVerseModal(parentId);
-    const m = refStr.match(/^(.*?)\s+(\d+)\s*:/);
-    if(m){
-      const book = BOOKS.find(b=> b[0].toLowerCase() === m[1].trim().toLowerCase());
-      if(book){
-        renderChapterGrid(book[0]);
-        await chooseChapter(parseInt(m[2],10));
-      }
-    }
-  }
   function switchPickerTab(tab){
     document.getElementById('browsePane').style.display = tab==='browse' ? 'block' : 'none';
     document.getElementById('manualPane').style.display = tab==='manual' ? 'block' : 'none';
@@ -5485,7 +5235,6 @@ ${sourceLines.join('\n')}`;
     const newId = addVerseNode(pendingVerseParentId, {ref: ref, text: text});
     placeVerseAfterCursor(newId);
     await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList();
-    triggerCrossRefSuggestions(newId);
   }
   async function insertSelectedVerses(){
     const result = selectedVerseRefAndText();
@@ -5494,30 +5243,6 @@ ${sourceLines.join('\n')}`;
     const newId = addVerseNode(pendingVerseParentId, {ref: result.ref, text: result.text});
     placeVerseAfterCursor(newId);
     await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList();
-    triggerCrossRefSuggestions(newId);
-  }
-  async function triggerCrossRefSuggestions(nodeId){
-    const ctx = findContext(nodeId);
-    if(!ctx || ctx.node.kind !== 'verse' || !ctx.node.ref) return;
-    const node = ctx.node;
-    node.crossRefsLoading = true;
-    renderTree(); renderBrainstormList();
-    try{
-      const prompt = `Give 2-3 well-known Bible cross-references thematically related to ${node.ref}. Reply with ONLY a comma-separated list of references like "Romans 8:28, James 1:2-4" — no commentary, no verse text, nothing else.`;
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 150, messages: [{ role: "user", content: prompt }] })
-      });
-      const data = await res.json();
-      const textOut = (data.content || []).filter(b=>b.type==='text').map(b=>b.text).join(' ').trim();
-      if(textOut){
-        node.crossRefs = textOut.split(',').map(s=>s.trim()).filter(Boolean).slice(0,3);
-        node.crossRefsFor = node.ref;
-      }
-    }catch(e){ console.error(e); }
-    node.crossRefsLoading = false;
-    await saveLesson();
-    renderTree(); renderBrainstormList();
   }
 
   // ---------------- Lesson library modal ----------------
@@ -6232,15 +5957,6 @@ ${sourceLines.join('\n')}`;
     });
   })();
 
-  document.getElementById('previewDetailSegmented').addEventListener('click', (e)=>{
-    const btn = e.target.closest('button[data-detail]'); if(!btn) return;
-    previewDetailMode = btn.dataset.detail;
-    document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b===btn));
-    updatePreviewModeClass();
-    renderPreview();
-    savePublishSession();
-  });
-  document.getElementById('btnRegenerateAiSummary').addEventListener('click', ()=> generateAiSummary(true));
   let resizeRepaginateTimer = null;
   window.addEventListener('resize', ()=>{
     if(!document.getElementById('previewModalOverlay').classList.contains('open')) return;
@@ -6460,14 +6176,6 @@ ${sourceLines.join('\n')}`;
     openVerseModal('brainstorm');
   });
 
-  // AI Summary chip
-  document.getElementById('btnActionAiSummary').addEventListener('click', ()=>{
-    previewDetailMode = 'outline';
-    document.querySelectorAll('#previewDetailSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.detail==='outline'));
-    updatePreviewModeClass();
-    activePublishFilter = null;
-    openPreviewModal();
-  });
 
   // Preferences
   document.getElementById('railPrefsBtn').addEventListener('click', openPrefsModal);
@@ -6503,7 +6211,6 @@ ${sourceLines.join('\n')}`;
   document.getElementById('advPageBreakMode').addEventListener('change', (e)=> applyAdvancedPublishChange('pageBreakMode', e.target.value));
   document.getElementById('advShowKicker').addEventListener('change', (e)=> applyAdvancedPublishChange('showKicker', e.target.checked));
   document.getElementById('advShowTimeBadges').addEventListener('change', (e)=> applyAdvancedPublishChange('showTimeBadges', e.target.checked));
-  document.getElementById('advShowCrossRefs').addEventListener('change', (e)=> applyAdvancedPublishChange('showCrossRefs', e.target.checked));
   document.getElementById('advPageBody').addEventListener('change', async (e)=>{
     const field = e.target.dataset.pageField;
     if(!field) return;
@@ -6839,8 +6546,6 @@ ${sourceLines.join('\n')}`;
   });
 
   brainstormList.addEventListener('click', async (e)=>{
-    const xrefBtn = e.target.closest('[data-action="jump-to-xref"]');
-    if(xrefBtn){ await jumpToCrossRef(xrefBtn.dataset.id, xrefBtn.dataset.ref); return; }
     const uploadBtn = e.target.closest('[data-action="upload-photo"]');
     if(uploadBtn){ pendingPhotoNodeId = uploadBtn.dataset.id; photoFileInput.value=''; photoFileInput.click(); return; }
     const removeBtn = e.target.closest('[data-action="remove-photo"]');
@@ -6936,8 +6641,6 @@ ${sourceLines.join('\n')}`;
   function clearDropIndicators(){ mainTree.querySelectorAll('.node.drop-before, .node.drop-after, .node.drop-child').forEach(n=> n.classList.remove('drop-before','drop-after','drop-child')); }
 
   mainTree.addEventListener('click', async (e)=>{
-    const xrefBtn = e.target.closest('[data-action="jump-to-xref"]');
-    if(xrefBtn){ await jumpToCrossRef(xrefBtn.dataset.id, xrefBtn.dataset.ref); return; }
     const fmtToggle = e.target.closest('[data-action="format-menu-toggle"]');
     if(fmtToggle){
       const menu = mainTree.querySelector(`.format-menu[data-menu-for="${fmtToggle.dataset.id}"]`);
