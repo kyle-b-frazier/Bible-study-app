@@ -651,6 +651,12 @@
   #previewModalOverlay.presenter-mode .presenter-nav-arrow.next{ right:8px; }
   #previewModalOverlay.presenter-mode .presenter-nav-arrow:disabled{ opacity:0.2; pointer-events:none; }
   #previewModalOverlay.presenter-mode.controls-visible .presenter-nav-arrow{ display:none; }
+  @media (max-width: 640px){
+    /* page-turn arrows sit in the bottom corners so they never cover the text */
+    #previewModalOverlay.presenter-mode .presenter-nav-arrow{ position:fixed; top:auto; transform:none; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); }
+    #previewModalOverlay.presenter-mode .presenter-nav-arrow.prev{ left:16px; }
+    #previewModalOverlay.presenter-mode .presenter-nav-arrow.next{ right:70px; }
+  }
   @media (max-width:640px){
     .publish-topbar{ padding:8px 10px; gap:8px; }
     .publish-topbar .btn.icon{ width:38px; height:38px; }
@@ -1035,6 +1041,44 @@
     body.outline-style-classic #panel-outline #mainTree{min-height:0; padding:28px 20px 60px;}
     .word-status .ws-hint{display:none;}
   }
+  /* ================= Presenter Mode: plain document look =================
+     Presenting should read like the Word-style editor page: white sheet, one family of
+     type, bullets and indentation only. No frames, rules, pills, badges or quote bars.
+     Scoped to the presenter overlay, so printed output keeps its own design. */
+  #previewModalOverlay .preview-surface{
+    border:none !important; border-radius:0 !important; box-shadow:none !important; background:#FFFFFF; color:#1F2320;
+    font-family:'Calibri','Segoe UI','Inter',sans-serif; max-width:816px; margin-left:auto; margin-right:auto;
+  }
+  #previewModalOverlay .preview-surface .ms-band{border:none !important; padding-bottom:6px;}
+  #previewModalOverlay .preview-surface .ms-kicker{display:none;}
+  #previewModalOverlay .preview-surface .ms-band h1{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:700; font-size:1.6rem; letter-spacing:-.01em; color:#1F2320;}
+  #previewModalOverlay .preview-surface .p-node-row{border:none !important; background:transparent !important; box-shadow:none !important; flex-wrap:nowrap; gap:8px;}
+  #previewModalOverlay .preview-surface .p-node-row > .p-text{flex:1 1 auto; min-width:0;}
+  #previewModalOverlay .preview-surface .p-text{border:none !important; font-family:'Calibri','Segoe UI','Inter',sans-serif; color:#1F2320; line-height:1.55;}
+  #previewModalOverlay .preview-surface .p-text span{font-family:inherit;}
+  /* bullets instead of numbered badges */
+  #previewModalOverlay .preview-surface .p-number{background:transparent !important; color:#8A8F86; font-size:0; width:16px; min-width:16px; text-align:center; padding-top:3px; box-shadow:none; border:none;}
+  #previewModalOverlay .preview-surface .p-number::before{content:"●"; font-size:0.42rem;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
+  /* section headings: bold, top level in capitals, like the editor */
+  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="heading"][style*="margin-left:0px"] .p-text{text-transform:uppercase; font-size:1.2rem; letter-spacing:.01em;}
+  /* timing: quiet grey text after the heading instead of a pill */
+  #previewModalOverlay .preview-surface .time-badge{background:transparent !important; border:none !important; padding:0 0 0 8px; color:#8A8F86; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:400; font-size:.8rem; text-transform:none; letter-spacing:0;}
+  #previewModalOverlay .preview-surface .time-badge svg{display:none;}
+  /* verses: small grey reference, italic text, no side bar */
+  #previewModalOverlay .preview-surface .p-verse-ref{display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.02em; color:#6E7469; background:none; border:none; padding:0; margin-bottom:2px;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="verse"] .p-text{font-style:italic;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="question"] .p-text::before,
+  #previewModalOverlay .preview-surface .p-node[data-kind="application"] .p-text::before{content:none;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="statement"] .p-text,
+  #previewModalOverlay .preview-surface .p-node[data-kind="question"] .p-text,
+  #previewModalOverlay .preview-surface .p-node[data-kind="application"] .p-text{font-style:normal;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] .p-text{font-style:italic; color:#6E7469;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
+  html[data-theme="dark"] #previewModalOverlay .preview-surface{background:#FFFFFF; color:#1F2320;}
+  #previewModalOverlay .publish-body{background:#FFFFFF;}
+
   /* First-visit welcome + sample lesson label */
   .sample-badge{font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8C6A2E; background:#FCEFD1; border-radius:20px; padding:3px 10px; white-space:nowrap;}
   .welcome-card{display:flex; gap:20px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin:4px auto 6px; width:calc(100% - 48px); max-width:1392px; padding:18px 22px; background:var(--accent-soft); border:1px solid var(--border); border-radius:var(--radius);}
