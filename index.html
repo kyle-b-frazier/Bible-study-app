@@ -586,6 +586,7 @@
   #mainTree.drawer-drop-target{outline:2px dashed var(--accent); outline-offset:-4px; border-radius:var(--radius);}
 
   /* ================= Publish: full-screen leader's guide view ================= */
+  .publish-overlay{ padding:0; } /* the view fills the whole screen, no inset */
   .publish-overlay .modal{ padding:0; }
   .modal.publish-shell{
     max-width:none; width:100vw; height:100vh; height:100dvh; max-height:100vh; max-height:100dvh; border-radius:0;
@@ -595,7 +596,6 @@
     display:flex; align-items:center; gap:var(--space-5); flex-wrap:wrap;
     padding:12px 20px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0;
   }
-  .publish-ai-status{ display:flex; align-items:center; gap:var(--space-4); margin-left:auto; }
   .publish-body{
     flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:28px 20px; background:var(--bg);
     display:flex; flex-direction:column; align-items:stretch; overscroll-behavior:contain;
@@ -607,6 +607,10 @@
   .publish-body.mode-scroll .preview-surface{ max-height:none !important; overflow:visible !important; }
   .publish-body img, .publish-body .node-photo{ max-width:100%; height:auto; }
 
+  .awake-status{margin-left:auto; font-size:.74rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;}
+  .awake-status.on{background:var(--accent-soft); color:var(--accent);}
+  .awake-status.off{background:var(--danger-soft); color:var(--danger);}
+  .awake-status:empty{display:none;}
   /* Presenter mode: hide the chrome so a phone screen is nothing but the lesson,
      full height, no stray scrolling except the content itself. A small discreet
      handle in the corner is the only thing left on screen to bring it back. */
@@ -615,6 +619,11 @@
   #previewModalOverlay.presenter-mode.controls-visible .publish-topbar{ display:flex !important; }
   #previewModalOverlay.presenter-mode.controls-visible .book-nav{ display:flex !important; }
   #previewModalOverlay.presenter-mode .publish-body{ padding:14px 14px calc(14px + env(safe-area-inset-bottom, 0px)); }
+  @media (max-width: 640px){
+    /* On a phone, presenting is edge to edge: no page card framing eating the width. */
+    #previewModalOverlay.presenter-mode .publish-body{ padding:0 0 env(safe-area-inset-bottom, 0px); }
+    #previewModalOverlay.presenter-mode .preview-surface{ border:none; border-radius:0; box-shadow:none; }
+  }
   .presenter-reveal-handle{
     display:none; position:fixed; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); right:16px; z-index:60;
     width:42px; height:42px; border-radius:50%; border:none; background:rgba(20,20,20,0.4); color:#fff;
@@ -1295,7 +1304,7 @@
         <div class="add-menu-wrap" id="exportMenuWrap">
           <button class="btn icon" id="btnExportMenuToggle" title="Export this lesson"></button>
           <div class="add-menu" id="exportMenu">
-            <button data-action="export-pdf">Print / Export PDF</button>
+            <button data-action="export-pdf">Print / Save as PDF…</button>
             <button data-action="export-slides">Export to Slides (.pptx)</button>
             <button data-action="export-json">Save a Copy to Your Computer (.json)</button>
           </div>
@@ -1320,7 +1329,7 @@
       </button>
       <button class="action-card publish" id="btnActionPublish">
         <div class="ic"></div>
-        <div class="txt"><div class="t">Publish</div></div>
+        <div class="txt"><div class="t">View Lesson</div></div>
       </button>
     </div>
 
@@ -1338,7 +1347,7 @@
         <ol class="welcome-steps">
           <li><b>Brainstorm</b> — jot down ideas, questions and illustrations as they come.</li>
           <li><b>Scripture</b> — look up verses and pull them into your outline.</li>
-          <li><b>Publish</b> — print a handout, export slides, or present from this screen.</li>
+          <li><b>View Lesson</b> — teach from your phone in full screen; the screen stays on while you teach.</li>
         </ol>
         <p class="welcome-note">Your work saves automatically in this browser. Sign in to keep it in sync across devices.</p>
       </div>
@@ -1456,7 +1465,7 @@
   </aside>
   <div class="drawer-scrim no-print" id="drawerScrim"></div>
 
-  <!-- PUBLISH (full-screen, on-demand — a leader's guide view for live teaching) -->
+  <!-- VIEW LESSON (full-screen, on-demand — a leader's guide view for live teaching) -->
   <div class="modal-overlay publish-overlay" id="previewModalOverlay">
     <div class="modal preview-modal publish-shell">
       <div class="publish-topbar no-print">
@@ -1465,7 +1474,8 @@
           <button data-mode="pageflip" class="active" title="Turn one page at a time">Page-flip</button>
           <button data-mode="scroll" title="Scroll continuously">Scroll</button>
         </div>
-        <button class="btn icon" id="btnTogglePresenter" title="Present (hide these controls)"></button>
+        <button class="btn icon" id="btnTogglePresenter" title="Hide these controls"></button>
+        <span class="awake-status" id="awakeStatus" title=""></span>
       </div>
       <div class="publish-body" id="publishBody">
         <div class="book-viewport" id="bookViewport">
@@ -1723,15 +1733,15 @@
         </div>
 
         <div class="prefs-section">
-          <h4>Publish Style</h4>
-          <p class="hint" style="margin-top:0;">Applies to Full Lesson, Handout, and Custom exports alike.</p>
+          <h4>View &amp; Print Style</h4>
+          <p class="hint" style="margin-top:0;">Applies to View Lesson and to Full Lesson, Handout, and Custom prints alike.</p>
           <div id="prefsStyleBody"></div>
           <button class="btn small" id="btnOpenAdvancedPublish" style="margin-top:10px;">Advanced Output Settings…</button>
         </div>
 
         <div class="prefs-section">
           <h4>Full Lesson defaults</h4>
-          <p class="hint" style="margin-top:0;">What's included when you choose "Full Lesson" from Publish.</p>
+          <p class="hint" style="margin-top:0;">What's included in View Lesson and when you print the Full Lesson.</p>
           <div id="prefsFullBody"></div>
         </div>
 
@@ -1765,7 +1775,7 @@
 
         <div class="prefs-section">
           <h4>Typography</h4>
-          <p class="hint" style="margin-top:0;">Fine control beyond the basic preset — applies everywhere the basic Publish Style does.</p>
+          <p class="hint" style="margin-top:0;">Fine control beyond the basic preset — applies everywhere the basic View &amp; Print Style does.</p>
           <div class="prefs-row"><label style="flex:none; width:140px;">Heading font</label>
             <select id="advHeadingFont">
               <option value="spacegrotesk">Space Grotesk (default)</option>
@@ -1834,16 +1844,16 @@
   </div>
 </div>
 
-<!-- Publish chooser: what are you publishing? -->
+<!-- Print chooser: what are you printing? -->
 <div class="modal-overlay" id="publishChooserOverlay">
   <div class="modal" style="max-width:460px;">
     <button class="modal-x" id="xClosePublishChooser" title="Close">✕</button>
-    <h3>Publish</h3>
-    <p class="hint" style="margin-top:0;">What are you publishing?</p>
+    <h3>Print</h3>
+    <p class="hint" style="margin-top:0;">What would you like to print or save as PDF?</p>
     <div class="publish-choice-list">
       <button class="publish-choice" data-choice="full">
         <b>Full Lesson</b>
-        <span>Everything, per your saved Publish preferences.</span>
+        <span>Everything, per your saved View &amp; Print preferences.</span>
       </button>
       <button class="publish-choice" data-choice="handout">
         <b>Handout</b>
@@ -1851,7 +1861,7 @@
       </button>
       <button class="publish-choice" data-choice="custom">
         <b>Custom</b>
-        <span>Choose exactly what's included, just for this export.</span>
+        <span>Choose exactly what's included, just for this printout.</span>
       </button>
     </div>
   </div>
@@ -1861,12 +1871,12 @@
 <div class="modal-overlay" id="customPublishModalOverlay">
   <div class="modal" style="max-width:480px;">
     <button class="modal-x" id="xCloseCustomPublish" title="Close">✕</button>
-    <h3>Custom Publish</h3>
+    <h3>Custom Print</h3>
     <p class="hint" style="margin-top:0;">Starts from your saved defaults — adjust anything for just this export.</p>
     <div id="customPublishBody"></div>
     <div class="modal-actions">
       <button class="btn ghost" id="btnCancelCustomPublish">Cancel</button>
-      <button class="btn brass" id="btnApplyCustomPublish">Publish</button>
+      <button class="btn brass" id="btnApplyCustomPublish">Print</button>
     </div>
   </div>
 </div>
@@ -2589,7 +2599,7 @@ function icon(name, size){
   }
   async function savePublishPrefs(){ await safeSet('publish-prefs', JSON.stringify(publishPrefs), false); }
   async function restorePublishPrefsToDefaults(){
-    const ok = await appConfirm('Restore all Preferences — Publish style, Full Lesson defaults, and Handout defaults — back to the original settings? This cannot be undone.');
+    const ok = await appConfirm('Restore all Preferences — View & Print style, Full Lesson defaults, and Handout defaults — back to the original settings? This cannot be undone.');
     if(!ok) return;
     publishPrefs = defaultPublishPrefs();
     await savePublishPrefs();
@@ -2899,22 +2909,17 @@ function icon(name, size){
     });
   }
 
-  // ---------------- Publish chooser: Full / Handout / Custom ----------------
+  // ---------------- Print chooser: Full / Handout / Custom ----------------
   function openPublishChooser(){ document.getElementById('publishChooserOverlay').classList.add('open'); }
   function closePublishChooser(){ document.getElementById('publishChooserOverlay').classList.remove('open'); }
   function goPublish(choice){
     closePublishChooser();
-    previewDetailMode = 'full';
-    updatePreviewModeClass();
     if(choice === 'full'){
-      activePublishFilter = JSON.parse(JSON.stringify(publishPrefs.full));
-      activePublishFilter.style = publishPrefs.style;
-      openPreviewModal();
+      printLessonPdf(JSON.parse(JSON.stringify(publishPrefs.full)));
     } else if(choice === 'handout'){
-      activePublishFilter = JSON.parse(JSON.stringify(publishPrefs.handout));
-      activePublishFilter.types.teacherNotes = false; // hard rule regardless of saved prefs
-      activePublishFilter.style = publishPrefs.style;
-      openPreviewModal();
+      const f = JSON.parse(JSON.stringify(publishPrefs.handout));
+      f.types.teacherNotes = false; // hard rule regardless of saved prefs
+      printLessonPdf(f);
     } else if(choice === 'custom'){
       openCustomPublishModal();
     }
@@ -2937,12 +2942,9 @@ function icon(name, size){
     if(!customPublishDraft) return;
     publishPrefs.custom = JSON.parse(JSON.stringify(customPublishDraft));
     await savePublishPrefs();
-    activePublishFilter = JSON.parse(JSON.stringify(customPublishDraft));
-    activePublishFilter.style = publishPrefs.style;
+    const f = JSON.parse(JSON.stringify(customPublishDraft));
     closeCustomPublishModal();
-    previewDetailMode = 'full';
-    updatePreviewModeClass();
-    openPreviewModal();
+    printLessonPdf(f);
   }
 
   async function saveLesson(){
@@ -3781,8 +3783,8 @@ function icon(name, size){
       { type:'command', id:'toggle-brainstorm', label:'Toggle Brainstorm' },
       { type:'command', id:'open-series', label:'Manage Series & Folders' },
       { type:'command', id:'open-library', label:'Open My Lessons' },
-      { type:'command', id:'go-preview', label:'Publish (full-screen guide)' },
-      { type:'command', id:'export-pdf', label:'Print / Export PDF' },
+      { type:'command', id:'go-preview', label:'View Lesson (full screen for teaching)' },
+      { type:'command', id:'export-pdf', label:'Print / Save as PDF' },
       { type:'command', id:'export-slides', label:'Export to Slides' },
       { type:'command', id:'toggle-theme', label:'Toggle Dark Mode' },
       { type:'command', id:'show-shortcuts', label:'Keyboard Shortcuts' },
@@ -3816,8 +3818,8 @@ function icon(name, size){
       case 'toggle-brainstorm': toggleBrainstormDrawer(); break;
       case 'open-series': openFolderModal(); break;
       case 'open-library': openLibraryModal(); break;
-      case 'go-preview': openPublishChooser(); break;
-      case 'export-pdf': window.print(); break;
+      case 'go-preview': viewLesson(); break;
+      case 'export-pdf': openPublishChooser(); break;
       case 'export-slides': exportToSlides(); break;
       case 'toggle-theme': toggleTheme(); break;
       case 'show-shortcuts': openShortcutsModal(); break;
@@ -3918,7 +3920,7 @@ function icon(name, size){
     { keys: 'T', label: "Add a Teacher's Note" },
     { keys: 'P', label: 'Add a Photo' },
     { keys: 'H', label: 'Add a Section' },
-    { keys: '← / →', label: 'Turn pages in Publish (page-flip mode)' },
+    { keys: '← / →', label: 'Turn pages in View Lesson (page-flip mode)' },
     { keys: '?', label: 'Show this shortcuts list' },
     { keys: 'Esc', label: 'Close the current dialog or menu' },
   ];
@@ -4358,6 +4360,32 @@ function icon(name, size){
     scrim.classList.toggle('open', open);
   }
 
+  // ---------------- View Lesson: full-screen teaching view ----------------
+  // One tap from the editor straight into the presenter view: the whole lesson (teacher's
+  // notes included, per the Full Lesson preferences), browser chrome hidden where the
+  // phone allows it, and the screen kept awake.
+  function viewLesson(){
+    previewDetailMode = 'full';
+    updatePreviewModeClass();
+    activePublishFilter = JSON.parse(JSON.stringify(publishPrefs.full));
+    activePublishFilter.style = publishPrefs.style;
+    enterFullscreen();
+    openPreviewModal();
+    setPresenterMode(true);
+  }
+  function enterFullscreen(){
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if(!req || document.fullscreenElement || document.webkitFullscreenElement) return;
+    try{ const r = req.call(el, { navigationUI: 'hide' }); if(r && r.catch) r.catch(()=>{}); }catch(e){}
+  }
+  function exitFullscreen(){
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if(exit && (document.fullscreenElement || document.webkitFullscreenElement)){
+      try{ const r = exit.call(document); if(r && r.catch) r.catch(()=>{}); }catch(e){}
+    }
+  }
+
   // ---------------- Preview (on-demand overlay, not a tab) ----------------
   function openPreviewModal(){
     renderPreview();
@@ -4369,6 +4397,7 @@ function icon(name, size){
     document.getElementById('previewModalOverlay').classList.remove('open');
     setPresenterMode(false);
     releasePresentationWakeLock();
+    exitFullscreen();
     clearPublishSession();
   }
 
@@ -4389,13 +4418,40 @@ function icon(name, size){
     document.getElementById('previewModalOverlay').classList.toggle('controls-visible');
   }
   let wakeLockSentinel = null;
+  let wakeLockNoticeShown = false;
+  function setAwakeStatus(on, why){
+    const el = document.getElementById('awakeStatus');
+    if(!el) return;
+    el.className = 'awake-status ' + (on ? 'on' : 'off');
+    el.textContent = on ? 'Screen stays on' : 'Screen may sleep';
+    el.title = on ? 'Your screen won\'t turn off while this view is open.' : why;
+  }
   async function requestPresentationWakeLock(){
+    const overlayOpen = ()=> document.getElementById('previewModalOverlay').classList.contains('open');
+    let why = "This browser can't keep the screen on. While teaching, turn off Auto-Lock (iPhone: Settings → Display & Brightness → Auto-Lock) or lengthen Screen timeout (Android: Settings → Display).";
     try{
-      if('wakeLock' in navigator){ wakeLockSentinel = await navigator.wakeLock.request('screen'); }
-    }catch(e){ /* not fatal — e.g. low battery mode can refuse this on iOS */ console.error('wake lock request failed', e); }
+      if('wakeLock' in navigator){
+        if(wakeLockSentinel && !wakeLockSentinel.released){ setAwakeStatus(true); return; }
+        wakeLockSentinel = await navigator.wakeLock.request('screen');
+        // The system drops the lock when the page is hidden; take it back as soon as we're visible and still teaching.
+        wakeLockSentinel.addEventListener('release', ()=>{
+          if(overlayOpen() && document.visibilityState === 'visible') requestPresentationWakeLock();
+        });
+        setAwakeStatus(true);
+        return;
+      }
+    }catch(e){
+      /* not fatal — e.g. Low Power Mode can refuse this on iPhone */
+      console.error('wake lock request failed', e);
+      why = "The phone refused to keep the screen on (Low Power Mode can do this). Turn off Auto-Lock in your phone's settings while teaching.";
+    }
+    setAwakeStatus(false, why);
+    if(!wakeLockNoticeShown){ wakeLockNoticeShown = true; showToast(why, true); }
   }
   function releasePresentationWakeLock(){
     if(wakeLockSentinel){ try{ wakeLockSentinel.release(); }catch(e){} wakeLockSentinel = null; }
+    const el = document.getElementById('awakeStatus');
+    if(el) el.textContent = '';
   }
   document.addEventListener('visibilitychange', ()=>{
     if(document.visibilityState === 'visible'){
@@ -4516,7 +4572,7 @@ function icon(name, size){
     });
 
     // Action row cards
-    const actionIcons = { btnActionBrainstorm:'lightbulb', btnActionScripture:'cross', btnActionPublish:'presentation' };
+    const actionIcons = { btnActionBrainstorm:'lightbulb', btnActionScripture:'cross', btnActionPublish:'book-open' };
     Object.keys(actionIcons).forEach(id=>{
       const card = document.getElementById(id);
       const ic = card && card.querySelector('.ic');
@@ -5130,13 +5186,13 @@ function icon(name, size){
   // Builds the complete, unpaginated Lesson content into #printExportRoot — a sibling
   // of .app-shell rather than a descendant of it, so hiding the app chrome for print
   // can never accidentally hide this too (see the print CSS note above).
-  function buildFullLessonPrintHtml(){
+  function buildFullLessonPrintHtml(filterOverride){
     const tags = (lesson.tags || []);
     const kicker = tags.length ? tags.join(' · ') : 'Bible Lesson Builder';
     const showKicker = !publishPrefs || publishPrefs.style.showKicker !== false;
     const kickerHtml = showKicker ? `<div class="ms-kicker">${escapeHtml(kicker)}</div>` : '';
     const band = `<div class="ms-band">${kickerHtml}<h1>${escapeHtml(lesson.title || 'Untitled Lesson')}</h1></div>`;
-    const filter = publishPrefs ? publishPrefs.full : null;
+    const filter = filterOverride || (publishPrefs ? publishPrefs.full : null);
     const nodes = filter ? filterNodesForPublish(lesson.outline || [], 0, filter) : (lesson.outline || []);
     const bodyHtml = nodes.length
       ? nodes.map((node, idx)=> renderNodesPreview([node], 0, idx)).join('')
@@ -5149,10 +5205,10 @@ function icon(name, size){
     })();
     return `<div class="preview-surface"${styleAttr}>${band}<div class="ms-body">${bodyHtml}</div></div>`;
   }
-  function printLessonPdf(){
+  function printLessonPdf(filterOverride){
     const root = document.getElementById('printExportRoot');
     if(!root){ window.print(); return; }
-    root.innerHTML = buildFullLessonPrintHtml();
+    root.innerHTML = buildFullLessonPrintHtml(filterOverride);
     window.print();
   }
   window.addEventListener('afterprint', ()=>{
@@ -5907,7 +5963,7 @@ function icon(name, size){
   document.getElementById('btnActionBrainstorm').addEventListener('click', ()=> toggleBrainstormDrawer());
   document.getElementById('btnCloseDrawer').addEventListener('click', ()=> toggleBrainstormDrawer(false));
   document.getElementById('drawerScrim').addEventListener('click', ()=> toggleBrainstormDrawer(false));
-  document.getElementById('btnActionPublish').addEventListener('click', openPublishChooser);
+  document.getElementById('btnActionPublish').addEventListener('click', viewLesson);
   document.getElementById('xClosePreview').addEventListener('click', closePreviewModal);
   document.getElementById('previewModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='previewModalOverlay') closePreviewModal(); });
   document.getElementById('btnTogglePresenter').addEventListener('click', ()=>{
@@ -5997,7 +6053,7 @@ function icon(name, size){
   document.getElementById('mBtnRedo').addEventListener('click', ()=> performRedo());
   document.getElementById('mBtnTags').addEventListener('click', ()=>{ toggleMobileDrawer(false); openTagsModal(); });
   document.getElementById('mBtnTeam').addEventListener('click', ()=>{ toggleMobileDrawer(false); openTeamModal(); });
-  document.getElementById('mBtnExportPdf').addEventListener('click', ()=>{ toggleMobileDrawer(false); printLessonPdf(); });
+  document.getElementById('mBtnExportPdf').addEventListener('click', ()=>{ toggleMobileDrawer(false); openPublishChooser(); });
   document.getElementById('mBtnExportSlides').addEventListener('click', ()=>{ toggleMobileDrawer(false); exportToSlides(); });
   document.getElementById('mBtnExportJson').addEventListener('click', ()=>{ toggleMobileDrawer(false); saveToLocalFile(); });
   document.getElementById('mBtnTheme').addEventListener('click', toggleTheme);
@@ -6473,7 +6529,7 @@ function icon(name, size){
   document.getElementById('exportMenu').addEventListener('click', (e)=>{
     const btn = e.target.closest('[data-action]'); if(!btn) return;
     document.getElementById('exportMenu').classList.remove('open');
-    if(btn.dataset.action === 'export-pdf') printLessonPdf();
+    if(btn.dataset.action === 'export-pdf') openPublishChooser();
     else if(btn.dataset.action === 'export-slides') exportToSlides();
     else if(btn.dataset.action === 'export-json') saveToLocalFile();
   });
