@@ -1314,6 +1314,27 @@
     .rb-actions .action-card.publish .t{display:none;}
     .rb-actions .action-card.publish{padding-right:8px;}
   }
+  /* ================= Desktop: give the page (the typing area) as much room as possible =================
+     No separate app bar (the sidebar is the app chrome), a slim title row that scrolls away, a pinned
+     ribbon at the very top, an icon-only sidebar until you expand it, and a wide page with tight margins. */
+  @media (min-width: 901px){
+    header.app-header, .app-header{display:none !important;}
+    .app-shell{min-height:100vh;}
+    .rail{top:0; height:100vh; width:52px; padding-top:10px;}
+    .rail.expanded{width:188px;}
+    .main-wrap{margin-left:52px;}
+    #appRail.expanded ~ .main-wrap{margin-left:188px;}
+    .lesson-bar{padding:6px 18px; gap:10px; flex-wrap:nowrap;}
+    textarea.lesson-title{font-size:1.1rem; padding:2px; min-width:160px;}
+    .word-ribbon{top:0; margin:0 -12px 6px; padding:3px 14px;}
+    main{padding:0 12px 0;}
+    #panel-outline #mainTree.doc-view,
+    body.outline-style-classic #panel-outline #mainTree{
+      max-width:1200px; min-height:calc(100vh - 120px); padding:20px 56px 90px;
+    }
+    body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]{margin-top:18px;}
+    .word-status{padding:2px 14px;}
+  }
 </style>
 </head>
 <body>
@@ -4735,7 +4756,8 @@ function icon(name, size){
 
   function autosizeVisibleTextareas(container){
     container.querySelectorAll('textarea').forEach(t=>{
-      if(t.offsetParent !== null){ t.style.height='auto'; t.style.height=(t.scrollHeight)+'px'; }
+      // rows=1: a textarea defaults to 2 rows, which made every one-line entry two lines tall.
+      if(t.offsetParent !== null){ t.rows = 1; t.style.height='auto'; t.style.height=(t.scrollHeight)+'px'; }
     });
   }
 
@@ -6248,11 +6270,6 @@ function icon(name, size){
     let saved = null;
     try{ saved = localStorage.getItem(lsKey('rail-expanded')); }catch(e){}
     if(saved === '1') toggleRailExpanded(true);
-    else if(saved === null && window.innerWidth >= 1280){
-      // No preference yet: start wide screens with labels showing, without saving that as a choice.
-      document.getElementById('appRail').classList.add('expanded');
-      document.getElementById('railExpandToggle').title = 'Collapse sidebar';
-    }
   })();
   wirePanelResize('drawerResizeHandle', document.getElementById('brainstormDrawer'), { min:280, max:640, default:360, storeKey:'drawer-width', grow:'left' });
 
@@ -7291,6 +7308,23 @@ function icon(name, size){
       if(el){ editSessionActive = true; el.focus(); const pos2 = (last.text || '').length - after.length; try{ el.setSelectionRange(pos2, pos2); }catch(err){} }
     });
   });
+
+  // Text boxes are sized to their text when drawn; re-fit them whenever the available width
+  // changes (window resize, sidebar/drawer toggle) or the web fonts finish loading.
+  (function keepTextareasFitted(){
+    const targets = [mainTree, document.getElementById('brainstormList')];
+    const widths = new Map(); let raf = null;
+    const refit = ()=>{ cancelAnimationFrame(raf); raf = requestAnimationFrame(()=> targets.forEach(c=>autosizeVisibleTextareas(c))); };
+    if(window.ResizeObserver){
+      const ro = new ResizeObserver(entries=>{
+        let changed = false;
+        entries.forEach(en=>{ const w = Math.round(en.contentRect.width); if(widths.get(en.target) !== w){ widths.set(en.target, w); changed = true; } });
+        if(changed) refit();
+      });
+      targets.forEach(c=>ro.observe(c));
+    }
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
+  })();
 
   // Paste a screenshot / copied picture into the outline or Brainstorm: it becomes a photo line
   // right after the line you're typing in (or at the end of Brainstorm if nothing is focused).
