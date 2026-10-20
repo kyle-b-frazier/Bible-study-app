@@ -1462,6 +1462,24 @@
   .rt-edit.node-text:focus{border-color:var(--accent);}
   .rt-edit .rt-run{white-space:pre-wrap;}
   @media (max-width:1560px){ .rb-font{max-width:96px;} .rb-sz-step{display:none;} }
+
+  /* Photos: sized and cropped frame */
+  .photo-wrap{max-width:100%;}
+  .photo-frame{position:relative; overflow:hidden; display:block; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--bg); line-height:0;}
+  .photo-frame .photo-img{display:block; user-select:none; -webkit-user-drag:none; pointer-events:none;}
+  .photo-grip{position:absolute; right:3px; bottom:3px; width:16px; height:16px; border-radius:4px; background:var(--accent); border:2px solid #fff; cursor:nwse-resize; opacity:0; transition:opacity .12s; touch-action:none; box-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .photo-frame:hover .photo-grip, .photo-frame.resizing .photo-grip{opacity:1;}
+  @media (hover:none){ .photo-grip{opacity:1;} }
+  .photo-frame.resizing{outline:2px solid var(--accent);}
+  .photo-frame.cropping{overflow:hidden; cursor:default; touch-action:none;}
+  .crop-box{position:absolute; border:2px solid #fff; box-shadow:0 0 0 9999px rgba(0,0,0,.5); cursor:move; touch-action:none;}
+  .crop-box::before,.crop-box::after{content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(#fff6 1px,transparent 1px) 0 33.33%/100% 33.34% repeat-y, linear-gradient(90deg,#fff6 1px,transparent 1px) 33.33% 0/33.34% 100% repeat-x;}
+  .crop-h{position:absolute; width:12px; height:12px; background:#fff; border:2px solid var(--accent); border-radius:3px; touch-action:none;}
+  .crop-h[data-h="nw"]{left:-7px; top:-7px; cursor:nwse-resize;} .crop-h[data-h="n"]{left:calc(50% - 6px); top:-7px; cursor:ns-resize;}
+  .crop-h[data-h="ne"]{right:-7px; top:-7px; cursor:nesw-resize;} .crop-h[data-h="e"]{right:-7px; top:calc(50% - 6px); cursor:ew-resize;}
+  .crop-h[data-h="se"]{right:-7px; bottom:-7px; cursor:nwse-resize;} .crop-h[data-h="s"]{left:calc(50% - 6px); bottom:-7px; cursor:ns-resize;}
+  .crop-h[data-h="sw"]{left:-7px; bottom:-7px; cursor:nesw-resize;} .crop-h[data-h="w"]{left:-7px; top:calc(50% - 6px); cursor:ew-resize;}
+  .p-node .photo-frame{border:none; border-radius:4px; margin:4px 0;}
 </style>
 </head>
 <body>
@@ -3435,6 +3453,53 @@ function icon(name, size){
   }
   async function deletePhotoData(key){ await safeDelete(key, false); delete photoCache[key]; }
 
+
+  // ---------------- Photos: size + crop ----------------
+  // node.imgW = display width in px; node.crop = {x,y,w,h} as fractions of the original picture (what stays visible);
+  // node.natW / natH = the picture's own pixel size (needed to keep the shape while resizing / cropping).
+  const FULL_CROP = { x:0, y:0, w:1, h:1 };
+  let cropEditingId = null, cropDraft = null;
+  function imageNaturalSize(dataUrl){
+    return new Promise(resolve=>{
+      const im = new Image();
+      im.onload = ()=> resolve({ w: im.naturalWidth, h: im.naturalHeight });
+      im.onerror = ()=> resolve(null);
+      im.src = dataUrl;
+    });
+  }
+  async function ensurePhotoDims(node){
+    if(node.natW && node.natH) return;
+    const url = node.photoRef ? photoCache[node.photoRef] : null;
+    if(!url) return;
+    const sz = await imageNaturalSize(url);
+    if(sz){ node.natW = sz.w; node.natH = sz.h; }
+  }
+  function photoGeom(node){
+    const nw = node.natW || 0, nh = node.natH || 0;
+    if(!nw || !nh) return null;
+    const c = node.crop || FULL_CROP;
+    return { c, ratio: (c.w * nw) / (c.h * nh), w: node.imgW || Math.round(Math.min(c.w * nw, 420)) };
+  }
+  // mode: 'edit' (resize grip), 'crop' (whole picture with a movable crop box) or 'static' (presenter / print)
+  function photoFrameHtml(node, dataUrl, mode){
+    const g = photoGeom(node);
+    if(!g) return `<img class="photo-img-plain" src="${dataUrl}" alt="" style="max-width:100%;height:auto;display:block">`;
+    const imgBase = 'position:absolute;max-width:none;max-height:none;';
+    if(mode === 'crop'){
+      const full = Math.round(g.w / g.c.w);
+      const d = cropDraft || g.c;
+      return `<div class="photo-frame cropping" data-photo-frame="${node.id}" style="width:min(${full}px,100%);aspect-ratio:${node.natW}/${node.natH}">
+        <img class="photo-img" src="${dataUrl}" alt="" draggable="false" style="${imgBase}left:0;top:0;width:100%;height:100%">
+        <div class="crop-box" data-crop-box style="left:${d.x*100}%;top:${d.y*100}%;width:${d.w*100}%;height:${d.h*100}%">
+          ${['nw','n','ne','e','se','s','sw','w'].map(h=>`<span class="crop-h" data-h="${h}"></span>`).join('')}
+        </div></div>`;
+    }
+    const c = g.c;
+    const grip = mode === 'edit' ? '<span class="photo-grip" data-photo-grip title="Drag to resize"></span>' : '';
+    return `<div class="photo-frame" data-photo-frame="${node.id}" style="width:${g.w}px;max-width:100%;aspect-ratio:${g.ratio}">`
+      + `<img class="photo-img" src="${dataUrl}" alt="" draggable="false" style="${imgBase}left:${-c.x/c.w*100}%;top:${-c.y/c.h*100}%;width:${100/c.w}%;height:${100/c.h}%">${grip}</div>`;
+  }
+
   async function migrateEmbeddedPhotos(nodes){
     for(const node of nodes){
       if(node.kind === 'photo' && node.imageData){
@@ -3448,7 +3513,7 @@ function icon(name, size){
   }
   async function prefetchPhotos(nodes){
     for(const node of nodes){
-      if(node.kind === 'photo' && node.photoRef) await loadPhotoData(node.photoRef);
+      if(node.kind === 'photo' && node.photoRef){ await loadPhotoData(node.photoRef); await ensurePhotoDims(node); }
       if(node.children && node.children.length) await prefetchPhotos(node.children);
     }
   }
@@ -4898,13 +4963,13 @@ function icon(name, size){
       reader.onload = ()=>{
         const img = new Image();
         img.onload = ()=>{
-          const maxW = 1000;
+          const maxW = 1400;
           let w = img.width, h = img.height;
           if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
           const canvas = document.createElement('canvas');
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', 0.82));
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
         };
         img.onerror = reject;
         img.src = reader.result;
@@ -5323,8 +5388,8 @@ function icon(name, size){
         if(node.photoRef){
           const dataUrl = photoCache[node.photoRef];
           mainContent = dataUrl
-            ? `<img class="node-photo" src="${dataUrl}" alt="">
-               <input type="text" class="photo-caption" data-field="caption" data-id="${node.id}" placeholder="Caption (optional)" value="${escapeHtml(node.caption||'')}">`
+            ? `<div class="photo-wrap">${photoFrameHtml(node, dataUrl, cropEditingId === node.id ? 'crop' : 'edit')}
+               <input type="text" class="photo-caption" data-field="caption" data-id="${node.id}" placeholder="Caption (optional)" value="${escapeHtml(node.caption||'')}"></div>`
             : `<div class="photo-placeholder"><span class="condensed-flag">loading photo…</span></div>`;
         } else {
           mainContent = `<div class="photo-placeholder"><button class="btn small brass" data-action="upload-photo" data-id="${node.id}">Upload Photo</button></div>`;
@@ -5333,9 +5398,13 @@ function icon(name, size){
         mainContent = `<div class="node-text full-only rt-edit" contenteditable="true" spellcheck="true" role="textbox" data-field="text" data-id="${node.id}" data-ph="${escapeHtml(placeholderFor(node.kind))}"${node.text ? '' : ' data-empty="1"'} style="${escapeHtml(styleObjToCssText(node.style))}">${runsToHtml(node.text, node.runs)}</div>`;
       }
 
-      const photoExtra = isPhoto ? `
+      const photoExtra = isPhoto ? (cropEditingId === node.id ? `
+            <button class="btn small brass" data-action="apply-crop" data-id="${node.id}">Apply crop</button>
+            <button class="btn small" data-action="cancel-crop" data-id="${node.id}">Cancel</button>` : `
+            ${(node.photoRef && node.natW) ? `<button class="btn small" data-action="crop-photo" data-id="${node.id}">Crop</button>` : ''}
+            ${(node.imgW || node.crop) ? `<button class="btn small" data-action="reset-photo" data-id="${node.id}" title="Back to the original size and framing">Reset</button>` : ''}
             <button class="btn small" data-action="upload-photo" data-id="${node.id}">${node.photoRef?'Replace':'Upload'}</button>
-            ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}` : '';
+            ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}`) : '';
 
       const hasKids = !!(node.children && node.children.length > 0);
       const collapseToggle = hasKids
@@ -5538,7 +5607,7 @@ function icon(name, size){
     } else if(node.kind==='photo'){
       const dataUrl = node.photoRef ? photoCache[node.photoRef] : null;
       body = dataUrl
-        ? `<img class="node-photo" src="${dataUrl}" alt=""><div>${escapeHtml(node.caption||'')}</div>`
+        ? `${photoFrameHtml(node, dataUrl, 'static')}<div>${escapeHtml(node.caption||'')}</div>`
         : '<em>(no photo yet)</em>';
     } else {
       body = `<span style="${styleCss}">${node.text ? runsToHtml(node.text, node.runs) : '(empty)'}</span>`;
@@ -7607,8 +7676,36 @@ function icon(name, size){
     if(removeBtn){
       pushUndo();
       const ctx = findContext(removeBtn.dataset.id);
-      if(ctx && ctx.node.photoRef){ await deletePhotoData(ctx.node.photoRef); ctx.node.photoRef = ''; }
+      if(ctx && ctx.node.photoRef){ await deletePhotoData(ctx.node.photoRef); ctx.node.photoRef = ''; delete ctx.node.crop; delete ctx.node.imgW; delete ctx.node.natW; delete ctx.node.natH; }
       await saveLesson(); renderTree(); return;
+    }
+    const cropBtn = e.target.closest('[data-action="crop-photo"]');
+    if(cropBtn){
+      const ctx = findContext(cropBtn.dataset.id); if(!ctx) return;
+      cropEditingId = ctx.node.id; cropDraft = Object.assign({}, ctx.node.crop || FULL_CROP);
+      renderTree(); return;
+    }
+    const cancelCropBtn = e.target.closest('[data-action="cancel-crop"]');
+    if(cancelCropBtn){ cropEditingId = null; cropDraft = null; renderTree(); return; }
+    const applyCropBtn = e.target.closest('[data-action="apply-crop"]');
+    if(applyCropBtn){
+      const ctx = findContext(applyCropBtn.dataset.id);
+      const frame = mainTree.querySelector(`.photo-frame.cropping[data-photo-frame="${applyCropBtn.dataset.id}"]`);
+      if(ctx && frame && cropDraft){
+        pushUndo();
+        const frameW = frame.offsetWidth, d = cropDraft;
+        const isFull = d.x < 0.002 && d.y < 0.002 && d.w > 0.996 && d.h > 0.996;
+        if(isFull){ delete ctx.node.crop; } else ctx.node.crop = { x:+d.x.toFixed(4), y:+d.y.toFixed(4), w:+d.w.toFixed(4), h:+d.h.toFixed(4) };
+        ctx.node.imgW = Math.max(48, Math.round(frameW * d.w));   // keep the same scale: cropping trims, it doesn't zoom
+        await saveLesson();
+      }
+      cropEditingId = null; cropDraft = null; renderTree(); return;
+    }
+    const resetPhotoBtn = e.target.closest('[data-action="reset-photo"]');
+    if(resetPhotoBtn){
+      const ctx = findContext(resetPhotoBtn.dataset.id);
+      if(ctx){ pushUndo(); delete ctx.node.crop; delete ctx.node.imgW; await saveLesson(); renderTree(); }
+      return;
     }
 
     const actionBtn = e.target.closest('[data-action]');
@@ -7631,6 +7728,8 @@ function icon(name, size){
         if(ok){
           if(oldRef && oldRef !== key) await deletePhotoData(oldRef);
           ctx.node.photoRef = key;
+          delete ctx.node.crop; delete ctx.node.imgW; delete ctx.node.natW; delete ctx.node.natH;
+          await ensurePhotoDims(ctx.node);
           await saveLesson();
           renderTree();
           renderBrainstormList();
@@ -7891,7 +7990,10 @@ function icon(name, size){
   document.addEventListener('paste', async (e)=>{
     const cd = e.clipboardData; if(!cd) return;
     const imgItem = Array.from(cd.items || []).find(it=>it.kind === 'file' && it.type.startsWith('image/'));
-    if(!imgItem || cd.getData('text/plain')) return;
+    // A screenshot / copied picture. (Some sources also attach text or HTML; a plain-text-only copy is left alone.)
+    const plain = (cd.getData('text/plain') || '').trim();
+    const html = cd.getData('text/html') || '';
+    if(!imgItem || (plain && !/<img\b/i.test(html))) return;
     const t = e.target;
     const rowEl = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
     const drawerOpen = document.getElementById('brainstormDrawer').classList.contains('open');
@@ -7901,13 +8003,21 @@ function icon(name, size){
     e.preventDefault();
     try{
       const dataUrl = await readAndCompressImage(file);
-      const node = makeNode('photo');
+      const ctx = rowEl ? findContext(rowEl.dataset.id) : null;
+      // Cursor in an empty line: the picture takes that line's place (same spot in the outline).
+      const inPlace = !!(ctx && FLOW_KINDS.includes(ctx.node.kind) && !(ctx.node.text || '').trim());
+      const node = inPlace ? ctx.node : makeNode('photo');
       const key = photoKeyFor(node.id);
       if(!(await savePhotoData(key, dataUrl))){ showToast("Couldn't save that image.", true); return; }
-      node.photoRef = key;
       pushUndo();
-      const ctx = rowEl ? findContext(rowEl.dataset.id) : null;
-      if(ctx) ctx.arr.splice(ctx.idx + 1, 0, node); else lesson.brainstorm.push(node);
+      if(inPlace){
+        node.kind = 'photo'; node.caption = ''; delete node.text; delete node.runs; delete node.style; delete node.kindManual;
+      }
+      node.photoRef = key;
+      const sz = await imageNaturalSize(dataUrl); if(sz){ node.natW = sz.w; node.natH = sz.h; }
+      if(!inPlace){
+        if(ctx) ctx.arr.splice(ctx.idx + 1, 0, node); else lesson.brainstorm.push(node);
+      }
       await saveLesson();
       rerenderStructure();
       updateActionCardsAndChips();
@@ -7916,6 +8026,53 @@ function icon(name, size){
       console.error(err);
       showToast("Couldn't load that image.", true);
     }
+  });
+
+
+  // ---- Photo resize grip + crop box (mouse / touch / pen) ----
+  mainTree.addEventListener('pointerdown', (e)=>{
+    const grip = e.target.closest && e.target.closest('[data-photo-grip]');
+    const cropH = e.target.closest && e.target.closest('.crop-h, [data-crop-box]');
+    if(!grip && !cropH) return;
+    e.preventDefault(); e.stopPropagation();
+    if(grip){
+      const frame = grip.closest('.photo-frame');
+      const nodeId = frame.dataset.photoFrame;
+      const startX = e.clientX, startW = frame.offsetWidth;
+      const scale = (frame.getBoundingClientRect().width / (frame.offsetWidth || 1)) || 1;
+      const maxW = Math.max(48, frame.parentElement.clientWidth);
+      frame.classList.add('resizing');
+      const move = (ev)=>{ frame.style.width = Math.round(Math.min(maxW, Math.max(48, startW + (ev.clientX - startX) / scale))) + 'px'; };
+      const up = async ()=>{
+        window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+        frame.classList.remove('resizing');
+        const ctx = findContext(nodeId);
+        if(ctx && Math.abs(frame.offsetWidth - startW) > 1){ pushUndo(); ctx.node.imgW = frame.offsetWidth; await saveLesson(); renderTree(); }
+      };
+      window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+      return;
+    }
+    const frame = cropH.closest('.photo-frame.cropping'); if(!frame || !cropDraft) return;
+    const box = frame.querySelector('[data-crop-box]');
+    const handle = cropH.dataset.h || 'move';
+    const r = frame.getBoundingClientRect();
+    const d0 = Object.assign({}, cropDraft), startX = e.clientX, startY = e.clientY, MIN = 0.05;
+    const clamp = (v, lo, hi)=> Math.min(hi, Math.max(lo, v));
+    const move = (ev)=>{
+      const dx = (ev.clientX - startX) / r.width, dy = (ev.clientY - startY) / r.height;
+      let { x, y, w, h } = d0;
+      if(handle === 'move'){ x = clamp(d0.x + dx, 0, 1 - d0.w); y = clamp(d0.y + dy, 0, 1 - d0.h); }
+      else {
+        if(handle.includes('w')){ x = clamp(d0.x + dx, 0, d0.x + d0.w - MIN); w = d0.x + d0.w - x; }
+        if(handle.includes('e')){ w = clamp(d0.w + dx, MIN, 1 - d0.x); }
+        if(handle.includes('n')){ y = clamp(d0.y + dy, 0, d0.y + d0.h - MIN); h = d0.y + d0.h - y; }
+        if(handle.includes('s')){ h = clamp(d0.h + dy, MIN, 1 - d0.y); }
+      }
+      cropDraft = { x, y, w, h };
+      box.style.left = x * 100 + '%'; box.style.top = y * 100 + '%'; box.style.width = w * 100 + '%'; box.style.height = h * 100 + '%';
+    };
+    const up = ()=>{ window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
 
   let autosaveTimer = null;
