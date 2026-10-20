@@ -1032,6 +1032,10 @@
   .rb-select{height:30px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--text); font:inherit; font-size:.82rem; padding:0 6px;}
   .rb-style{width:150px;}
   .rb-select:disabled{opacity:.45;}
+  .rb-size{width:44px; text-align:center; padding:0 2px;}
+  .rb-font{max-width:130px;}
+  .rb-size-wrap{display:flex; align-items:center; gap:2px;}
+  .rb-sz-step{width:22px; padding:0; font-size:1rem; line-height:1;}
   .rb-color-wrap{position:relative;}
   .rb-color-a{font-weight:700; line-height:1; display:block;}
   #rbColorBtn{flex-direction:column; gap:1px;}
@@ -1595,12 +1599,23 @@
           <option value="verse" disabled>Verse</option>
           <option value="photo" disabled>Photo</option>
         </select>
-        <select class="rb-select rb-size" id="rbSize" title="Text size">
-          <option value="small">Small</option>
-          <option value="normal">Normal</option>
-          <option value="large">Large</option>
-          <option value="xlarge">X-Large</option>
+        <select class="rb-select rb-font" id="rbFont" title="Font">
+          <option value="">Default font</option>
+          <option value="calibri">Calibri</option>
+          <option value="arial">Arial</option>
+          <option value="georgia">Georgia</option>
+          <option value="times">Times New Roman</option>
+          <option value="garamond">Garamond</option>
+          <option value="verdana">Verdana</option>
+          <option value="trebuchet">Trebuchet MS</option>
+          <option value="courier">Courier New</option>
         </select>
+        <div class="rb-size-wrap">
+          <button class="rb-btn rb-sz-step" id="rbSizeDown" title="Decrease font size">−</button>
+          <input class="rb-select rb-size" id="rbSize" list="rbSizeList" inputmode="numeric" autocomplete="off" title="Font size">
+          <button class="rb-btn rb-sz-step" id="rbSizeUp" title="Increase font size">+</button>
+          <datalist id="rbSizeList"><option value="8"><option value="9"><option value="10"><option value="11"><option value="12"><option value="14"><option value="16"><option value="18"><option value="20"><option value="24"><option value="28"><option value="32"><option value="36"><option value="48"><option value="60"><option value="72"></datalist>
+        </div>
       </div>
       <div class="rb-grp">
         <button class="rb-btn rb-fmt" data-rb-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
@@ -3520,13 +3535,22 @@ function icon(name, size){
     return node.style;
   }
   const FONT_SIZE_MAP = { small:'0.82rem', normal:'', large:'1.15rem', xlarge:'1.35rem' };
+  const FONT_FAMILIES = {
+    calibri:"'Calibri','Segoe UI','Inter',sans-serif", arial:"Arial,'Helvetica Neue',sans-serif", georgia:"Georgia,'Times New Roman',serif",
+    times:"'Times New Roman',Times,serif", garamond:"Garamond,'Palatino Linotype',Georgia,serif", verdana:"Verdana,Geneva,sans-serif",
+    trebuchet:"'Trebuchet MS','Lucida Grande',sans-serif", courier:"'Courier New',Courier,monospace"
+  };
+  const FONT_PT_MIN = 6, FONT_PT_MAX = 144;
+  function clampPt(v){ v = Math.round(parseFloat(v) * 2) / 2; return isNaN(v) ? null : Math.min(FONT_PT_MAX, Math.max(FONT_PT_MIN, v)); }
   function styleObjToCssText(style){
     if(!style) return '';
     let css = '';
     if(style.bold) css += 'font-weight:700;';
     if(style.italic) css += 'font-style:italic;';
     if(style.underline) css += 'text-decoration:underline;';
-    if(style.size && FONT_SIZE_MAP[style.size]) css += 'font-size:' + FONT_SIZE_MAP[style.size] + ';';
+    if(style.pt) css += 'font-size:' + style.pt + 'pt;';
+    else if(style.size && FONT_SIZE_MAP[style.size]) css += 'font-size:' + FONT_SIZE_MAP[style.size] + ';';
+    if(style.font && FONT_FAMILIES[style.font]) css += 'font-family:' + FONT_FAMILIES[style.font] + ';';
     if(style.color) css += 'color:' + style.color + ';';
     return css;
   }
@@ -3535,7 +3559,8 @@ function icon(name, size){
     el.style.fontWeight = style.bold ? '700' : '';
     el.style.fontStyle = style.italic ? 'italic' : '';
     el.style.textDecoration = style.underline ? 'underline' : '';
-    el.style.fontSize = (style.size && FONT_SIZE_MAP[style.size]) ? FONT_SIZE_MAP[style.size] : '';
+    el.style.fontSize = style.pt ? style.pt + 'pt' : ((style.size && FONT_SIZE_MAP[style.size]) ? FONT_SIZE_MAP[style.size] : '');
+    el.style.fontFamily = (style.font && FONT_FAMILIES[style.font]) ? FONT_FAMILIES[style.font] : '';
     el.style.color = style.color || '';
   }
   const FORMAT_COLORS = [
@@ -7714,7 +7739,7 @@ function icon(name, size){
       if(ctx){
         pushUndo();
         const style = ensureStyle(ctx.node);
-        style.size = t.value;
+        style.size = t.value; delete style.pt;
         await saveLesson();
         const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
@@ -7773,6 +7798,20 @@ function icon(name, size){
       e.preventDefault();
       await toggleNodeFormat(t.dataset.id, {b:'bold', i:'italic', u:'underline'}[e.key.toLowerCase()]);
       return;
+    }
+    // Enter on a verse starts a new statement right below it (inside it if it already has lines nested under it).
+    if(t.tagName === 'TEXTAREA' && t.readOnly && t.dataset.id && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey){
+      const vctx = findContext(t.dataset.id);
+      if(vctx && vctx.node.kind === 'verse'){
+        e.preventDefault();
+        pushUndo();
+        const fresh = makeNode('statement'); fresh.style = {bold:false, italic:false, underline:false, size:'normal', color:''};
+        if(vctx.node.children && vctx.node.children.length && !vctx.node.collapsed) vctx.node.children.unshift(fresh);
+        else vctx.arr.splice(vctx.idx + 1, 0, fresh);
+        await saveLesson(); rerenderStructure();
+        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`.node-text[data-id="${fresh.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+        return;
+      }
     }
     if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
     const id = t.dataset.id;
@@ -7919,23 +7958,40 @@ function icon(name, size){
     return lastFocusedNodeId ? (findContext(lastFocusedNodeId) || null) : null;
   }
   function isFormattableNode(node){ return !!node && (node.kind === 'heading' || node.kind === 'verse' || FLOW_KINDS.includes(node.kind)); }
+  // Formatting goes to every highlighted line when several are selected, otherwise to the line you're in.
+  function formatTargetIds(fallbackId){
+    if(blockSel && blockSel.container === mainTree){
+      const ids = blockSelectedIds().filter(i=>{ const c = findContext(i); return c && isFormattableNode(c.node); });
+      if(ids.length) return ids;
+    }
+    return fallbackId ? [fallbackId] : [];
+  }
+  function applyStyleToIds(ids, fn){
+    ids.forEach(i=>{
+      const c = findContext(i); if(!c || !isFormattableNode(c.node)) return;
+      const st = ensureStyle(c.node);
+      fn(st, c.node);
+      applyStyleObjToEl(mainTree.querySelector(`.node-text.full-only[data-id="${i}"]`), st);
+    });
+  }
   async function toggleNodeFormat(id, key){
-    const ctx = findContext(id);
-    if(!ctx || !isFormattableNode(ctx.node)) return;
+    const ids = formatTargetIds(id);
+    if(!ids.length) return;
     pushUndo();
-    const style = ensureStyle(ctx.node);
-    style[key] = !style[key];
-    applyStyleObjToEl(mainTree.querySelector(`textarea.node-text.full-only[data-id="${id}"]`), style);
+    const all = ids.every(i=>{ const c = findContext(i); return c && ensureStyle(c.node)[key]; });
+    applyStyleToIds(ids, st=>{ st[key] = !all; });
     await saveLesson();
     updateRibbonState();
   }
   async function setNodeStyleField(id, key, value){
-    const ctx = findContext(id);
-    if(!ctx || !isFormattableNode(ctx.node)) return;
+    const ids = formatTargetIds(id);
+    if(!ids.length) return;
     pushUndo();
-    const style = ensureStyle(ctx.node);
-    style[key] = value;
-    applyStyleObjToEl(mainTree.querySelector(`textarea.node-text.full-only[data-id="${id}"]`), style);
+    applyStyleToIds(ids, st=>{
+      st[key] = value;
+      if(key === 'pt'){ if(!value) delete st.pt; else st.size = 'normal'; }
+      if(key === 'font' && !value) delete st.font;
+    });
     await saveLesson();
     updateRibbonState();
   }
@@ -7973,7 +8029,14 @@ function icon(name, size){
     styleSel.value = node ? node.kind : 'statement';
     const sizeSel = document.getElementById('rbSize');
     sizeSel.disabled = !formattable;
-    sizeSel.value = style.size || 'normal';
+    document.getElementById('rbSizeDown').disabled = document.getElementById('rbSizeUp').disabled = !formattable;
+    if(document.activeElement !== sizeSel){
+      const el = node && mainTree.querySelector(`.node-text[data-id="${node.id}"]`);
+      sizeSel.value = el ? String(Math.round(parseFloat(getComputedStyle(el).fontSize) * 0.75 * 2) / 2) : '';
+    }
+    const fontSel = document.getElementById('rbFont');
+    fontSel.disabled = !formattable;
+    fontSel.value = (style.font && FONT_FAMILIES[style.font]) ? style.font : '';
     ribbon.querySelectorAll('[data-rb-fmt]').forEach(b=>{ b.disabled = !formattable; b.classList.toggle('active', !!style[b.dataset.rbFmt]); });
     document.getElementById('rbColorBtn').disabled = !formattable;
     document.getElementById('rbColorBar').style.background = style.color || 'var(--text)';
@@ -8048,8 +8111,25 @@ function icon(name, size){
     ribbon.addEventListener('change', async (e)=>{
       if(!lastFocusedNodeId) return;
       if(e.target.id === 'rbStyle') await changeNodeKind(lastFocusedNodeId, e.target.value);
-      else if(e.target.id === 'rbSize'){ await setNodeStyleField(lastFocusedNodeId, 'size', e.target.value); focusNodeText(lastFocusedNodeId, 'end'); }
+      else if(e.target.id === 'rbSize'){
+        const pt = clampPt(e.target.value);
+        if(pt) await setNodeStyleField(lastFocusedNodeId, 'pt', pt);
+        focusNodeText(lastFocusedNodeId, 'end');
+      }
+      else if(e.target.id === 'rbFont'){ await setNodeStyleField(lastFocusedNodeId, 'font', e.target.value); focusNodeText(lastFocusedNodeId, 'end'); }
     });
+    // A − / + step through the usual word-processor sizes.
+    const PT_STEPS = [8,9,10,11,12,14,16,18,20,24,28,32,36,48,60,72];
+    async function stepSize(dir){
+      if(!lastFocusedNodeId) return;
+      const cur = parseFloat(document.getElementById('rbSize').value) || 11;
+      const next = dir > 0 ? (PT_STEPS.find(x=>x > cur) || PT_STEPS[PT_STEPS.length-1]) : ([...PT_STEPS].reverse().find(x=>x < cur) || PT_STEPS[0]);
+      await setNodeStyleField(lastFocusedNodeId, 'pt', next);
+      focusNodeText(lastFocusedNodeId, 'end');
+    }
+    document.getElementById('rbSizeUp').addEventListener('click', ()=>stepSize(1));
+    document.getElementById('rbSizeDown').addEventListener('click', ()=>stepSize(-1));
+    document.getElementById('rbSize').addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); e.target.dispatchEvent(new Event('change', {bubbles:true})); } });
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.rb-color-wrap')) document.getElementById('rbColorMenu').classList.remove('open'); });
   })();
 
