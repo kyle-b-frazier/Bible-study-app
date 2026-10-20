@@ -1368,6 +1368,12 @@
   .ws-path{max-width:46vw; overflow:hidden; text-overflow:ellipsis; color:var(--text); font-weight:600;}
   .ws-path:empty{display:none;}
   @media (max-width: 900px){ .ws-path{display:none;} }
+  /* No vertical guide lines or side bars in the editor. */
+  html body.outline-style-classic #mainTree .node-children,
+  html body #mainTree.doc-view .node-children,
+  html body #brainstormList .node-children{border-left:none !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="verse"] > .node-row,
+  html body #mainTree.doc-view .node[data-kind="verse"] > .node-row{border-left:none !important;}
 </style>
 </head>
 <body>
