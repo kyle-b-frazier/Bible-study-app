@@ -1436,6 +1436,21 @@
   html body #mainTree .node[data-kind="question"][data-bl="2"] > .node-row > .node-number::before{content:"▪ Q:" !important; white-space:pre;}
   html body #mainTree .node[data-kind="question"][data-bl="3"] > .node-row > .node-number::before{content:"– Q:" !important; white-space:pre;}
   html body #mainTree .node[data-kind="question"][data-bl="4"] > .node-row > .node-number::before{content:"› Q:" !important; white-space:pre;}
+  /* Applications: their own colour and an "A:" marker, like questions get "Q:". */
+  :root{--apply:#B45309;}
+  html[data-theme="dark"]{--apply:#F2A65A;}
+  html body #mainTree .node[data-kind="application"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--apply) !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"]) > .node-row > .node-number::before{content:"A:" !important; font-size:.8rem !important; font-weight:700 !important; font-family:'Inter',sans-serif !important; color:var(--apply) !important; white-space:pre;}
+  html body #mainTree .node[data-kind="application"] > .node-row textarea.node-text,
+  html body #brainstormList .node[data-kind="application"] textarea.node-text{color:var(--apply) !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"• A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .node-row > .node-number::before{content:"◦ A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .node-row > .node-number::before{content:"▪ A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .node-row > .node-number::before{content:"– A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .node-row > .node-number::before{content:"› A:" !important;}
+  html body .p-node[data-kind="application"] > .p-node-row > .p-number{visibility:hidden;}
+  html body .p-node[data-kind="application"] > .p-node-row > .p-text{color:#B45309 !important;}
+  html body .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:"A: " !important; display:inline !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
 </style>
 </head>
 <body>
@@ -6124,7 +6139,7 @@ function icon(name, size){
         if(child.kind === 'verse'){
           bullets.push({ text: child.ref || 'Verse', options:{ bullet:true, bold:true, color:'2C4F52' } });
         } else {
-          const prefix = child.kind==='question' ? 'Q: ' : child.kind==='application' ? 'Apply: ' : '';
+          const prefix = child.kind==='question' ? 'Q: ' : child.kind==='application' ? 'A: ' : '';
           bullets.push({ text: prefix + (child.text || ''), options:{ bullet:true } });
         }
       });
