@@ -1353,6 +1353,18 @@
   .ws-zoom input[type=range]{width:90px; accent-color:var(--accent);}
   #wsZoomPct{min-width:40px; text-align:right; font-variant-numeric:tabular-nums; cursor:pointer;}
   @media (max-width: 900px){ .ws-zoom input[type=range]{display:none;} }
+  /* Hierarchy: sections show their outline number (I. / A. / 1.) in the same column as bullets, so a
+     section and the lines under it line up, and a section's level is readable at a glance. */
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row{align-items:center;}
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row > .node-number{
+    display:block !important; min-width:30px; text-align:right; padding-top:0; color:var(--text-faint) !important;
+    font-family:'Inter',sans-serif; font-size:.78rem !important; font-weight:700;
+  }
+  body.outline-style-classic #mainTree .node-children > .node[data-kind="heading"]{margin-top:10px;}
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-children{border-left:1px solid var(--border); margin-left:14px; padding-left:8px;}
+  .ws-path{max-width:46vw; overflow:hidden; text-overflow:ellipsis; color:var(--text); font-weight:600;}
+  .ws-path:empty{display:none;}
+  @media (max-width: 900px){ .ws-path{display:none;} }
 </style>
 </head>
 <body>
@@ -1549,6 +1561,7 @@
   </section>
     </main>
     <div class="word-status no-print" id="wordStatus">
+      <span id="wsPath" class="ws-path" title="Where you are in the outline"></span>
       <span id="wsPage">Page 1 of 1</span>
       <span id="wsWords">0 words</span>
       <span id="wsVerses">0 verses</span>
@@ -4905,8 +4918,10 @@ function icon(name, size){
 
   function renderNodesEditable(nodes, depth, bl){
     bl = bl || 0; // nesting level among non-section items (drives the bullet style)
+    let headingCount = 0;
     return nodes.map((node, idx)=>{
-      const label = numberLabel(depth, idx);
+      // Sections are numbered by their position among the sections (I., II. / A., B. / 1., 2. by level).
+      const label = node.kind === 'heading' ? numberLabel(depth, headingCount++) : numberLabel(depth, idx);
       const isHeading = node.kind === 'heading';
       const isVerse = node.kind === 'verse';
       const isPhoto = node.kind === 'photo';
@@ -7005,7 +7020,24 @@ function icon(name, size){
     if(ta) lastFocusedNodeId = ta.dataset.id;
     else { const row = e.target.closest && e.target.closest('.node[data-id]'); if(row) lastFocusedNodeId = row.dataset.id; }
     updateRibbonState();
+    updateWsPath();
   });
+  // "You are here": the chain of sections (with their outline numbers) above the line you're in.
+  function updateWsPath(){
+    const el = document.getElementById('wsPath'); if(!el) return;
+    const id = lastFocusedNodeId;
+    let found = null;
+    (function walk(nodes, depth, trail){
+      let hc = 0;
+      for(const n of nodes){
+        const label = n.kind === 'heading' ? numberLabel(depth, hc++) : null;
+        const next = label ? trail.concat([label + ' ' + ((n.text || '').trim() || 'Untitled')]) : trail;
+        if(n.id === id){ found = next; return; }
+        if(n.children && n.children.length){ walk(n.children, label ? depth + 1 : depth, next); if(found) return; }
+      }
+    })(lesson.outline || [], 0, []);
+    el.textContent = found && found.length ? found.join('  ›  ') : '';
+  }
   function openQuickAddMenuAt(afterId){
     const menu = document.getElementById('nodeContextMenu');
     ctxMenuTargetId = null;
