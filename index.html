@@ -1272,6 +1272,10 @@
   body.outline-style-classic #mainTree textarea.node-text{min-height:0;}
   #mainTree .node-children > .node{margin:0;}
   body.outline-style-classic #mainTree .node-children > .node:not([data-kind="heading"]) > .node-row{padding-top:1px; padding-bottom:1px;}
+  /* Multi-line selection highlight */
+  html body .node-row.block-selected{background:var(--accent-soft) !important; box-shadow:inset 0 0 0 1px var(--accent);}
+  html body .node-row.block-selected textarea.node-text{background:transparent !important;}
+  html body .node-row.block-selected ::selection{background:transparent;}
 </style>
 </head>
 <body>
@@ -7055,6 +7059,196 @@ function icon(name, size){
       showToast("Couldn't load that image.", true);
     }
     pendingPhotoNodeId = null;
+  });
+
+  // ---------------- Multi-line selection (outline + Brainstorm) ----------------
+  // Every line is its own text box, so a normal browser selection can't span lines. This adds a
+  // "line selection": Ctrl/Cmd+A selects every line, dragging from one line into another or
+  // Shift+Click / Shift+Up / Shift+Down selects a run of lines. Selected lines can be copied
+  // (as indented text), cut, or deleted. Pasting multi-line text back in creates one line per row,
+  // nesting by indentation.
+  let blockSel = null;     // { container, anchorId, headId }
+  let blockDrag = null;    // { id, container }
+  const BLOCK_CONTAINERS = ()=>[mainTree, document.getElementById('brainstormList')];
+  function blockVisibleNodes(container){
+    return Array.from(container.querySelectorAll('.node')).filter(n=>n.dataset.id && n.offsetParent !== null);
+  }
+  function blockSelectedIds(){
+    if(!blockSel) return [];
+    const ids = blockVisibleNodes(blockSel.container).map(n=>n.dataset.id);
+    const a = ids.indexOf(blockSel.anchorId), h = ids.indexOf(blockSel.headId);
+    if(a < 0 || h < 0) return [];
+    return ids.slice(Math.min(a,h), Math.max(a,h)+1);
+  }
+  function paintBlockSel(){
+    BLOCK_CONTAINERS().forEach(c=>c.querySelectorAll('.node-row.block-selected').forEach(r=>r.classList.remove('block-selected')));
+    if(!blockSel) return;
+    const set = new Set(blockSelectedIds());
+    blockSel.container.querySelectorAll('.node').forEach(n=>{ if(set.has(n.dataset.id)) n.querySelector(':scope > .node-row').classList.add('block-selected'); });
+  }
+  function setBlockSel(container, anchorId, headId){
+    blockSel = { container, anchorId, headId };
+    paintBlockSel();
+    const ae = document.activeElement;
+    if(ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && container.contains(ae)){ try{ ae.setSelectionRange(ae.selectionEnd, ae.selectionEnd); }catch(err){} }
+  }
+  function clearBlockSel(){ if(!blockSel) return; blockSel = null; paintBlockSel(); }
+  function blockNodeDepth(el){ let d = 0, n = el.parentElement; while(n){ if(n.classList && n.classList.contains('node')) d++; n = n.parentElement; } return d; }
+  function blockSelectionText(){
+    const ids = blockSelectedIds();
+    const els = ids.map(id=>blockSel.container.querySelector(`.node[data-id="${id}"]`));
+    const depths = els.map(blockNodeDepth);
+    const base = Math.min(...depths);
+    const lines = [];
+    ids.forEach((id, i)=>{
+      const c = findContext(id); if(!c) return;
+      const n = c.node;
+      let t = n.kind === 'verse' ? ((n.ref ? n.ref + ' ' : '') + (n.text || '')) : n.kind === 'photo' ? (n.caption || '') : (n.text || '');
+      t = t.replace(/\s*\n\s*/g, ' ');
+      if(n.kind === 'photo' && !t) return;
+      lines.push('\t'.repeat(depths[i] - base) + t);
+    });
+    return lines.join('\n');
+  }
+  async function deleteBlockSelection(){
+    const ids = blockSelectedIds(); if(!ids.length) return;
+    const set = new Set(ids);
+    pushUndo();
+    for(let i = ids.length - 1; i >= 0; i--){
+      const c = findContext(ids[i]); if(!c) continue;
+      // keep any children that weren't selected, in the deleted line's place
+      const keep = (c.node.children || []).filter(k=>!set.has(k.id));
+      c.arr.splice(c.idx, 1, ...keep);
+    }
+    clearBlockSel();
+    await saveLesson();
+    rerenderStructure();
+    updateActionCardsAndChips();
+    showToast(ids.length === 1 ? 'Line deleted.' : ids.length + ' lines deleted.');
+  }
+  document.addEventListener('mousedown', (e)=>{
+    const row = e.target.closest ? e.target.closest('#mainTree .node, #brainstormList .node') : null;
+    if(blockSel && !(e.shiftKey && row)) clearBlockSel();
+    blockDrag = null;
+    if(!row || e.button !== 0 || e.target.closest('button, .drag-handle, .drawer-drag-handle, .add-menu, .node-controls')) return;
+    const container = row.closest('#mainTree, #brainstormList');
+    if(e.shiftKey && lastFocusedNodeId && lastFocusedNodeId !== row.dataset.id && container.querySelector(`.node[data-id="${lastFocusedNodeId}"]`)){
+      e.preventDefault();
+      setBlockSel(container, lastFocusedNodeId, row.dataset.id);
+      return;
+    }
+    blockDrag = { id: row.dataset.id, container };
+  }, true);
+  document.addEventListener('mousemove', (e)=>{
+    if(!blockDrag || !(e.buttons & 1)) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const r = el && el.closest ? el.closest('.node') : null;
+    if(!r || !blockDrag.container.contains(r)) return;
+    if(r.dataset.id === blockDrag.id){ if(blockSel) clearBlockSel(); return; }
+    setBlockSel(blockDrag.container, blockDrag.id, r.dataset.id);
+    e.preventDefault();
+  }, true);
+  document.addEventListener('mouseup', ()=>{ blockDrag = null; }, true);
+  document.addEventListener('selectstart', (e)=>{ if(blockSel) e.preventDefault(); }, true);
+  document.addEventListener('keydown', (e)=>{
+    const t = e.target;
+    const row = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
+    const mod = e.metaKey || e.ctrlKey;
+    if(blockSel){
+      if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); clearBlockSel(); return; }
+      if(e.key === 'Delete' || e.key === 'Backspace'){ e.preventDefault(); e.stopPropagation(); deleteBlockSelection(); return; }
+      if(e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+        e.preventDefault(); e.stopPropagation();
+        const ids = blockVisibleNodes(blockSel.container).map(n=>n.dataset.id);
+        const h = ids.indexOf(blockSel.headId) + (e.key === 'ArrowUp' ? -1 : 1);
+        if(h >= 0 && h < ids.length){ blockSel.headId = ids[h]; paintBlockSel(); const el = blockSel.container.querySelector(`.node[data-id="${ids[h]}"]`); if(el) el.scrollIntoView({block:'nearest'}); }
+        return;
+      }
+      if(mod && ['c','x','v','a'].includes(e.key.toLowerCase())){
+        if(e.key.toLowerCase() === 'a' && row){ e.preventDefault(); e.stopPropagation(); }
+        else if(e.key.toLowerCase() === 'v'){ clearBlockSel(); }
+        if(e.key.toLowerCase() !== 'a') return;
+      } else if(!['Shift','Control','Meta','Alt'].includes(e.key)){
+        clearBlockSel();
+        return;
+      }
+    }
+    if(!row || (t.tagName !== 'TEXTAREA' && t.tagName !== 'INPUT')) return;
+    const container = row.closest('#mainTree, #brainstormList');
+    if(mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'a'){
+      const ids = blockVisibleNodes(container).map(n=>n.dataset.id);
+      if(ids.length > 1){
+        e.preventDefault(); e.stopPropagation();
+        setBlockSel(container, ids[0], ids[ids.length - 1]);
+      }
+      return;
+    }
+    if(e.shiftKey && !mod && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && t.tagName === 'TEXTAREA'){
+      const atEdge = e.key === 'ArrowUp' ? t.selectionStart === 0 : t.selectionEnd === t.value.length;
+      if(!atEdge) return;
+      const ids = blockVisibleNodes(container).map(n=>n.dataset.id);
+      const i = ids.indexOf(row.dataset.id);
+      const j = i + (e.key === 'ArrowUp' ? -1 : 1);
+      if(i < 0 || j < 0 || j >= ids.length) return;
+      e.preventDefault(); e.stopPropagation();
+      setBlockSel(container, row.dataset.id, ids[j]);
+    }
+  }, true);
+  document.addEventListener('copy', (e)=>{
+    if(!blockSel || !e.clipboardData) return;
+    e.preventDefault();
+    e.clipboardData.setData('text/plain', blockSelectionText());
+  });
+  document.addEventListener('cut', async (e)=>{
+    if(!blockSel || !e.clipboardData) return;
+    e.preventDefault();
+    e.clipboardData.setData('text/plain', blockSelectionText());
+    await deleteBlockSelection();
+  });
+
+  // Pasting several lines of text into a line: one new line per row, nested by indentation.
+  document.addEventListener('paste', async (e)=>{
+    const cd = e.clipboardData; if(!cd) return;
+    const t = e.target;
+    if(!t || t.tagName !== 'TEXTAREA' || t.dataset.field !== 'text' || t.readOnly) return;
+    const row = t.closest('#mainTree .node, #brainstormList .node'); if(!row) return;
+    const raw = cd.getData('text/plain').replace(/\r\n?/g, '\n').replace(/\n+$/, '');
+    if(!raw.includes('\n')) return;
+    e.preventDefault();
+    const ctx = findContext(row.dataset.id); if(!ctx) return;
+    const parsed = raw.split('\n').filter(l=>l.trim()).map(l=>{
+      const ws = l.match(/^[ \t]*/)[0];
+      const level = (ws.match(/\t/g) || []).length + Math.floor(ws.replace(/\t/g, '').length / 2);
+      const text = l.slice(ws.length).replace(/^([-*•●○▪▫◦‣]|\d+[.)]|[a-zA-Z][.)])\s+/, '').trim();
+      return { level, text };
+    }).filter(x=>x.text);
+    if(!parsed.length) return;
+    pushUndo();
+    const before = t.value.slice(0, t.selectionStart), after = t.value.slice(t.selectionEnd);
+    const base = parsed[0].level;
+    ctx.node.text = before + parsed[0].text;
+    let pos = ctx.idx + 1, stack = [], last = ctx.node;
+    parsed.slice(1).forEach(({level, text})=>{
+      const nn = makeNode('statement'); nn.text = text;
+      const k = autoClassifyKind(text); if(k) nn.kind = k;
+      if(level <= base){ stack = []; ctx.arr.splice(pos++, 0, nn); }
+      else {
+        while(stack.length && stack[stack.length - 1].level >= level) stack.pop();
+        const parent = stack.length ? stack[stack.length - 1].node : ctx.node;
+        parent.children = parent.children || []; parent.children.push(nn); parent.collapsed = false;
+      }
+      if(level <= base) stack = [{ level: base, node: nn }]; else stack.push({ level, node: nn });
+      last = nn;
+    });
+    last.text = (last.text || '') + after;
+    await saveLesson();
+    rerenderStructure();
+    updateActionCardsAndChips();
+    const inBrainstorm = !!row.closest('#brainstormList');
+    requestAnimationFrame(()=>{
+      const el = (inBrainstorm ? document.getElementById('brainstormList') : mainTree).querySelector(`textarea[data-id="${last.id}"]`);
+      if(el){ editSessionActive = true; el.focus(); const pos2 = (last.text || '').length - after.length; try{ el.setSelectionRange(pos2, pos2); }catch(err){} }
+    });
   });
 
   // Paste a screenshot / copied picture into the outline or Brainstorm: it becomes a photo line
