@@ -1374,6 +1374,15 @@
   html body #brainstormList .node-children{border-left:none !important;}
   html body.outline-style-classic #mainTree .node[data-kind="verse"] > .node-row,
   html body #mainTree.doc-view .node[data-kind="verse"] > .node-row{border-left:none !important;}
+  /* Row controls (drag grip, collapse arrow) appear only for the single line under the pointer, not for every parent above it. */
+  html body.outline-style-classic #mainTree .node:hover > .node-row .drag-handle,
+  html body.outline-style-classic #mainTree .node:hover > .node-row button[data-action="toggle-collapse"],
+  html body #mainTree.doc-view .node:hover > .node-row .drag-handle,
+  html body #mainTree.doc-view .node:hover > .node-row button[data-action="toggle-collapse"]{opacity:0; pointer-events:none;}
+  html body.outline-style-classic #mainTree .node > .node-row:hover .drag-handle,
+  html body.outline-style-classic #mainTree .node > .node-row:hover button[data-action="toggle-collapse"],
+  html body #mainTree.doc-view .node > .node-row:hover .drag-handle,
+  html body #mainTree.doc-view .node > .node-row:hover button[data-action="toggle-collapse"]{opacity:1; pointer-events:auto;}
 </style>
 </head>
 <body>
