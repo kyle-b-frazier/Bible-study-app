@@ -1044,7 +1044,7 @@
   .word-status .ws-hint{margin-left:auto; color:var(--text-faint);}
   @media (max-width: 900px){
     main{padding-left:16px; padding-right:16px;}
-    .word-ribbon{position:static; margin:0 -16px 14px; padding:6px 12px; flex-wrap:nowrap; overflow-x:auto;}
+    .word-ribbon{margin:0 -16px 14px; padding:6px 12px; flex-wrap:nowrap; overflow-x:auto;}
     .word-status{gap:12px; padding:5px 12px;}
     .ws-view{margin-left:auto;}
     #wsPage, #wsVerses{display:none;} /* page count is only meaningful at desktop page width */
@@ -1108,11 +1108,6 @@
     .action-card .count-pill{padding:0 6px; font-size:.64rem;}
     .lesson-bar{padding:12px 16px; row-gap:6px;}
     .lesson-bar textarea.lesson-title{flex:1 1 100%; font-size:1.2rem; min-width:0; max-height:none;}
-  }
-  @media (max-width: 420px){
-    .action-card{justify-content:center;}
-    .action-card .ic, .action-card .count-pill{display:none;}
-    .action-card .txt{flex:0 1 auto;}
   }
   .chip-ic{display:flex; align-items:center;}
 
@@ -1295,6 +1290,30 @@
   /* Statements are never italic (overrides any leftover per-line italic formatting). */
   html body #mainTree .node[data-kind="statement"] > .node-row textarea.node-text,
   html body #brainstormList .node[data-kind="statement"] > .node-row textarea.node-text{font-style:normal !important;}
+  /* Brainstorm / Scripture / Presenter Mode / Set time live at the right end of the sticky ribbon. */
+  .rb-actions{display:flex; align-items:center; gap:6px; margin-left:auto; padding-left:12px; flex-shrink:0; background:var(--surface);}
+  .rb-actions .action-card{padding:3px 11px 3px 4px;}
+  .rb-actions .action-card.publish{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .rb-actions .action-card.publish .t{color:#fff;}
+  .rb-actions .action-card.publish:hover{filter:brightness(1.08); transform:none;}
+  @media (max-width: 900px){
+    .rb-actions{position:sticky; right:0; box-shadow:-10px 0 8px -6px var(--surface);}
+    .rb-actions .action-card .t, .rb-actions .chip-time b{display:none;}
+    .rb-actions .action-card.publish .t{display:inline;}
+  }
+  @media (max-width: 1750px){
+    .rb-actions .action-card.brainstorm .t, .rb-actions .action-card.scripture .t{display:none;}
+    .rb-actions .action-card.brainstorm, .rb-actions .action-card.scripture{padding-right:8px;}
+  }
+  @media (max-width: 1750px){
+    .word-ribbon .rb-label{display:none;}
+    .word-ribbon .rb-grp{padding:0 5px;}
+    .rb-actions{padding-left:6px; gap:4px;}
+  }
+  @media (max-width: 1560px) and (min-width: 901px){
+    .rb-actions .action-card.publish .t{display:none;}
+    .rb-actions .action-card.publish{padding-right:8px;}
+  }
 </style>
 </head>
 <body>
@@ -1404,27 +1423,6 @@
       </div>
     </div>
 
-    <div class="action-row no-print">
-      <button class="action-card brainstorm" id="btnActionBrainstorm">
-        <div class="ic"></div>
-        <div class="txt"><div class="t">Brainstorm</div></div>
-        <span class="count-pill" id="brainstormCountPill">0</span>
-      </button>
-      <button class="action-card scripture" id="btnActionScripture">
-        <div class="ic"></div>
-        <div class="txt"><div class="t">Scripture</div></div>
-        <span class="count-pill" id="scriptureCountPill">0</span>
-      </button>
-      <button class="action-card publish" id="btnActionPublish">
-        <div class="ic"></div>
-        <div class="txt"><div class="t">Presenter Mode</div></div>
-      </button>
-      <button class="chip-time" id="btnActionTiming">
-        <span class="chip-ic"></span>
-        <b id="timingChipLabel">Set time</b>
-      </button>
-    </div>
-
     <div class="welcome-card no-print" id="welcomeCard" style="display:none;" role="region" aria-labelledby="welcomeTitle">
       <div class="welcome-text">
         <h2 id="welcomeTitle">Welcome to Bible Lesson Builder</h2>
@@ -1486,6 +1484,26 @@
         <button class="rb-btn rb-text" id="rbInsertVerse" title="Look up a verse and insert it below the current line">Verse</button>
         <button class="rb-btn rb-text" id="rbInsertPhoto" title="Insert a photo below the current line">Photo</button>
         <button class="rb-btn rb-text" id="rbInsertBrainstorm" title="Pull an idea in from Brainstorm">From Brainstorm</button>
+      </div>
+      <div class="rb-actions">
+      <button class="action-card brainstorm" id="btnActionBrainstorm" title="Brainstorm">
+        <div class="ic"></div>
+        <div class="txt"><div class="t">Brainstorm</div></div>
+        <span class="count-pill" id="brainstormCountPill">0</span>
+      </button>
+      <button class="action-card scripture" id="btnActionScripture" title="Scripture">
+        <div class="ic"></div>
+        <div class="txt"><div class="t">Scripture</div></div>
+        <span class="count-pill" id="scriptureCountPill">0</span>
+      </button>
+      <button class="action-card publish" id="btnActionPublish" title="Presenter Mode — teach from this lesson">
+        <div class="ic"></div>
+        <div class="txt"><div class="t">Presenter Mode</div></div>
+      </button>
+      <button class="chip-time" id="btnActionTiming" title="Lesson timing">
+        <span class="chip-ic"></span>
+        <b id="timingChipLabel">Set time</b>
+      </button>
       </div>
     </div>
     <div class="outline-tree" id="mainTree"></div>
