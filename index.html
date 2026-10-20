@@ -1344,10 +1344,9 @@
   #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:1rem !important;}
   /* Zoom (editor page) */
   #panel-outline #mainTree{zoom:var(--page-zoom, 1);}
-  @media (min-width: 901px){
-    #panel-outline #mainTree.doc-view,
-    body.outline-style-classic #panel-outline #mainTree{max-width:calc(1200px / var(--page-zoom, 1));}
-  }
+  /* The whole page (box and text) scales together; when it grows wider than the window it scrolls sideways. */
+  .page-scroller{overflow-x:auto; overflow-y:hidden;}
+  html body #panel-outline #mainTree{width:var(--page-w, 100%) !important; max-width:none !important; margin-left:auto; margin-right:auto; box-sizing:border-box;}
   .ws-zoom{display:flex; align-items:center; gap:4px; margin-left:12px;}
   .ws-zoom button{border:none; background:transparent; color:var(--text-dim); width:22px; height:22px; border-radius:4px; font-size:1rem; line-height:1; cursor:pointer; padding:0;}
   .ws-zoom button:hover{background:var(--bg); color:var(--text);}
@@ -1546,7 +1545,7 @@
       </button>
       </div>
     </div>
-    <div class="outline-tree" id="mainTree"></div>
+    <div class="page-scroller" id="pageScroller"><div class="outline-tree" id="mainTree"></div></div>
   </section>
     </main>
     <div class="word-status no-print" id="wordStatus">
@@ -7368,6 +7367,11 @@ function icon(name, size){
       if(save){ try{ localStorage.setItem(lsKey('page-zoom'), String(zoom)); }catch(e){} }
       requestAnimationFrame(()=> autosizeVisibleTextareas(mainTree));
     }
+    // The page's width at 100% (fits the window, capped at 1200px); zoom then scales the whole sheet from there.
+    const scroller = document.getElementById('pageScroller');
+    function setBaseWidth(){ document.documentElement.style.setProperty('--page-w', Math.min(1200, scroller.clientWidth) + 'px'); }
+    setBaseWidth();
+    if(window.ResizeObserver) new ResizeObserver(setBaseWidth).observe(scroller); else window.addEventListener('resize', setBaseWidth);
     apply(zoom, false);
     range.addEventListener('input', ()=> apply(parseInt(range.value, 10), true));
     document.getElementById('wsZoomOut').addEventListener('click', ()=> apply(zoom - 10, true));
