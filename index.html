@@ -3672,11 +3672,9 @@ function icon(name, size){
   const KIND_LABEL = {heading:'Section', statement:'Statement', question:'Question', application:'Application', teachernote:"Teacher's Note", verse:'Verse', photo:'Photo'};
   const FLOW_KINDS = ['statement','question','application','teachernote'];
 
+  // New lines are always statements; a line only becomes a question (or anything else) when the
+  // user picks that style themselves, so nothing is re-labelled (or italicised) automatically.
   function autoClassifyKind(text){
-    const t = (text||'').trim();
-    if(!t) return null;
-    if(t.endsWith('?')) return 'question';
-    if(t.endsWith('.') || t.endsWith('!')) return 'statement';
     return null;
   }
 
