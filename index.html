@@ -3164,6 +3164,21 @@ function icon(name, size){
     // Sections are never shifted sideways by hand (that left same-numbered sections at different indents).
     const unshift = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'heading') delete n.indent; unshift(n.children); });
     unshift(l.outline); unshift(l.brainstorm);
+    // Sections only live at the top level or inside other sections; one tabbed under a statement is lifted back out.
+    const pull = (n, out)=>{
+      if(!n.children) return;
+      const keep = [];
+      n.children.forEach(c=>{ if(c.kind === 'heading') out.push(c); else { pull(c, out); keep.push(c); } });
+      if(keep.length) n.children = keep; else delete n.children;
+    };
+    const lift = arr=>{
+      for(let i=0;i<arr.length;i++){
+        const n = arr[i];
+        if(n.kind === 'heading') lift(n.children || []);
+        else { const out = []; pull(n, out); if(out.length) arr.splice(i+1, 0, ...out); }
+      }
+    };
+    lift(l.outline);
     // Statements are never italic; older lines picked it up by copying the style of the line above.
     const strip = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'statement' && n.style) n.style.italic = false; strip(n.children); });
     strip(l.outline); strip(l.brainstorm);
@@ -3605,6 +3620,10 @@ function icon(name, size){
     if(!prevSibling && ctx.node.kind === 'heading'){
       // A section's level is always real structure (never just shifted sideways), so numbers and indents agree.
       showToast('Nothing above this section to nest it under.');
+      return;
+    }
+    if(prevSibling && ctx.node.kind === 'heading' && prevSibling.kind !== 'heading'){
+      showToast('A section can only nest under another section.');
       return;
     }
     pushUndo();
