@@ -1292,6 +1292,9 @@
   #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:.95rem !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before,
   #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:.95rem !important;}
+  /* Statements are never italic (overrides any leftover per-line italic formatting). */
+  html body #mainTree .node[data-kind="statement"] > .node-row textarea.node-text,
+  html body #brainstormList .node[data-kind="statement"] > .node-row textarea.node-text{font-style:normal !important;}
 </style>
 </head>
 <body>
@@ -3064,12 +3067,9 @@ function icon(name, size){
     if(!l.tags) l.tags = [];
     if(l.folderId === undefined) l.folderId = null;
     delete l.aiSummary; // leftover from the removed AI Summary feature
-    if(!l.italicFixed){
-      // Statements are never italic; older lines picked it up by copying the style of the line above.
-      const strip = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'statement' && n.style) n.style.italic = false; strip(n.children); });
-      strip(l.outline); strip(l.brainstorm);
-      l.italicFixed = true;
-    }
+    // Statements are never italic; older lines picked it up by copying the style of the line above.
+    const strip = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'statement' && n.style) n.style.italic = false; strip(n.children); });
+    strip(l.outline); strip(l.brainstorm);
     return l;
   }
 
