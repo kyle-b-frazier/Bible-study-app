@@ -3638,6 +3638,7 @@ function icon(name, size){
         <div class="ctx-divider"></div>`;
     }
 
+    html += `<button data-action="ctx-move-to-brainstorm">${icon('lightbulb',14)} Move to Brainstorm</button>`;
     html += `<button data-action="delete-node" class="ctx-danger">${icon('x',14)} Delete</button>`;
     menu.innerHTML = html;
   }
@@ -7641,6 +7642,21 @@ function icon(name, size){
       const mode = (ctx && ctx.node.kind === 'heading') ? 'child' : 'after';
       closeNodeContextMenu();
       openBrainstormPicker(id, mode);
+      return;
+    }
+    const toBrainstormBtn = e.target.closest('[data-action="ctx-move-to-brainstorm"]');
+    if(toBrainstormBtn){
+      closeNodeContextMenu();
+      const ctx = findContext(id);
+      if(!ctx || ctx.arr === lesson.brainstorm || findContext(id, lesson.brainstorm || [], null)) return;
+      pushUndo();
+      const node = removeNodeById(id); if(!node) return;
+      delete node.indent;
+      lesson.brainstorm.push(node);
+      await saveLesson();
+      rerenderStructure();
+      updateActionCardsAndChips();
+      showToast('Moved to Brainstorm.');
       return;
     }
     const deleteBtn = e.target.closest('[data-action="delete-node"]');
