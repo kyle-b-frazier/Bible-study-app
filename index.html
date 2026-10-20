@@ -1268,6 +1268,10 @@
   html body .p-node[data-kind="question"] > .p-node-row > .p-number{visibility:hidden;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-text{font-style:italic !important;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-text::before{content:"Q: " !important; display:inline !important; font-style:italic !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
+  /* Tighter spacing so nested points read as a group (not stacked on top of each other). */
+  body.outline-style-classic #mainTree textarea.node-text{min-height:0;}
+  #mainTree .node-children > .node{margin:0;}
+  body.outline-style-classic #mainTree .node-children > .node:not([data-kind="heading"]) > .node-row{padding-top:1px; padding-bottom:1px;}
 </style>
 </head>
 <body>
