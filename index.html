@@ -4978,7 +4978,7 @@ function icon(name, size){
       let mainContent = '';
       if(isVerse){
         mainContent = `<span class="verse-ref-chip">${escapeHtml(node.ref||'Reference')}</span>
-          <textarea class="node-text full-only" readonly>${escapeHtml(node.text)}</textarea>`;
+          <textarea class="node-text full-only" data-id="${node.id}" style="${escapeHtml(styleObjToCssText(node.style))}" readonly>${escapeHtml(node.text)}</textarea>`;
       } else if(isPhoto){
         if(node.photoRef){
           const dataUrl = photoCache[node.photoRef];
@@ -7064,6 +7064,13 @@ function icon(name, size){
   // Tracks whichever outline node was last focused, so keyboard add-shortcuts
   // (+, S, Q, V, A, T, P, H — see the global keydown handler) know where to insert.
   let lastFocusedNodeId = null;
+  // Clicking a verse's reference label puts the cursor in the verse so Tab / Shift+Tab / formatting work on it.
+  mainTree.addEventListener('click', e=>{
+    const chip = e.target.closest && e.target.closest('.verse-ref-chip');
+    if(!chip) return;
+    const ta = chip.parentElement && chip.parentElement.querySelector('textarea.node-text');
+    if(ta){ editSessionActive = true; ta.focus(); }
+  });
   mainTree.addEventListener('focusin', (e)=>{
     const ta = e.target.closest && e.target.closest('textarea.node-text[data-id]');
     if(ta) lastFocusedNodeId = ta.dataset.id;
@@ -7574,6 +7581,11 @@ function icon(name, size){
         return;
       }
     }
+    if(t.tagName === 'TEXTAREA' && t.readOnly && t.dataset.id && (e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
+      e.preventDefault();
+      await toggleNodeFormat(t.dataset.id, {b:'bold', i:'italic', u:'underline'}[e.key.toLowerCase()]);
+      return;
+    }
     if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
     const id = t.dataset.id;
     const ctx = findContext(id);
@@ -7718,7 +7730,7 @@ function icon(name, size){
   function currentRibbonNode(){
     return lastFocusedNodeId ? (findContext(lastFocusedNodeId) || null) : null;
   }
-  function isFormattableNode(node){ return !!node && (node.kind === 'heading' || FLOW_KINDS.includes(node.kind)); }
+  function isFormattableNode(node){ return !!node && (node.kind === 'heading' || node.kind === 'verse' || FLOW_KINDS.includes(node.kind)); }
   async function toggleNodeFormat(id, key){
     const ctx = findContext(id);
     if(!ctx || !isFormattableNode(ctx.node)) return;
