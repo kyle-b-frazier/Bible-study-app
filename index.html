@@ -7595,16 +7595,16 @@ function icon(name, size){
     // Backspace at the very start of a line: delete an empty line, or merge into the line above.
     if(e.key === 'Backspace' && caretAtStart){
       const isEmpty = !t.value.length;
-      const leafOrEmptySection = !(ctx.node.children && ctx.node.children.length) && (FLOW_KINDS.includes(ctx.node.kind) || ctx.node.kind === 'heading');
-      if(isEmpty && leafOrEmptySection){
-        const prev = adjacentNodeText(t, -1);
-        if(!prev) return;
+      if(isEmpty && (FLOW_KINDS.includes(ctx.node.kind) || ctx.node.kind === 'heading')){
+        // Backspace on a blank line deletes the whole line (any lines nested under it move up in its place).
+        const prev = adjacentNodeText(t, -1) || adjacentNodeText(t, 1);
         e.preventDefault();
         pushUndo();
-        removeNodeById(id);
+        const keep = ctx.node.children || [];
+        ctx.arr.splice(ctx.idx, 1, ...keep);
         await saveLesson();
         renderTree();
-        focusNodeText(prev.dataset.id, 'end');
+        if(prev) focusNodeText(prev.dataset.id, adjacentNodeText(t, -1) ? 'end' : 0);
         return;
       }
       const prevSib = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
