@@ -7057,6 +7057,38 @@ function icon(name, size){
     pendingPhotoNodeId = null;
   });
 
+  // Paste a screenshot / copied picture into the outline or Brainstorm: it becomes a photo line
+  // right after the line you're typing in (or at the end of Brainstorm if nothing is focused).
+  document.addEventListener('paste', async (e)=>{
+    const cd = e.clipboardData; if(!cd) return;
+    const imgItem = Array.from(cd.items || []).find(it=>it.kind === 'file' && it.type.startsWith('image/'));
+    if(!imgItem || cd.getData('text/plain')) return;
+    const t = e.target;
+    const rowEl = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
+    const drawerOpen = document.getElementById('brainstormDrawer').classList.contains('open');
+    const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT');
+    if(!rowEl && (typing || !drawerOpen)) return; // some other field (title, search, modal): leave it alone
+    const file = imgItem.getAsFile(); if(!file) return;
+    e.preventDefault();
+    try{
+      const dataUrl = await readAndCompressImage(file);
+      const node = makeNode('photo');
+      const key = photoKeyFor(node.id);
+      if(!(await savePhotoData(key, dataUrl))){ showToast("Couldn't save that image.", true); return; }
+      node.photoRef = key;
+      pushUndo();
+      const ctx = rowEl ? findContext(rowEl.dataset.id) : null;
+      if(ctx) ctx.arr.splice(ctx.idx + 1, 0, node); else lesson.brainstorm.push(node);
+      await saveLesson();
+      rerenderStructure();
+      updateActionCardsAndChips();
+      showToast('Picture added.');
+    }catch(err){
+      console.error(err);
+      showToast("Couldn't load that image.", true);
+    }
+  });
+
   let autosaveTimer = null;
   function scheduleAutosave(){
     if(autosaveTimer) clearTimeout(autosaveTimer);
