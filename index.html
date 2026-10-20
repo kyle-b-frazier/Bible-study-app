@@ -3457,32 +3457,17 @@ function icon(name, size){
   async function indentNode(id){
     const ctx = findContext(id);
     if(!ctx) return;
+    // Nest under the item directly above (whatever its kind) as its last child. With
+    // nothing above at this level there is nothing to nest under, same as Word.
     const prevSibling = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
-    if(prevSibling && prevSibling.kind === 'heading'){
-      pushUndo();
-      ctx.arr.splice(ctx.idx, 1);
-      prevSibling.children = prevSibling.children || [];
-      prevSibling.children.push(ctx.node);
-      prevSibling.collapsed = false;
-      await saveLesson();
-      renderTree();
-      return;
-    }
-    // Any item (heading or not) with no section directly above it to nest under gets
-    // wrapped in a new blank subsection, so Tab always moves it one level deeper.
-    {
-      pushUndo();
-      const wrapper = makeNode('heading');
-      ctx.arr.splice(ctx.idx, 1, wrapper);
-      wrapper.children = [ctx.node];
-      wrapper.collapsed = false;
-      await saveLesson();
-      renderTree();
-      requestAnimationFrame(()=>{
-        const ta = mainTree.querySelector(`textarea[data-id="${wrapper.id}"]`);
-        if(ta){ editSessionActive = true; ta.focus(); }
-      });
-    }
+    if(!prevSibling) return;
+    pushUndo();
+    ctx.arr.splice(ctx.idx, 1);
+    prevSibling.children = prevSibling.children || [];
+    prevSibling.children.push(ctx.node);
+    prevSibling.collapsed = false;
+    await saveLesson();
+    renderTree();
   }
   async function outdentNode(id){
     const ctx = findContext(id);
@@ -4756,7 +4741,7 @@ function icon(name, size){
             <button class="btn small" data-action="upload-photo" data-id="${node.id}">${node.photoRef?'Replace':'Upload'}</button>
             ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}` : '';
 
-      const hasKids = isHeading && node.children && node.children.length > 0;
+      const hasKids = !!(node.children && node.children.length > 0);
       const collapseToggle = hasKids
         ? `<button class="btn small" data-action="toggle-collapse" data-id="${node.id}" title="${node.collapsed ? 'Expand section' : 'Collapse section'}">${node.collapsed ? '▸' : '▾'}</button>`
         : '';
@@ -4766,8 +4751,8 @@ function icon(name, size){
       // A section shows its add-menu area whenever it's expanded — even before it has
       // any content yet. Previously this required at least one existing child, which
       // left freshly-created empty sections with no way to add anything to them.
-      const showChildrenArea = isHeading && !node.collapsed;
-      const bottomAddMenu = showChildrenArea ? `
+      const showChildrenArea = (isHeading || hasKids) && !node.collapsed;
+      const bottomAddMenu = (showChildrenArea && isHeading) ? `
           <div class="node-add-bottom">
             <div class="add-menu-wrap">
               <button class="btn small" data-action="add-menu-toggle" data-id="${node.id}" title="Add inside this section">+ Add</button>
@@ -7013,7 +6998,7 @@ function icon(name, size){
     // Backspace at the very start of a line: delete an empty line, or merge into the line above.
     if(e.key === 'Backspace' && caretAtStart){
       const isEmpty = !t.value.length;
-      const leafOrEmptySection = FLOW_KINDS.includes(ctx.node.kind) || (ctx.node.kind === 'heading' && !(ctx.node.children && ctx.node.children.length));
+      const leafOrEmptySection = !(ctx.node.children && ctx.node.children.length) && (FLOW_KINDS.includes(ctx.node.kind) || ctx.node.kind === 'heading');
       if(isEmpty && leafOrEmptySection){
         const prev = adjacentNodeText(t, -1);
         if(!prev) return;
@@ -7026,7 +7011,7 @@ function icon(name, size){
         return;
       }
       const prevSib = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
-      if(!isEmpty && FLOW_KINDS.includes(ctx.node.kind) && prevSib && FLOW_KINDS.includes(prevSib.kind)){
+      if(!isEmpty && FLOW_KINDS.includes(ctx.node.kind) && prevSib && FLOW_KINDS.includes(prevSib.kind) && !(ctx.node.children && ctx.node.children.length) && !(prevSib.children && prevSib.children.length)){
         e.preventDefault();
         pushUndo();
         const joinAt = (prevSib.text || '').length;
@@ -7113,9 +7098,10 @@ function icon(name, size){
     }
     pushUndo();
     if(kind === 'heading'){
-      node.children = []; node.collapsed = false; node.minutes = null;
+      node.children = node.children || []; node.collapsed = false; node.minutes = null;
     } else if(node.kind === 'heading'){
-      delete node.children; delete node.collapsed; delete node.minutes;
+      delete node.minutes;
+      if(!(node.children && node.children.length)){ delete node.children; delete node.collapsed; }
     }
     node.kind = kind;
     node.kindManual = true;
