@@ -3487,6 +3487,13 @@ function icon(name, size){
     const parentCtx = findContext(ctx.parentNode.id);
     if(!parentCtx) return;
     pushUndo();
+    // Stay put in the document: the lines below this one (same level) become its children,
+    // then it moves up one level, landing right after its old parent.
+    const following = ctx.arr.splice(ctx.idx + 1);
+    if(following.length){
+      ctx.node.children = (ctx.node.children || []).concat(following);
+      ctx.node.collapsed = false;
+    }
     ctx.arr.splice(ctx.idx, 1);
     parentCtx.arr.splice(parentCtx.idx + 1, 0, ctx.node);
     await saveLesson();
