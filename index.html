@@ -1398,6 +1398,33 @@
   html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle[title="Expand section"]{display:inline-flex !important;}
   /* The collapse arrow floats in the gutter so a section with lines under it lines up with one without. */
   html body.outline-style-classic #mainTree .node > .node-row > button[data-action="toggle-collapse"]{position:absolute !important; left:-30px; top:50%; transform:translateY(-50%); margin:0 !important;}
+  /* Verse picker: books | chapters | verses on one screen */
+  .modal.vp-modal{max-width:920px;}
+  .vp-goto{display:flex; gap:8px; margin-bottom:12px;}
+  .vp-goto input{flex:1; margin:0; padding:10px 14px; border-radius:999px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:.9rem;}
+  .vp-cols{display:grid; grid-template-columns:190px 170px 1fr; gap:12px; height:min(380px, 50vh);}
+  .vp-col{display:flex; flex-direction:column; min-height:0; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); padding:8px;}
+  .vp-col-title{display:flex; align-items:center; justify-content:space-between; font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); padding:2px 4px 8px;}
+  .vp-all{display:flex; gap:4px;} .vp-all .btn{padding:2px 8px; font-size:.7rem; text-transform:none; letter-spacing:0;}
+  .vp-col .book-filter{margin:0 0 6px;}
+  #bookGrid, #chapterGrid, #verseChecklist{flex:1; min-height:0; overflow-y:auto;}
+  #bookGrid{display:block !important; max-height:none !important; padding:0;}
+  #bookGrid .book-section-label{margin:8px 4px 4px;}
+  #bookGrid .bk{display:block; width:100%; text-align:left; background:transparent; border:none; border-left:none; border-radius:6px; padding:6px 10px; font-size:.84rem; color:var(--text);}
+  #bookGrid .bk:hover{background:var(--accent-soft);}
+  #bookGrid .bk.sel{background:var(--accent); color:#fff; font-weight:600;}
+  #chapterGrid{display:grid !important; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:6px; align-content:start; max-height:none !important; padding:2px; margin:0;}
+  #chapterGrid .chap{padding:9px 0; font-size:.85rem; font-weight:600; font-variant-numeric:tabular-nums; border-radius:8px;}
+  #chapterGrid .chap.sel{background:var(--accent); color:#fff; border-color:var(--accent);}
+  #verseChecklist{display:block !important;}
+  #verseList{max-height:none !important; border:none;}
+  .verse-check-row{border-radius:8px; border-bottom:none; margin-bottom:2px; padding:7px 9px;}
+  .verse-check-row.on{background:var(--accent-soft);}
+  .vp-empty{color:var(--text-faint); font-size:.85rem; padding:14px 8px; text-align:center;}
+  .vp-foot{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px;}
+  .vp-summary{font-size:.85rem; color:var(--text-faint);}
+  .vp-summary.has{color:var(--text); font-weight:700; font-size:1rem;}
+  @media (max-width:760px){ .vp-cols{grid-template-columns:1fr; height:auto;} .vp-col{max-height:200px;} .vp-col.vp-verses{max-height:300px;} }
 </style>
 </head>
 <body>
@@ -1741,7 +1768,7 @@
 
 <!-- Verse modal -->
 <div class="modal-overlay" id="verseModalOverlay">
-  <div class="modal">
+  <div class="modal vp-modal">
     <button class="modal-x" id="xCloseVerse" title="Close">✕</button>
     <h3>Insert a Verse</h3>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
@@ -1749,20 +1776,32 @@
       <button class="btn small ghost" id="pickerTabManual">Paste manually</button>
     </div>
     <div id="browsePane">
-      <div id="browseBreadcrumb" class="hint" style="margin-top:0;"></div>
-      <div id="bookGrid" class="picker-grid"></div>
-      <div id="chapterGrid" class="picker-grid" style="display:none;"></div>
-      <div id="verseChecklist" style="display:none;">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
-          <button class="btn ghost small" id="btnSelectAllVerses">Select whole chapter</button>
+      <div class="vp-goto">
+        <input type="text" id="vpGoto" placeholder="Jump to a passage — e.g. 1 Pet 3:1-7, John 3:16, Ps 23" autocomplete="off">
+        <button class="btn small brass" id="vpGotoBtn">Go</button>
+      </div>
+      <div class="vp-cols">
+        <div class="vp-col vp-books">
+          <div class="vp-col-title">Book</div>
+          <input type="search" class="book-filter" id="bookFilter" placeholder="Filter books…" autocomplete="off">
+          <div id="bookGrid"></div>
         </div>
-        <div id="verseList" class="lib-list" style="max-height:260px;"></div>
-        <div class="modal-actions" style="justify-content:space-between;">
-          <button class="btn ghost small" id="btnBackToChapters">← Back to chapters</button>
-          <button class="btn brass" id="btnInsertSelectedVerses" disabled>Insert Selected</button>
+        <div class="vp-col vp-chaps">
+          <div class="vp-col-title" id="vpChapTitle">Chapter</div>
+          <div id="chapterGrid"></div>
+        </div>
+        <div class="vp-col vp-verses">
+          <div class="vp-col-title"><span id="browseBreadcrumb">Verses</span>
+            <span class="vp-all"><button class="btn ghost small" id="btnSelectAllVerses">All</button><button class="btn ghost small" id="btnClearVerses">None</button></span>
+          </div>
+          <div id="verseChecklist"><div id="verseList"></div></div>
         </div>
       </div>
       <p class="hint" id="browseStatus"></p>
+      <div class="vp-foot">
+        <div id="vpSummary" class="vp-summary">Pick a book, chapter and verse(s). Shift-click selects a range.</div>
+        <button class="btn brass" id="btnInsertSelectedVerses" disabled>Insert</button>
+      </div>
     </div>
     <div id="manualPane" style="display:none;">
       <p class="hint" style="margin-top:0;">Paste a passage in yourself.</p>
@@ -4475,37 +4514,40 @@ function icon(name, size){
 
   let browseBook = null, browseChapter = null, browseVerses = [], selectedVerseNums = new Set();
 
+  function resetVersePane(msg){
+    browseChapter = null; browseVerses = []; selectedVerseNums = new Set(); lastVersePicked = null;
+    document.getElementById('verseList').innerHTML = `<div class="vp-empty">${msg || 'Choose a chapter to see its verses.'}</div>`;
+    document.getElementById('browseBreadcrumb').textContent = 'Verses';
+    updateInsertButtonLabel();
+  }
+  let lastVersePicked = null;
   function renderBookGrid(){
     const grid = document.getElementById('bookGrid');
-    const section = (label, test)=>`<div class="book-section" data-test="${test}"><div class="book-section-label">${label}</div><div class="book-row">`
-      + BOOKS.filter(b=>b[2]===test).map(([name,n])=>`<button class="${test}" data-book="${escapeHtml(name)}" title="${n} chapters">${escapeHtml(name)}</button>`).join('') + `</div></div>`;
-    grid.innerHTML = `<input type="search" class="book-filter" id="bookFilter" placeholder="Search books (e.g. 1 Pet)" autocomplete="off">`
-      + section('Old Testament','ot') + section('New Testament','nt');
-    document.getElementById('browseBreadcrumb').textContent = 'Choose a book';
-    grid.style.display = 'block';
-    document.getElementById('chapterGrid').style.display = 'none';
-    document.getElementById('verseChecklist').style.display = 'none';
+    const section = (label, test)=>`<div class="book-section"><div class="book-section-label">${label}</div>`
+      + BOOKS.filter(b=>b[2]===test).map(([name])=>`<button class="bk ${name===browseBook?'sel':''}" data-book="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join('') + `</div>`;
+    grid.innerHTML = section('Old Testament','ot') + section('New Testament','nt');
+    const f = document.getElementById('bookFilter'); if(f && f.value){ f.value = ''; }
     document.getElementById('browseStatus').textContent = '';
   }
-  function renderChapterGrid(bookName){
+  function renderChapterGrid(bookName, keepVerses){
     browseBook = bookName;
     const book = BOOKS.find(b=>b[0]===bookName);
     const grid = document.getElementById('chapterGrid');
-    let html = `<div class="chapter-head"><button data-back-to-books="1">← Books</button><strong>${escapeHtml(bookName)}</strong><span>${book[1]} chapter${book[1]===1?'':'s'}</span></div>`;
-    for(let c=1;c<=book[1];c++) html += `<button class="chap" data-chapter="${c}">${c}</button>`;
+    let html = '';
+    for(let c=1;c<=book[1];c++) html += `<button class="chap ${c===browseChapter?'sel':''}" data-chapter="${c}">${c}</button>`;
     grid.innerHTML = html;
-    document.getElementById('browseBreadcrumb').innerHTML = `<a href="#" data-nav="books" style="text-decoration:underline;cursor:pointer;">All books</a> → ${escapeHtml(bookName)} — choose a chapter`;
-    document.getElementById('bookGrid').style.display = 'none';
-    grid.style.display = 'grid';
-    grid.scrollTop = 0;
-    document.getElementById('verseChecklist').style.display = 'none';
+    document.getElementById('vpChapTitle').textContent = `${bookName} · ${book[1]} chapter${book[1]===1?'':'s'}`;
+    document.querySelectorAll('#bookGrid .bk').forEach(b=>b.classList.toggle('sel', b.dataset.book === bookName));
+    if(!keepVerses) resetVersePane();
     document.getElementById('browseStatus').textContent = '';
   }
   async function chooseChapter(chapterNum){
     browseChapter = chapterNum;
+    document.querySelectorAll('#chapterGrid .chap').forEach(b=>b.classList.toggle('sel', parseInt(b.dataset.chapter,10) === chapterNum));
     const statusEl = document.getElementById('browseStatus');
-    statusEl.textContent = 'Loading verses…';
-    document.getElementById('chapterGrid').style.display = 'none';
+    statusEl.textContent = '';
+    browseVerses = []; selectedVerseNums = new Set();
+    document.getElementById('verseList').innerHTML = '<div class="vp-empty">Loading verses…</div>';
     try{
       const query = `${browseBook} ${chapterNum}`;
       const url = 'https://api.esv.org/v3/passage/text/?q=' + encodeURIComponent(query)
@@ -4527,33 +4569,69 @@ function icon(name, size){
         if(text) verses.push({num, text});
       }
       if(!verses.length) throw new Error('Could not parse verses');
+      if(browseChapter !== chapterNum) return;
       browseVerses = verses; selectedVerseNums = new Set();
       renderVerseChecklist();
-      statusEl.textContent = '';
     }catch(e){
       console.error(e);
-      statusEl.textContent = "Couldn't load that chapter — this may be a network/CORS restriction. Try \"Paste manually\" instead.";
-      document.getElementById('chapterGrid').style.display = 'grid';
+      resetVersePane("Couldn't load that chapter — this may be a network restriction. Use “Paste manually” instead.");
+      statusEl.textContent = '';
     }
   }
+  // "1 Pet 3:1-7" / "john 3:16" / "Ps 23" → open that passage with its verses ticked.
+  function parsePassageQuery(q){
+    const m = /^\s*((?:[1-3]|I{1,3})?\s*[A-Za-z][A-Za-z .]*?)\s*(\d+)?\s*(?::\s*([\d,\s\-–]+))?\s*$/.exec(q || '');
+    if(!m) return null;
+    const norm = x=>x.toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^iii/,'3').replace(/^ii/,'2').replace(/^i(?=[a-z])/,'1');
+    const key = norm(m[1]); if(!key) return null;
+    const book = BOOKS.find(b=>norm(b[0]) === key) || BOOKS.find(b=>norm(b[0]).startsWith(key)) || BOOKS.find(b=>norm(b[0]).includes(key));
+    if(!book) return null;
+    const chapter = m[2] ? Math.min(parseInt(m[2],10), book[1]) : null;
+    const nums = new Set();
+    (m[3] || '').split(',').forEach(part=>{
+      const r = part.split(/[-–]/).map(x=>parseInt(x,10));
+      if(r.some(isNaN)) return;
+      for(let n=r[0]; n<=(r[1]||r[0]); n++) nums.add(n);
+    });
+    return {book:book[0], chapter, nums};
+  }
+  async function goToPassage(q){
+    const p = parsePassageQuery(q);
+    const statusEl = document.getElementById('browseStatus');
+    if(!p){ statusEl.textContent = "Couldn't find that book — try something like “1 Pet 3:1-7”."; return false; }
+    statusEl.textContent = '';
+    renderChapterGrid(p.book);
+    const sc = document.querySelector('#bookGrid .bk.sel'); if(sc) sc.scrollIntoView({block:'nearest'});
+    if(!p.chapter) return true;
+    await chooseChapter(p.chapter);
+    if(p.nums.size){
+      selectedVerseNums = new Set([...p.nums].filter(n=>browseVerses.some(v=>v.num===n)));
+      renderVerseChecklist();
+    }
+    return true;
+  }
   function renderVerseChecklist(){
-    document.getElementById('browseBreadcrumb').innerHTML =
-      `<a href="#" data-nav="books" style="text-decoration:underline;cursor:pointer;">All books</a> → ` +
-      `<a href="#" data-nav="chapters" style="text-decoration:underline;cursor:pointer;">${escapeHtml(browseBook)}</a> → Chapter ${browseChapter} — select verse(s)`;
+    document.getElementById('browseBreadcrumb').textContent = `${browseBook} ${browseChapter}`;
     const list = document.getElementById('verseList');
     list.innerHTML = browseVerses.map(v=>`
-      <label class="verse-check-row">
+      <label class="verse-check-row ${selectedVerseNums.has(v.num)?'on':''}">
         <input type="checkbox" data-vnum="${v.num}" ${selectedVerseNums.has(v.num)?'checked':''}>
         <span class="vnum">${v.num}</span><span>${escapeHtml(v.text)}</span>
       </label>`).join('');
-    document.getElementById('verseChecklist').style.display = 'block';
     updateInsertButtonLabel();
   }
   function updateInsertButtonLabel(){
     const n = selectedVerseNums.size;
     const btn = document.getElementById('btnInsertSelectedVerses');
-    btn.textContent = n ? `Insert Selected (${n})` : 'Insert Selected';
+    btn.textContent = editingVerseId ? (n ? `Update verse (${n})` : 'Update verse') : (n ? `Insert ${n} verse${n===1?'':'s'}` : 'Insert');
     btn.disabled = n === 0;
+    const sum = document.getElementById('vpSummary');
+    const r = n ? selectedVerseRefAndText() : null;
+    sum.textContent = r ? r.ref : 'Pick a book, chapter and verse(s). Shift-click selects a range.';
+    sum.classList.toggle('has', !!r);
+    document.querySelectorAll('#verseList .verse-check-row').forEach(row=>{
+      const cb = row.querySelector('input'); row.classList.toggle('on', !!(cb && cb.checked));
+    });
   }
   function selectedVerseRefAndText(){
     const nums = Array.from(selectedVerseNums).sort((a,b)=>a-b);
@@ -5576,6 +5654,10 @@ function icon(name, size){
     browseBook = null; browseChapter = null; browseVerses = []; selectedVerseNums = new Set();
     switchPickerTab('browse');
     renderBookGrid();
+    document.getElementById('chapterGrid').innerHTML = '<div class="vp-empty">Choose a book.</div>';
+    document.getElementById('vpChapTitle').textContent = 'Chapter';
+    document.getElementById('vpGoto').value = ''; document.getElementById('bookFilter').value = '';
+    resetVersePane();
     document.getElementById('verseModalOverlay').classList.add('open');
   }
   function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; editingVerseId = null; }
@@ -5592,7 +5674,7 @@ function icon(name, size){
     const m = /^(.+?)\s+(\d+):([\d,\s\-–]+)$/.exec((ctx.node.ref || '').trim());
     const book = m && BOOKS.find(b=>b[0].toLowerCase() === m[1].trim().toLowerCase());
     if(!book){ switchPickerTab('manual'); return; }
-    browseBook = book[0];
+    renderChapterGrid(book[0]);
     await chooseChapter(parseInt(m[2],10));
     if(editingVerseId !== id) return;
     const nums = new Set();
@@ -7095,35 +7177,43 @@ function icon(name, size){
   document.getElementById('btnSaveInsertVerse').addEventListener('click', saveNewVerseAndInsert);
   document.getElementById('pickerTabBrowse').addEventListener('click', ()=> switchPickerTab('browse'));
   document.getElementById('pickerTabManual').addEventListener('click', ()=> switchPickerTab('manual'));
-  document.getElementById('bookGrid').addEventListener('input', (e)=>{
-    if(e.target.id !== 'bookFilter') return;
+  document.getElementById('bookFilter').addEventListener('input', (e)=>{
     const q = e.target.value.trim().toLowerCase();
-    document.querySelectorAll('#bookGrid .book-row button').forEach(b=>{ b.style.display = (!q || b.dataset.book.toLowerCase().includes(q)) ? '' : 'none'; });
+    document.querySelectorAll('#bookGrid .bk').forEach(b=>{ b.style.display = (!q || b.dataset.book.toLowerCase().includes(q)) ? '' : 'none'; });
     document.querySelectorAll('#bookGrid .book-section').forEach(sec=>{
-      sec.style.display = [...sec.querySelectorAll('button')].some(b=>b.style.display !== 'none') ? '' : 'none';
+      sec.style.display = [...sec.querySelectorAll('.bk')].some(b=>b.style.display !== 'none') ? '' : 'none';
     });
   });
-  document.getElementById('bookGrid').addEventListener('keydown', (e)=>{
-    if(e.target.id !== 'bookFilter' || e.key !== 'Enter') return;
-    const first = [...document.querySelectorAll('#bookGrid .book-row button')].find(b=>b.style.display !== 'none');
-    if(first) renderChapterGrid(first.dataset.book);
+  document.getElementById('bookFilter').addEventListener('keydown', (e)=>{
+    if(e.key !== 'Enter') return;
+    const first = [...document.querySelectorAll('#bookGrid .bk')].find(b=>b.style.display !== 'none');
+    if(first){ document.getElementById('bookFilter').value = ''; document.getElementById('bookFilter').dispatchEvent(new Event('input')); renderChapterGrid(first.dataset.book); }
   });
   document.getElementById('bookGrid').addEventListener('click', (e)=>{ const b=e.target.closest('button[data-book]'); if(b) renderChapterGrid(b.dataset.book); });
   document.getElementById('chapterGrid').addEventListener('click', (e)=>{
-    const back = e.target.closest('button[data-back-to-books]'); if(back){ renderBookGrid(); return; }
     const b=e.target.closest('button[data-chapter]'); if(b) chooseChapter(parseInt(b.dataset.chapter,10));
   });
-  document.getElementById('browseBreadcrumb').addEventListener('click', (e)=>{
-    const link = e.target.closest('a[data-nav]'); if(!link) return; e.preventDefault();
-    if(link.dataset.nav==='books') renderBookGrid(); if(link.dataset.nav==='chapters') renderChapterGrid(browseBook);
+  document.getElementById('vpGotoBtn').addEventListener('click', ()=> goToPassage(document.getElementById('vpGoto').value));
+  document.getElementById('vpGoto').addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); goToPassage(e.target.value); } });
+  // Click selects; Shift+click selects everything between this verse and the last one clicked.
+  document.getElementById('verseList').addEventListener('click', (e)=>{
+    const row = e.target.closest('.verse-check-row'); if(!row) return;
+    const cb = row.querySelector('input[data-vnum]'); if(!cb) return;
+    const num = parseInt(cb.dataset.vnum,10);
+    if(e.shiftKey && lastVersePicked != null){
+      e.preventDefault();
+      const [a,b] = [Math.min(lastVersePicked, num), Math.max(lastVersePicked, num)];
+      browseVerses.forEach(v=>{ if(v.num>=a && v.num<=b) selectedVerseNums.add(v.num); });
+      renderVerseChecklist();
+    } else lastVersePicked = num;
   });
-  document.getElementById('btnBackToChapters').addEventListener('click', ()=> renderChapterGrid(browseBook));
   document.getElementById('verseList').addEventListener('change', (e)=>{
     const cb = e.target.closest('input[data-vnum]'); if(!cb) return;
     const num = parseInt(cb.dataset.vnum,10);
     if(cb.checked) selectedVerseNums.add(num); else selectedVerseNums.delete(num);
     updateInsertButtonLabel();
   });
+  document.getElementById('btnClearVerses').addEventListener('click', ()=>{ selectedVerseNums = new Set(); if(browseVerses.length) renderVerseChecklist(); });
   document.getElementById('btnInsertSelectedVerses').addEventListener('click', insertSelectedVerses);
   document.getElementById('btnSelectAllVerses').addEventListener('click', ()=>{ selectedVerseNums = new Set(browseVerses.map(v=>v.num)); renderVerseChecklist(); });
 
