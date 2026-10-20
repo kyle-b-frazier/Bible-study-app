@@ -1386,6 +1386,8 @@
   /* Lines (non-sections) show no dropdown arrow; only a collapsed one keeps a small arrow so it can be reopened. */
   html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle{display:none !important;}
   html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle[title="Expand section"]{display:inline-flex !important;}
+  /* The collapse arrow floats in the gutter so a section with lines under it lines up with one without. */
+  html body.outline-style-classic #mainTree .node > .node-row > button[data-action="toggle-collapse"]{position:absolute !important; left:-30px; top:50%; transform:translateY(-50%); margin:0 !important;}
 </style>
 </head>
 <body>
