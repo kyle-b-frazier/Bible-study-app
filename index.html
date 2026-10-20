@@ -1383,6 +1383,9 @@
   html body.outline-style-classic #mainTree .node > .node-row:hover button[data-action="toggle-collapse"],
   html body #mainTree.doc-view .node > .node-row:hover .drag-handle,
   html body #mainTree.doc-view .node > .node-row:hover button[data-action="toggle-collapse"]{opacity:1; pointer-events:auto;}
+  /* Lines (non-sections) show no dropdown arrow; only a collapsed one keeps a small arrow so it can be reopened. */
+  html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle{display:none !important;}
+  html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle[title="Expand section"]{display:inline-flex !important;}
 </style>
 </head>
 <body>
