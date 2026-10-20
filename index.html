@@ -4981,10 +4981,7 @@ function icon(name, size){
   }
   function placeholderFor(kind){
     if(kind==='heading') return 'Section title... (press Enter to add your first line below)';
-    if(kind==='question') return 'Discussion question...';
-    if(kind==='statement') return 'Statement or teaching point... (press Enter for a new line)';
-    if(kind==='application') return 'How should this change how we live this week?';
-    if(kind==='teachernote') return "Private note to yourself — won't show on the audience handout...";
+    // Lines are left blank (just a bullet), like a word processor.
     return '';
   }
 
@@ -6958,12 +6955,6 @@ function icon(name, size){
       const ctx = findContext(t.dataset.id, lesson.brainstorm || [], null);
       if(!ctx){ await saveLesson(); t.blur(); return; }
       ctx.node.text = t.value;
-      // Enter on an empty nested line steps out a level; on an empty top-level line it just finishes.
-      if(!t.value.trim()){
-        if(ctx.parentNode || ctx.node.indent > 0){ if(ensureManualBrainstormOrder()) await outdentNode(ctx.node.id); }
-        else { await saveLesson(); t.blur(); }
-        return;
-      }
       // Otherwise start the next line right below (first child if this line already has some).
       if(!ensureManualBrainstormOrder()) return;
       pushUndo();
@@ -7539,13 +7530,8 @@ function icon(name, size){
       }
 
       if(FLOW_KINDS.includes(ctx.node.kind)){
-        // Enter on an empty indented line steps back out a level (Word list behaviour).
-        if(!t.value.trim() && ctx.parentNode){
-          await outdentNode(id);
-          focusNodeText(id, 0);
-          return;
-        }
-        // Otherwise split at the cursor: text after it moves to a new line below.
+        // Enter always starts another line right below (even from an empty one); use Shift+Tab to step out.
+        // Split at the cursor: text after it moves to the new line.
         const before = t.value.slice(0, t.selectionStart);
         const after = t.value.slice(t.selectionEnd);
         ctx.node.text = before;
