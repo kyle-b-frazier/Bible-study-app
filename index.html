@@ -5612,6 +5612,16 @@ function icon(name, size){
   function placeVerseAfterCursor(newId){
     const afterId = pendingVerseAfterId;
     if(!afterId || afterId === newId || !findContext(afterId)) return;
+    // Cursor in an empty statement-type line: the verse takes that line's place (same spot in the hierarchy).
+    const blank = findContext(afterId);
+    if(FLOW_KINDS.includes(blank.node.kind) && !(blank.node.text || '').trim()){
+      const fresh = removeNodeById(newId);
+      if(fresh){
+        Object.assign(blank.node, {kind:'verse', ref:fresh.ref, text:fresh.text});
+        delete blank.node.style; delete blank.node.kindManual;
+        return;
+      }
+    }
     const node = removeNodeById(newId);
     if(node) insertRelative(afterId, node, 'after');
   }
