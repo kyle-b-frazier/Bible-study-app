@@ -3468,7 +3468,9 @@ function icon(name, size){
       renderTree();
       return;
     }
-    if(ctx.node.kind === 'heading'){
+    // Any item (heading or not) with no section directly above it to nest under gets
+    // wrapped in a new blank subsection, so Tab always moves it one level deeper.
+    {
       pushUndo();
       const wrapper = makeNode('heading');
       ctx.arr.splice(ctx.idx, 1, wrapper);
@@ -3565,10 +3567,10 @@ function icon(name, size){
       html += `<div class="ctx-divider"></div>`;
     }
 
-    if(isHeading){
+    {
       const canOutdent = !!ctx.parentNode;
-      html += `<button data-action="indent-node">${icon('indent',14)} Make Subsection</button>`;
-      html += `<button data-action="outdent-node" ${canOutdent?'':'disabled'}>${icon('outdent',14)} Make Section</button>`;
+      html += `<button data-action="indent-node">${icon('indent',14)} ${isHeading?'Make Subsection':'Indent'}</button>`;
+      html += `<button data-action="outdent-node" ${canOutdent?'':'disabled'}>${icon('outdent',14)} ${isHeading?'Make Section':'Outdent'}</button>`;
       html += `<div class="ctx-divider"></div>`;
     }
 
@@ -3954,7 +3956,7 @@ function icon(name, size){
     { keys: 'Backspace at line start', label: 'Delete an empty line, or join with the line above' },
     { keys: '↑ / ↓', label: 'Move between lines' },
     { keys: '⌘/Ctrl B / I / U', label: 'Bold, italic, underline the current line' },
-    { keys: 'Tab', label: 'Indent the current line into the section above it' },
+    { keys: 'Tab', label: 'Indent the current line one level (Shift+Tab to outdent)' },
     { keys: 'Shift Tab', label: 'Outdent the current line back out a level' },
     { keys: '+', label: 'Open a menu to add any kind of item after the current line' },
     { keys: 'S', label: 'Add a Statement (when not typing in a field)' },
@@ -6926,22 +6928,29 @@ function icon(name, size){
 
   mainTree.addEventListener('keydown', async (e)=>{
     const t = e.target;
+    // Tab / Shift+Tab indent or outdent from any row's field: text, read-only verse
+    // text, or a photo caption — not just editable text areas.
+    if(e.key === 'Tab' && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
+      const rowEl = t.closest('.node');
+      const tabId = rowEl && rowEl.dataset.id;
+      const tabCtx = tabId && findContext(tabId);
+      if(tabCtx){
+        e.preventDefault();
+        const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
+        if(isText) tabCtx.node.text = t.value;
+        const selStart = t.selectionStart, selEnd = t.selectionEnd;
+        if(e.shiftKey) await outdentNode(tabId); else await indentNode(tabId);
+        requestAnimationFrame(()=>{
+          const el = mainTree.querySelector(`.node[data-id="${tabId}"] > .node-row textarea, .node[data-id="${tabId}"] > .node-row input`);
+          if(el){ editSessionActive = true; el.focus(); try{ if(isText) el.setSelectionRange(selStart, selEnd); }catch(err){} }
+        });
+        return;
+      }
+    }
     if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
     const id = t.dataset.id;
     const ctx = findContext(id);
     if(!ctx) return;
-
-    if(e.key === 'Tab'){
-      e.preventDefault();
-      ctx.node.text = t.value;
-      const selStart = t.selectionStart, selEnd = t.selectionEnd;
-      if(e.shiftKey) await outdentNode(id); else await indentNode(id);
-      requestAnimationFrame(()=>{
-        const ta = mainTree.querySelector(`textarea[data-id="${id}"]`);
-        if(ta){ editSessionActive = true; ta.focus(); try{ ta.setSelectionRange(selStart, selEnd); }catch(err){} }
-      });
-      return;
-    }
 
     if((e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
       e.preventDefault();
@@ -7364,10 +7373,7 @@ function icon(name, size){
     rowEl.classList.remove('will-indent','will-outdent');
     if(dx > SWIPE_ACTION_THRESHOLD){
       const ctx = findContext(id);
-      const isHeading = ctx && ctx.node.kind === 'heading';
-      const prevIsHeading = ctx && ctx.idx > 0 && ctx.arr[ctx.idx-1].kind === 'heading';
-      if(isHeading || prevIsHeading) await indentNode(id);
-      else showToast("Can't indent — no section directly above this one.");
+      if(ctx) await indentNode(id);
     } else if(dx < -SWIPE_ACTION_THRESHOLD){
       const ctx = findContext(id);
       const canOutdent = ctx && !!ctx.parentNode;
