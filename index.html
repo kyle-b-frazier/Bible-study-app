@@ -3143,6 +3143,9 @@ function icon(name, size){
     if(!l.tags) l.tags = [];
     if(l.folderId === undefined) l.folderId = null;
     delete l.aiSummary; // leftover from the removed AI Summary feature
+    // Sections are never shifted sideways by hand (that left same-numbered sections at different indents).
+    const unshift = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'heading') delete n.indent; unshift(n.children); });
+    unshift(l.outline); unshift(l.brainstorm);
     // Statements are never italic; older lines picked it up by copying the style of the line above.
     const strip = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'statement' && n.style) n.style.italic = false; strip(n.children); });
     strip(l.outline); strip(l.brainstorm);
@@ -3581,8 +3584,13 @@ function icon(name, size){
   async function indentNode(id){
     const ctx = findContext(id);
     if(!ctx) return;
-    pushUndo();
     const prevSibling = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
+    if(!prevSibling && ctx.node.kind === 'heading'){
+      // A section's level is always real structure (never just shifted sideways), so numbers and indents agree.
+      showToast('Nothing above this section to nest it under.');
+      return;
+    }
+    pushUndo();
     if(prevSibling){
       // Nest under the item directly above (whatever its kind) as its last child.
       ctx.arr.splice(ctx.idx, 1);
@@ -4979,7 +4987,7 @@ function icon(name, size){
       // Photos keep their own small Upload/Replace controls inline since those need
       // to be reachable without knowing this pattern exists.
       return `
-      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl + (node.indent||0)}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
+      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl + (isHeading ? 0 : (node.indent||0))}"${(node.indent && !isHeading) ? ` style="margin-left:${node.indent*22}px"` : ''}>
         <div class="node-row">
           <span class="drag-handle" draggable="true" title="Drag to move or nest">${icon('grip-vertical',14)}</span>
           ${collapseToggle}
@@ -7580,6 +7588,12 @@ function icon(name, size){
         const autoNew = autoClassifyKind(after);
         if(autoNew) newNode.kind = autoNew;
         newNode.style = Object.assign({}, ensureStyle(ctx.node), { italic:false });
+        // A line that has lines nested under it keeps them with the lower half, so the new line
+        // appears directly below this one instead of after all of its nested lines.
+        if(ctx.node.children && ctx.node.children.length){
+          newNode.children = ctx.node.children; newNode.collapsed = ctx.node.collapsed;
+          delete ctx.node.children; delete ctx.node.collapsed;
+        }
         ctx.arr.splice(ctx.idx + 1, 0, newNode);
         await saveLesson();
         renderTree();
