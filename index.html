@@ -1425,6 +1425,17 @@
   .vp-summary{font-size:.85rem; color:var(--text-faint);}
   .vp-summary.has{color:var(--text); font-weight:700; font-size:1rem;}
   @media (max-width:760px){ .vp-cols{grid-template-columns:1fr; height:auto;} .vp-col{max-height:200px;} .vp-col.vp-verses{max-height:300px;} }
+  /* Every kind of line sits on the same grid: same left edge at the same level (verses and notes used to sit further right). */
+  html body.outline-style-classic #mainTree .node:not([data-kind="heading"]) > .node-row,
+  html body #mainTree.doc-view .node:not([data-kind="heading"]) > .node-row{padding-left:0 !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row::before,
+  html body #mainTree.doc-view .node[data-kind="teachernote"] > .node-row::before{position:absolute; right:100%; top:10px; margin:0 8px 0 0; white-space:nowrap; font-size:.62rem !important;}
+  /* A question's Q: also carries its level's bullet, so questions at different depths don't look identical. */
+  html body #mainTree .node[data-kind="question"][data-bl="0"] > .node-row > .node-number::before{content:"• Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="1"] > .node-row > .node-number::before{content:"◦ Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="2"] > .node-row > .node-number::before{content:"▪ Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="3"] > .node-row > .node-number::before{content:"– Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="4"] > .node-row > .node-number::before{content:"› Q:" !important; white-space:pre;}
 </style>
 </head>
 <body>
