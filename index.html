@@ -1276,6 +1276,22 @@
   html body .node-row.block-selected{background:var(--accent-soft) !important; box-shadow:inset 0 0 0 1px var(--accent);}
   html body .node-row.block-selected textarea.node-text{background:transparent !important;}
   html body .node-row.block-selected ::selection{background:transparent;}
+  /* Bullets change with each nesting level (under a section: ● ○ ■ – ›) so you can tell the levels apart. */
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"●" !important; font-size:.5rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .node-row > .node-number::before{content:"○" !important; font-size:.62rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .node-row > .node-number::before{content:"■" !important; font-size:.42rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .node-row > .node-number::before{content:"–" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .node-row > .node-number::before{content:"›" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before,
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.5rem !important;}
+  body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before,
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.62rem !important;}
+  body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before,
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.42rem !important;}
+  body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before,
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:.95rem !important;}
+  body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before,
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:.95rem !important;}
 </style>
 </head>
 <body>
@@ -3048,6 +3064,12 @@ function icon(name, size){
     if(!l.tags) l.tags = [];
     if(l.folderId === undefined) l.folderId = null;
     delete l.aiSummary; // leftover from the removed AI Summary feature
+    if(!l.italicFixed){
+      // Statements are never italic; older lines picked it up by copying the style of the line above.
+      const strip = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'statement' && n.style) n.style.italic = false; strip(n.children); });
+      strip(l.outline); strip(l.brainstorm);
+      l.italicFixed = true;
+    }
     return l;
   }
 
@@ -4817,7 +4839,8 @@ function icon(name, size){
     </div>`;
   }
 
-  function renderNodesEditable(nodes, depth){
+  function renderNodesEditable(nodes, depth, bl){
+    bl = bl || 0; // nesting level among non-section items (drives the bullet style)
     return nodes.map((node, idx)=>{
       const label = numberLabel(depth, idx);
       const isHeading = node.kind === 'heading';
@@ -4865,7 +4888,7 @@ function icon(name, size){
             </div>
           </div>` : '';
       const childrenHtml = showChildrenArea
-        ? `<div class="node-children">${hasKids ? renderNodesEditable(node.children, depth+1) : ''}${bottomAddMenu}</div>` : '';
+        ? `<div class="node-children">${hasKids ? renderNodesEditable(node.children, depth+1, isHeading ? 0 : bl + 1) : ''}${bottomAddMenu}</div>` : '';
 
       const nodeMainInner = `${mainContent}${collapsedCount}`;
 
@@ -4877,7 +4900,7 @@ function icon(name, size){
       // Photos keep their own small Upload/Replace controls inline since those need
       // to be reachable without knowing this pattern exists.
       return `
-      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
+      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
         <div class="node-row">
           <span class="drag-handle" draggable="true" title="Drag to move or nest">${icon('grip-vertical',14)}</span>
           ${collapseToggle}
@@ -5067,28 +5090,30 @@ function icon(name, size){
     }
     return `<div class="p-node-row"><div class="p-number">${label}</div><div class="p-text">${body}${timeBadge}</div></div>`;
   }
-  function renderNodesPreview(nodes, depth, startIdx){
+  function renderNodesPreview(nodes, depth, startIdx, bl){
+    bl = bl || 0;
     return nodes.map((node, i)=>{
       const idx = (startIdx != null) ? startIdx : i;
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1)}</div>` : '';
-      return `<div class="p-node" data-kind="${node.kind}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
+      const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1, undefined, node.kind === 'heading' ? 0 : bl + 1)}</div>` : '';
+      return `<div class="p-node" data-kind="${node.kind}" data-bl="${bl}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
     }).join('');
   }
   // Pre-order flatten of the outline into one paginatable block per node. Indentation
   // that used to come from nested <div class="p-children"> wrappers is reproduced here
   // as a per-block margin-left instead, since each block now needs to be able to land
   // on its own page independent of its parent/children.
-  function flattenNodesFlat(nodes, depth){
+  function flattenNodesFlat(nodes, depth, bl){
+    bl = bl || 0;
     let out = [];
     nodes.forEach((node, idx)=>{
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const html = `<div class="p-node p-flat" data-kind="${node.kind}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
+      const html = `<div class="p-node p-flat" data-kind="${node.kind}" data-bl="${bl}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
       out.push({ html, isSectionStart: depth === 0 && node.kind === 'heading' });
       if(node.children && node.children.length){
-        out = out.concat(flattenNodesFlat(node.children, depth+1));
+        out = out.concat(flattenNodesFlat(node.children, depth+1, node.kind === 'heading' ? 0 : bl + 1));
       }
     });
     return out;
@@ -7417,7 +7442,7 @@ function icon(name, size){
         newNode.text = after;
         const autoNew = autoClassifyKind(after);
         if(autoNew) newNode.kind = autoNew;
-        newNode.style = Object.assign({}, ensureStyle(ctx.node));
+        newNode.style = Object.assign({}, ensureStyle(ctx.node), { italic:false });
         ctx.arr.splice(ctx.idx + 1, 0, newNode);
         await saveLesson();
         renderTree();
