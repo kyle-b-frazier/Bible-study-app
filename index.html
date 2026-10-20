@@ -253,7 +253,7 @@
   .outline-tree{background: var(--surface); color: var(--text); border:1px solid var(--border); border-radius: var(--radius); padding: 20px 18px 26px;}
 
   .node{position:relative; margin: 3px 0;}
-  .node-row{display:flex; gap:var(--space-4); align-items:flex-start; padding:8px 6px; border-radius:var(--radius-sm); transition:background .12s ease;}
+  .node-row{position:relative; display:flex; gap:var(--space-4); align-items:flex-start; padding:8px 6px; border-radius:var(--radius-sm); transition:background .12s ease;}
   .node-row:hover{background: var(--bg);}
   .node[data-kind="question"] > .node-row{border-left:3px solid var(--accent);}
   .node[data-kind="statement"] > .node-row{border-left:3px solid var(--text-faint);}
@@ -291,6 +291,8 @@
     border-left-width: 4px;
   }
 
+  /* Collapse toggle on non-section items sits in the left gutter so adding a child never shifts the line. */
+  .node-row > .nh-toggle{position:absolute; left:-30px; top:6px; padding:1px 6px;}
   .drag-handle{cursor: grab; color: var(--text-faint); font-size:0.95rem; padding-top:8px; user-select:none;}
   .drag-handle:active{cursor:grabbing;}
   .indent-controls{display:flex; flex-direction:column; gap:2px; padding-top:6px; flex-shrink:0;}
@@ -945,8 +947,8 @@
   textarea.lesson-title{
     background:transparent; border:none; border-bottom:1px solid transparent; color:var(--text);
     font-size:1.5rem; font-family:'Inter', sans-serif; font-weight:800; letter-spacing:-.015em;
-    padding:4px 2px; flex:1; min-width:220px; resize:none; overflow-y:auto;
-    line-height:1.28; max-height:calc(1.28em * 2 + 10px); white-space:normal; word-wrap:break-word;
+    padding:4px 2px; flex:1; min-width:220px; resize:none; overflow:hidden;
+    line-height:1.28; max-height:none; white-space:normal; word-wrap:break-word;
   }
   textarea.lesson-title:hover, textarea.lesson-title:focus{border-bottom:1px solid var(--accent); outline:none;}
   .lesson-toolbar{display:flex; align-items:center; gap:2px; margin-left:auto; flex-wrap:wrap;}
@@ -959,23 +961,22 @@
   .tb-dot{position:absolute; top:5px; right:5px; width:7px; height:7px; border-radius:50%; background:var(--accent);}
 
   /* ================= Action row: Brainstorm / Scripture / Publish ================= */
-  .action-row{display:flex; gap:10px; padding:14px 24px 0; width:100%; max-width:1440px; margin:0 auto; flex-wrap:wrap;}
+  .action-row{display:flex; align-items:center; gap:8px; padding:12px 24px 14px; width:100%; max-width:1440px; margin:0 auto; flex-wrap:wrap;}
   .action-card{
-    flex:0 1 240px; min-width:190px; max-width:280px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
-    padding:10px 14px; cursor:pointer; transition:box-shadow var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
-    display:flex; align-items:center; gap:10px; text-align:left; font-family:inherit;
+    flex:0 0 auto; background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:4px 12px 4px 5px; cursor:pointer; transition:box-shadow var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
+    display:flex; align-items:center; gap:8px; text-align:left; font-family:inherit;
   }
   .action-card:hover{box-shadow:var(--shadow-xs); border-color:var(--accent); transform:translateY(-1px);}
-  .action-card .ic{width:32px; height:32px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .action-card .ic{width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .action-card.brainstorm .ic{background:#FCEFD1; color:#8C6A2E;}
   .action-card.scripture .ic{background:#DCE7EE; color:#2C5B8C;}
   .action-card.publish .ic{background:linear-gradient(135deg, var(--ms-navy, #1F3A44), #2C5B6B); color:var(--ms-gold, #B8862B);}
   .action-card .txt{flex:1; min-width:0;}
-  .action-card .t{font-weight:700; font-size:.88rem; color:var(--text);}
-  .action-card .count-pill{background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:2px 9px; font-size:.72rem; font-weight:700; color:var(--text-dim); flex-shrink:0;}
+  .action-card .t{font-weight:700; font-size:.82rem; white-space:nowrap; color:var(--text);}
+  .action-card .count-pill{background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:0 7px; font-size:.7rem; font-weight:700; color:var(--text-dim); flex-shrink:0;}
 
   /* ================= Chip row: Time ================= */
-  .chip-row{display:flex; gap:8px; padding:12px 24px 18px; width:100%; max-width:1440px; margin:0 auto; flex-wrap:wrap;}
   .chip-time{
     display:flex; align-items:center; gap:7px; background:var(--surface); border:1px solid var(--border); border-radius:20px;
     padding:6px 14px; font-size:.8rem; cursor:pointer; color:var(--text-dim); font-family:inherit;
@@ -1091,12 +1092,10 @@
   /* Phones/small tablets: keep the three main steps on screen as a compact row
      (they used to be hidden in the drawer), and let the lesson title wrap fully. */
   @media (max-width: 900px){
-    .action-row{flex-wrap:nowrap; gap:6px; padding:12px 16px 0;}
-    .action-card{flex:1 1 0; min-width:0; max-width:none; padding:8px 10px; gap:8px;}
-    .action-card .ic{width:26px; height:26px;}
-    .action-card .t{font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .action-card .count-pill{padding:1px 6px; font-size:.66rem;}
-    .chip-row{padding:10px 16px 6px;}
+    .action-row{gap:6px; padding:10px 16px 10px;}
+    .action-card{padding:3px 9px 3px 4px; gap:6px;}
+    .action-card .t{font-size:.76rem;}
+    .action-card .count-pill{padding:0 6px; font-size:.64rem;}
     .lesson-bar{padding:12px 16px; row-gap:6px;}
     .lesson-bar textarea.lesson-title{flex:1 1 100%; font-size:1.2rem; min-width:0; max-height:none;}
   }
@@ -1375,9 +1374,6 @@
         <div class="ic"></div>
         <div class="txt"><div class="t">Presenter Mode</div></div>
       </button>
-    </div>
-
-    <div class="chip-row no-print">
       <button class="chip-time" id="btnActionTiming">
         <span class="chip-ic"></span>
         <b id="timingChipLabel">Set time</b>
@@ -1498,9 +1494,9 @@
       </label>
       <label>Sort:
         <select id="brainstormSort">
-          <option value="added">Order added</option>
+          <option value="added" selected>Order added</option>
           <option value="newest">Newest first</option>
-          <option value="kind" selected>By kind</option>
+          <option value="kind">By kind</option>
           <option value="az">Text A→Z</option>
         </select>
       </label>
@@ -3405,7 +3401,7 @@ function icon(name, size){
 
   async function insertBrainstormItemToOutline(id, targetId, position){
     const ctx = findContext(id);
-    if(!ctx || ctx.arr !== lesson.brainstorm) return; // only valid for items still in Brainstorm
+    if(!ctx || !findContext(id, lesson.brainstorm || [], null)) return; // only valid for items still in Brainstorm
     pushUndo();
     const node = removeNodeById(id);
     if(!node) return;
@@ -3454,31 +3450,47 @@ function icon(name, size){
   //     user can title it right away.
   // Non-heading items (statements/questions/verses/etc.) keep the original,
   // narrower rule — they only indent when a heading sibling directly precedes them.
+  const MAX_MANUAL_INDENT = 8;
+  function rerenderStructure(){ renderTree(); renderBrainstormList(); }
   async function indentNode(id){
     const ctx = findContext(id);
     if(!ctx) return;
-    // Nest under the item directly above (whatever its kind) as its last child. With
-    // nothing above at this level there is nothing to nest under, same as Word.
-    const prevSibling = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
-    if(!prevSibling) return;
     pushUndo();
-    ctx.arr.splice(ctx.idx, 1);
-    prevSibling.children = prevSibling.children || [];
-    prevSibling.children.push(ctx.node);
-    prevSibling.collapsed = false;
+    const prevSibling = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
+    if(prevSibling){
+      // Nest under the item directly above (whatever its kind) as its last child.
+      ctx.arr.splice(ctx.idx, 1);
+      prevSibling.children = prevSibling.children || [];
+      prevSibling.children.push(ctx.node);
+      prevSibling.collapsed = false;
+      delete ctx.node.indent;
+    } else {
+      // Nothing above to nest under (first item at this level): shift it right visually,
+      // like pressing Tab on the first line of a Word list.
+      ctx.node.indent = Math.min(MAX_MANUAL_INDENT, (ctx.node.indent || 0) + 1);
+    }
     await saveLesson();
-    renderTree();
+    rerenderStructure();
   }
   async function outdentNode(id){
     const ctx = findContext(id);
-    if(!ctx || !ctx.parentNode) return;
+    if(!ctx) return;
+    if(ctx.node.indent > 0){
+      pushUndo();
+      ctx.node.indent -= 1;
+      if(!ctx.node.indent) delete ctx.node.indent;
+      await saveLesson();
+      rerenderStructure();
+      return;
+    }
+    if(!ctx.parentNode) return;
     const parentCtx = findContext(ctx.parentNode.id);
     if(!parentCtx) return;
     pushUndo();
     ctx.arr.splice(ctx.idx, 1);
     parentCtx.arr.splice(parentCtx.idx + 1, 0, ctx.node);
     await saveLesson();
-    renderTree();
+    rerenderStructure();
   }
   function addNodeAfter(kind, afterId, extra){
     const node = makeNode(kind);
@@ -3553,7 +3565,7 @@ function icon(name, size){
     }
 
     {
-      const canOutdent = !!ctx.parentNode;
+      const canOutdent = !!ctx.parentNode || ctx.node.indent > 0;
       html += `<button data-action="indent-node">${icon('indent',14)} ${isHeading?'Make Subsection':'Indent'}</button>`;
       html += `<button data-action="outdent-node" ${canOutdent?'':'disabled'}>${icon('outdent',14)} ${isHeading?'Make Section':'Outdent'}</button>`;
       html += `<div class="ctx-divider"></div>`;
@@ -3732,7 +3744,7 @@ function icon(name, size){
   function updateActionCardsAndChips(){
     if(!lesson) return;
     const bPill = document.getElementById('brainstormCountPill');
-    if(bPill) bPill.textContent = (lesson.brainstorm || []).length;
+    if(bPill) bPill.textContent = countDescendants(lesson.brainstorm || []);
     const sPill = document.getElementById('scriptureCountPill');
     if(sPill) sPill.textContent = scriptureCount();
     const teamDot = document.getElementById('teamDot');
@@ -4646,7 +4658,7 @@ function icon(name, size){
   }
 
   let brainstormFilter = 'all';
-  let brainstormSort = 'kind';
+  let brainstormSort = 'added';
   const KIND_ORDER = {heading:0, statement:1, question:2, application:3, teachernote:4, verse:5, photo:6};
 
   function getFilteredSortedBrainstorm(){
@@ -4698,8 +4710,9 @@ function icon(name, size){
     const photoExtra = isPhoto ? `
           <button class="btn small" data-action="upload-photo" data-id="${node.id}">${node.photoRef?'Replace':'Upload'}</button>
           ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}` : '';
+    const kids = (node.children && node.children.length) ? `<div class="node-children">${node.children.map(renderBrainstormItem).join('')}</div>` : '';
     return `
-    <div class="node" data-kind="${node.kind}" data-id="${node.id}" draggable="true">
+    <div class="node" data-kind="${node.kind}" data-id="${node.id}" draggable="true"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
       <div class="node-row">
         <span class="drawer-drag-handle" title="Drag into the outline">${icon('grip-vertical',14)}</span>
         <div class="node-main"><span class="hint" style="margin:0 0 4px; display:block;">${KIND_LABEL[node.kind]}</span>${content}</div>
@@ -4709,6 +4722,7 @@ function icon(name, size){
           <button class="btn small danger" data-action="delete-node" data-id="${node.id}" title="Delete">${icon('x',14)}</button>
         </div>
       </div>
+      ${kids}
     </div>`;
   }
 
@@ -4743,7 +4757,7 @@ function icon(name, size){
 
       const hasKids = !!(node.children && node.children.length > 0);
       const collapseToggle = hasKids
-        ? `<button class="btn small" data-action="toggle-collapse" data-id="${node.id}" title="${node.collapsed ? 'Expand section' : 'Collapse section'}">${node.collapsed ? '▸' : '▾'}</button>`
+        ? `<button class="btn small${isHeading?'':' nh-toggle'}" data-action="toggle-collapse" data-id="${node.id}" title="${node.collapsed ? 'Expand section' : 'Collapse section'}">${node.collapsed ? '▸' : '▾'}</button>`
         : '';
       const collapsedCount = (hasKids && node.collapsed)
         ? `<span class="condensed-flag">(${countDescendants(node.children)} item${countDescendants(node.children)===1?'':'s'} hidden)</span>` : '';
@@ -4772,7 +4786,7 @@ function icon(name, size){
       // Photos keep their own small Upload/Replace controls inline since those need
       // to be reachable without knowing this pattern exists.
       return `
-      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}">
+      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
         <div class="node-row">
           <span class="drag-handle" draggable="true" title="Drag to move or nest">${icon('grip-vertical',14)}</span>
           ${collapseToggle}
@@ -4968,7 +4982,7 @@ function icon(name, size){
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
       const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1)}</div>` : '';
-      return `<div class="p-node" data-kind="${node.kind}">${rowHtml}${childrenHtml}</div>`;
+      return `<div class="p-node" data-kind="${node.kind}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
     }).join('');
   }
   // Pre-order flatten of the outline into one paginatable block per node. Indentation
@@ -4980,7 +4994,7 @@ function icon(name, size){
     nodes.forEach((node, idx)=>{
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const html = `<div class="p-node p-flat" data-kind="${node.kind}" style="margin-left:${depth*28}px;">${rowHtml}</div>`;
+      const html = `<div class="p-node p-flat" data-kind="${node.kind}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
       out.push({ html, isSectionStart: depth === 0 && node.kind === 'heading' });
       if(node.children && node.children.length){
         out = out.concat(flattenNodesFlat(node.children, depth+1));
@@ -6664,6 +6678,24 @@ function icon(name, size){
   }, true);
   brainstormList.addEventListener('keydown', async (e)=>{
     const t = e.target;
+    if(e.key === 'Tab' && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
+      const rowEl = t.closest('.node');
+      const tabId = rowEl && rowEl.dataset.id;
+      const tabCtx = tabId && findContext(tabId, lesson.brainstorm || [], null);
+      if(tabCtx){
+        e.preventDefault();
+        if(brainstormSort !== 'added' || brainstormFilter !== 'all'){ showToast('Set Show to "All kinds" and Sort to "Order added" to nest items.'); return; }
+        const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
+        if(isText) tabCtx.node.text = t.value;
+        const selStart = t.selectionStart, selEnd = t.selectionEnd;
+        if(e.shiftKey) await outdentNode(tabId); else await indentNode(tabId);
+        requestAnimationFrame(()=>{
+          const el = brainstormList.querySelector(`.node[data-id="${tabId}"] > .node-row textarea, .node[data-id="${tabId}"] > .node-row input`);
+          if(el){ editSessionActive = true; el.focus(); try{ if(isText) el.setSelectionRange(selStart, selEnd); }catch(err){} }
+        });
+        return;
+      }
+    }
     if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
@@ -7362,7 +7394,7 @@ function icon(name, size){
       if(ctx) await indentNode(id);
     } else if(dx < -SWIPE_ACTION_THRESHOLD){
       const ctx = findContext(id);
-      const canOutdent = ctx && !!ctx.parentNode;
+      const canOutdent = ctx && (!!ctx.parentNode || ctx.node.indent > 0);
       if(canOutdent) await outdentNode(id); else showToast("Already at the top level.");
     }
   });
