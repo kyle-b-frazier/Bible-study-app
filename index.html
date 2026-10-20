@@ -1260,6 +1260,14 @@
     font-family:'JetBrains Mono', monospace; font-size:0.72rem; background:var(--surface-2); color:var(--text);
     border:1px solid var(--border); border-radius:var(--radius-xs); padding:3px 8px; white-space:nowrap;
   }
+  /* Questions: always italic, marked with "Q:" in place of the number/bullet (editor, brainstorm, previews). */
+  html body #mainTree .node[data-kind="question"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--accent) !important;}
+  html body #mainTree .node[data-kind="question"] > .node-row > .node-number::before{content:"Q:" !important; font-size:.8rem !important; font-weight:700 !important; font-style:italic !important; font-family:'Inter',sans-serif !important; color:var(--accent) !important;}
+  html body #mainTree .node[data-kind="question"] > .node-row textarea.node-text,
+  html body #brainstormList .node[data-kind="question"] textarea.node-text{font-style:italic !important;}
+  html body .p-node[data-kind="question"] > .p-node-row > .p-number{visibility:hidden;}
+  html body .p-node[data-kind="question"] > .p-node-row > .p-text{font-style:italic !important;}
+  html body .p-node[data-kind="question"] > .p-node-row > .p-text::before{content:"Q: " !important; display:inline !important; font-style:italic !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
 </style>
 </head>
 <body>
