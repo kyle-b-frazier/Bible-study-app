@@ -3230,9 +3230,11 @@ function icon(name, size){
     printLessonPdf(f);
   }
 
-  async function saveLesson(){
+  // keepTime: saves that aren't a user edit (opening, migrations) must not look like "newest" to cloud sync,
+  // or a stale copy on a second device would overwrite the real, newer one.
+  async function saveLesson(opts){
     if(!lesson) return;
-    lesson.updatedAt = Date.now();
+    if(!(opts && opts.keepTime)) lesson.updatedAt = Date.now();
     flashSavedIndicator('saving');
     const ok = await safeSet('lesson:'+lesson.id, JSON.stringify(lesson), false);
     if(!ok){
@@ -3468,7 +3470,7 @@ function icon(name, size){
     lesson = ensureLessonDefaults(l);
     await migrateEmbeddedPhotos(lesson.outline);
     await migrateEmbeddedPhotos(lesson.brainstorm);
-    await saveLesson();
+    await saveLesson({ keepTime: true });
     updateLiveShareSubscription();
     await prefetchPhotos(lesson.outline);
     await prefetchPhotos(lesson.brainstorm);
@@ -4558,6 +4560,8 @@ function icon(name, size){
   }
   function syncKeyToCloud(key, value){
     if(!FIREBASE_ENABLED || !currentUser || !firebaseDb || CLOUD_SKIP_KEYS.has(key)) return;
+    // Until this device has reconciled with the cloud once, pushing could overwrite newer data from another device.
+    if(cloudSyncInProgress || (!lastCloudSyncAt && !cloudSyncError)) return;
     cloudSet(key, value).then(()=> updateSyncIndicator());
   }
   function syncKeyDeleteToCloud(key){
@@ -4570,6 +4574,38 @@ function icon(name, size){
 
   // Full reconcile, run once right after sign-in. Merges the lesson index, every individual
   // lesson, the folder tree, and publish preferences — newer `updatedAt` wins per item.
+  async function pullMissingPhotos(nodes){
+    for(const n of (nodes || [])){
+      if(n.photoRef && !(await safeGet(n.photoRef, false))){
+        const v = await cloudGet(n.photoRef);
+        if(v) await writeLocalOnly(n.photoRef, v);
+      }
+      if(n.children && n.children.length) await pullMissingPhotos(n.children);
+    }
+  }
+  // If the lesson on screen was updated from the cloud — or it's only the built-in sample / a blank page and
+  // real lessons just arrived — show the newer one instead of leaving a stale copy that would later overwrite it.
+  async function refreshOpenLessonAfterSync(pulledIds, mergedIndex){
+    if(!lesson) return;
+    const untouched = l=> l.id === EXAMPLE_LESSON_ID || ((!l.outline || !l.outline.length) && (!l.brainstorm || !l.brainstorm.length));
+    let targetId = null;
+    if(pulledIds.includes(lesson.id)) targetId = lesson.id;
+    else if(untouched(lesson)){
+      const newest = mergedIndex.filter(e=>e.id !== EXAMPLE_LESSON_ID && e.id !== lesson.id).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+      if(newest) targetId = newest.id;
+    }
+    if(!targetId) return;
+    if(typeof autosaveTimer !== 'undefined' && autosaveTimer && targetId === lesson.id) return; // unsaved typing here wins
+    const l = await loadLesson(targetId);
+    if(!l) return;
+    if(typeof autosaveTimer !== 'undefined' && autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
+    lesson = ensureLessonDefaults(l);
+    await prefetchPhotos(lesson.outline); await prefetchPhotos(lesson.brainstorm);
+    await safeSet('last-lesson-id', lesson.id, false);
+    undoStack = []; redoStack = []; updateUndoRedoButtons();
+    updateLiveShareSubscription();
+    renderShell();
+  }
   async function performCloudSync(){
     if(!FIREBASE_ENABLED || !currentUser || !firebaseDb || cloudSyncInProgress) return;
     cloudSyncInProgress = true;
@@ -4588,6 +4624,7 @@ function icon(name, size){
       });
       const mergedIndex = Array.from(byId.values());
 
+      const pulledIds = [];
       for(const entry of mergedIndex){
         const key = 'lesson:'+entry.id;
         const localRaw = await safeGet(key, false);
@@ -4597,7 +4634,8 @@ function icon(name, size){
         try{ cloudLesson = cloudRaw ? JSON.parse(cloudRaw) : null; }catch(e){}
         if(cloudLesson && (!localLesson || (cloudLesson.updatedAt||0) > (localLesson.updatedAt||0))){
           await writeLocalOnly(key, cloudRaw);
-          pulled++;
+          pulled++; pulledIds.push(entry.id);
+          await pullMissingPhotos(cloudLesson.outline); await pullMissingPhotos(cloudLesson.brainstorm);
         } else if(localLesson && (!cloudLesson || (localLesson.updatedAt||0) > (cloudLesson.updatedAt||0))){
           await cloudSet(key, localRaw);
           pushed++;
@@ -4634,6 +4672,7 @@ function icon(name, size){
 
       lastCloudSyncAt = Date.now();
       cloudSyncError = null;
+      await refreshOpenLessonAfterSync(pulledIds, mergedIndex);
       if(pulled || pushed){
         const parts = [];
         if(pulled) parts.push(`pulled ${pulled} lesson${pulled===1?'':'s'}`);
@@ -4654,6 +4693,17 @@ function icon(name, size){
       updateSyncIndicator();
     }
   }
+  // Pick up edits made on another device when you come back to this one.
+  let lastForegroundSync = 0;
+  function syncOnReturn(){
+    if(!FIREBASE_ENABLED || !currentUser || document.visibilityState === 'hidden') return;
+    if(Date.now() - lastForegroundSync < 20000) return;
+    lastForegroundSync = Date.now();
+    performCloudSync();
+  }
+  document.addEventListener('visibilitychange', syncOnReturn);
+  window.addEventListener('online', syncOnReturn);
+  window.addEventListener('focus', syncOnReturn);
   async function signInWithGoogle(){
     if(!FIREBASE_ENABLED){
       await appAlert("Google sign-in isn't set up yet. Once a Firebase project is connected (apiKey, authDomain, projectId, etc. pasted into FIREBASE_CONFIG near the top of the file), this button will sign you in and start syncing your lessons and preferences to the cloud. Until then, everything here works fully offline and saves to this browser.");
@@ -8729,7 +8779,7 @@ function icon(name, size){
     if(!lesson){ lesson = newLessonObj('Untitled Lesson'); await saveLesson(); await safeSet('last-lesson-id', lesson.id, false); }
     await migrateEmbeddedPhotos(lesson.outline);
     await migrateEmbeddedPhotos(lesson.brainstorm);
-    await saveLesson();
+    await saveLesson({ keepTime: true });
     await prefetchPhotos(lesson.outline);
     await prefetchPhotos(lesson.brainstorm);
     renderShell();
