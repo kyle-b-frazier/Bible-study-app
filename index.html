@@ -773,35 +773,35 @@
     width:26px; height:26px; min-width:26px; border-radius:var(--radius-sm); text-align:center; padding-top:0;
     display:flex; align-items:center; justify-content:center;
   }
-  .p-node[data-kind="heading"] .p-text{
+  .p-node[data-kind="heading"] > .p-node-row > .p-text{
     font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:var(--pub-heading-weight, 600); font-size:calc(1.0rem * var(--pub-scale, 1));
     text-transform: var(--pub-heading-transform, none); letter-spacing:0; border-bottom:1px solid var(--ms-line); padding:3px 0 8px; display:block; color:var(--ms-ink);
   }
-  .p-node[data-kind="question"] .p-text{font-style:normal;}
-  .p-node[data-kind="question"] .p-text::before{content:"Q "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-gold); margin-right:var(--space-2);}
-  .p-node[data-kind="application"] .p-text{font-style:normal; color:var(--ms-ink);}
-  .p-node[data-kind="application"] .p-text::before{content:"Apply "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-navy); margin-right:var(--space-2);}
-  .p-node[data-kind="teachernote"] .p-text{font-size:0.86rem; color: var(--text-dim);}
-  .p-node[data-kind="teachernote"] .p-text::before{content:"Teacher's Note — "; font-weight:700; color: var(--danger);}
+  .p-node[data-kind="question"] > .p-node-row > .p-text{font-style:normal;}
+  .p-node[data-kind="question"] > .p-node-row > .p-text::before{content:"Q "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-gold); margin-right:var(--space-2);}
+  .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal; color:var(--ms-ink);}
+  .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:"Apply "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-navy); margin-right:var(--space-2);}
+  .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-size:0.86rem; color: var(--text-dim);}
+  .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Teacher's Note — "; font-weight:700; color: var(--danger);}
   .p-node[data-kind="verse"] > .p-node-row{border-left:3px solid var(--ms-gold); padding-left:11px; margin-left:-14px;}
-  .p-node[data-kind="verse"] .p-text{font-style:italic; color:var(--ms-ink);}
+  .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic; color:var(--ms-ink);}
   .p-verse-ref{font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.72rem; text-transform:uppercase; letter-spacing:.03em; color:var(--ms-gold); font-style:normal; display:block; margin-bottom:3px;}
   .p-children{margin-left:26px; border-left:1px solid var(--ms-line); padding-left:12px;}
 
   /* Per-element-kind advanced overrides (Preferences → Publish Style → Advanced Output
      Settings). Placed after the base rules above so these take precedence; blank
      fields fall back to the existing base font/color/size via the var() fallback. */
-  .p-node[data-kind="heading"] .p-text{ font-family: var(--pk-heading-font, var(--pub-heading-font)); color: var(--pk-heading-color, var(--ms-ink)); font-size: calc(var(--pk-heading-scale, 1) * 1.0rem * var(--pub-scale, 1)); font-style: var(--pk-heading-italic, normal); font-weight: var(--pk-heading-bold, var(--pub-heading-weight, 600)); }
+  .p-node[data-kind="heading"] > .p-node-row > .p-text{ font-family: var(--pk-heading-font, var(--pub-heading-font)); color: var(--pk-heading-color, var(--ms-ink)); font-size: calc(var(--pk-heading-scale, 1) * 1.0rem * var(--pub-scale, 1)); font-style: var(--pk-heading-italic, normal); font-weight: var(--pk-heading-bold, var(--pub-heading-weight, 600)); }
   .p-node[data-kind="heading"] > .p-node-row{ background: var(--pk-heading-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="statement"] .p-text{ font-family: var(--pk-statement-font, var(--pub-body-font)); color: var(--pk-statement-color, var(--ms-ink)); font-size: calc(var(--pk-statement-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-statement-italic, normal); font-weight: var(--pk-statement-bold, 400); }
+  .p-node[data-kind="statement"] > .p-node-row > .p-text{ font-family: var(--pk-statement-font, var(--pub-body-font)); color: var(--pk-statement-color, var(--ms-ink)); font-size: calc(var(--pk-statement-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-statement-italic, normal); font-weight: var(--pk-statement-bold, 400); }
   .p-node[data-kind="statement"] > .p-node-row{ background: var(--pk-statement-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="question"] .p-text{ font-family: var(--pk-question-font, var(--pub-body-font)); color: var(--pk-question-color, var(--ms-ink)); font-size: calc(var(--pk-question-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-question-italic, normal); font-weight: var(--pk-question-bold, 400); }
+  .p-node[data-kind="question"] > .p-node-row > .p-text{ font-family: var(--pk-question-font, var(--pub-body-font)); color: var(--pk-question-color, var(--ms-ink)); font-size: calc(var(--pk-question-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-question-italic, normal); font-weight: var(--pk-question-bold, 400); }
   .p-node[data-kind="question"] > .p-node-row{ background: var(--pk-question-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="application"] .p-text{ font-family: var(--pk-application-font, var(--pub-body-font)); color: var(--pk-application-color, var(--ms-ink)); font-size: calc(var(--pk-application-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-application-italic, normal); font-weight: var(--pk-application-bold, 400); }
+  .p-node[data-kind="application"] > .p-node-row > .p-text{ font-family: var(--pk-application-font, var(--pub-body-font)); color: var(--pk-application-color, var(--ms-ink)); font-size: calc(var(--pk-application-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-application-italic, normal); font-weight: var(--pk-application-bold, 400); }
   .p-node[data-kind="application"] > .p-node-row{ background: var(--pk-application-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="teachernote"] .p-text{ font-family: var(--pk-teachernote-font, var(--pub-body-font)); color: var(--pk-teachernote-color, var(--text-dim)); font-size: calc(var(--pk-teachernote-scale, 1) * 0.86rem * var(--pub-scale, 1)); font-style: var(--pk-teachernote-italic, normal); font-weight: var(--pk-teachernote-bold, 400); }
+  .p-node[data-kind="teachernote"] > .p-node-row > .p-text{ font-family: var(--pk-teachernote-font, var(--pub-body-font)); color: var(--pk-teachernote-color, var(--text-dim)); font-size: calc(var(--pk-teachernote-scale, 1) * 0.86rem * var(--pub-scale, 1)); font-style: var(--pk-teachernote-italic, normal); font-weight: var(--pk-teachernote-bold, 400); }
   .p-node[data-kind="teachernote"] > .p-node-row{ background: var(--pk-teachernote-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="verse"] .p-text{ font-family: var(--pk-verse-font, var(--pub-body-font)); color: var(--pk-verse-color, var(--ms-ink)); font-size: calc(var(--pk-verse-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-verse-italic, italic); font-weight: var(--pk-verse-bold, 400); }
+  .p-node[data-kind="verse"] > .p-node-row > .p-text{ font-family: var(--pk-verse-font, var(--pub-body-font)); color: var(--pk-verse-color, var(--ms-ink)); font-size: calc(var(--pk-verse-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-verse-italic, italic); font-weight: var(--pk-verse-bold, 400); }
   .p-node[data-kind="verse"] > .p-node-row{ background: var(--pk-verse-bg, transparent); border-radius: var(--radius-sm); }
 
 
@@ -816,18 +816,18 @@
   body.outline-style-classic .p-children .p-number::before{content:"○"; font-size:0.55rem;}
   body.outline-style-classic .p-children .p-children .p-number::before{content:"▪"; font-size:0.5rem;}
   body.outline-style-classic .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
-  body.outline-style-classic .p-node[data-kind="heading"] .p-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-style:normal;}
-  body.outline-style-classic .p-node[data-kind="question"] .p-text::before,
-  body.outline-style-classic .p-node[data-kind="application"] .p-text::before{content:none;}
-  body.outline-style-classic .p-node[data-kind="statement"] .p-text,
-  body.outline-style-classic .p-node[data-kind="question"] .p-text,
-  body.outline-style-classic .p-node[data-kind="application"] .p-text{font-style:normal; color:var(--ms-ink);}
+  body.outline-style-classic .p-node[data-kind="heading"] > .p-node-row > .p-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-style:normal;}
+  body.outline-style-classic .p-node[data-kind="question"] > .p-node-row > .p-text::before,
+  body.outline-style-classic .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:none;}
+  body.outline-style-classic .p-node[data-kind="statement"] > .p-node-row > .p-text,
+  body.outline-style-classic .p-node[data-kind="question"] > .p-node-row > .p-text,
+  body.outline-style-classic .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal; color:var(--ms-ink);}
   body.outline-style-classic .p-node[data-kind="verse"] > .p-node-row{border-left:2px solid var(--ms-line) !important;}
-  body.outline-style-classic .p-node[data-kind="verse"] .p-text{font-style:italic;}
+  body.outline-style-classic .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic;}
   body.outline-style-classic .p-verse-ref{color:var(--text-dim);}
   body.outline-style-classic .p-node[data-kind="photo"] .node-photo{max-width:130px; max-height:100px; object-fit:cover;}
-  body.outline-style-classic .p-node[data-kind="teachernote"] .p-text{font-style:italic; color:var(--text-dim);}
-  body.outline-style-classic .p-node[data-kind="teachernote"] .p-text::before{content:"Note — "; font-weight:600; color:var(--text-faint);}
+  body.outline-style-classic .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-style:italic; color:var(--text-dim);}
+  body.outline-style-classic .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Note — "; font-weight:600; color:var(--text-faint);}
 
 
   /* ================= In-app dialog (replaces native alert/prompt/confirm) ================= */
@@ -1072,21 +1072,21 @@
   #previewModalOverlay .preview-surface .p-number::before{content:"●"; font-size:0.42rem;}
   #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
   /* section headings: bold, top level in capitals, like the editor */
-  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
   #previewModalOverlay .preview-surface .p-node[data-kind="heading"][style*="margin-left:0px"] .p-text{text-transform:uppercase; font-size:1.2rem; letter-spacing:.01em;}
   /* timing: quiet grey text after the heading instead of a pill */
   #previewModalOverlay .preview-surface .time-badge{background:transparent !important; border:none !important; padding:0 0 0 8px; color:#8A8F86; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:400; font-size:.8rem; text-transform:none; letter-spacing:0;}
   #previewModalOverlay .preview-surface .time-badge svg{display:none;}
   /* verses: small grey reference, italic text, no side bar */
   #previewModalOverlay .preview-surface .p-verse-ref{display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.02em; color:#6E7469; background:none; border:none; padding:0; margin-bottom:2px;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="verse"] .p-text{font-style:italic;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="question"] .p-text::before,
-  #previewModalOverlay .preview-surface .p-node[data-kind="application"] .p-text::before{content:none;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="statement"] .p-text,
-  #previewModalOverlay .preview-surface .p-node[data-kind="question"] .p-text,
-  #previewModalOverlay .preview-surface .p-node[data-kind="application"] .p-text{font-style:normal;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] .p-text{font-style:italic; color:#6E7469;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text::before,
+  #previewModalOverlay .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:none;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="statement"] > .p-node-row > .p-text,
+  #previewModalOverlay .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text,
+  #previewModalOverlay .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-style:italic; color:#6E7469;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
   html[data-theme="dark"] #previewModalOverlay .preview-surface{background:#FFFFFF; color:#1F2320;}
   #previewModalOverlay .publish-body{background:#FFFFFF;}
 
@@ -1335,6 +1335,25 @@
     body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]{margin-top:18px;}
     .word-status{padding:2px 14px;}
   }
+  /* Presenter: no guide lines, calmer bullets. */
+  #previewModalOverlay .preview-surface .p-children{border-left:none !important; padding-left:0 !important; margin-left:22px;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.62rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.7rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.5rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:1rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:1rem !important;}
+  /* Zoom (editor page) */
+  #panel-outline #mainTree{zoom:var(--page-zoom, 1);}
+  @media (min-width: 901px){
+    #panel-outline #mainTree.doc-view,
+    body.outline-style-classic #panel-outline #mainTree{max-width:calc(1200px / var(--page-zoom, 1));}
+  }
+  .ws-zoom{display:flex; align-items:center; gap:4px; margin-left:12px;}
+  .ws-zoom button{border:none; background:transparent; color:var(--text-dim); width:22px; height:22px; border-radius:4px; font-size:1rem; line-height:1; cursor:pointer; padding:0;}
+  .ws-zoom button:hover{background:var(--bg); color:var(--text);}
+  .ws-zoom input[type=range]{width:90px; accent-color:var(--accent);}
+  #wsZoomPct{min-width:40px; text-align:right; font-variant-numeric:tabular-nums; cursor:pointer;}
+  @media (max-width: 900px){ .ws-zoom input[type=range]{display:none;} }
 </style>
 </head>
 <body>
@@ -1534,6 +1553,12 @@
       <span id="wsPage">Page 1 of 1</span>
       <span id="wsWords">0 words</span>
       <span id="wsVerses">0 verses</span>
+      <span class="ws-zoom" title="Zoom (Ctrl + scroll also works)">
+        <button type="button" id="wsZoomOut" aria-label="Zoom out">−</button>
+        <input type="range" id="wsZoomRange" min="50" max="200" step="5" value="100" aria-label="Zoom">
+        <button type="button" id="wsZoomIn" aria-label="Zoom in">+</button>
+        <span id="wsZoomPct" title="Reset to 100%">100%</span>
+      </span>
       <span class="ws-hint">Enter for a new line · Tab to indent · right-click a line for more</span>
       <span class="view-level-wrap ws-view" title="Quickly collapse the outline down to just section titles, or down to section + subsection titles">
         <div class="segmented" id="outlineViewSegmented">
@@ -4928,7 +4953,7 @@ function icon(name, size){
             </div>
           </div>` : '';
       const childrenHtml = showChildrenArea
-        ? `<div class="node-children">${hasKids ? renderNodesEditable(node.children, depth+1, isHeading ? 0 : bl + 1) : ''}${bottomAddMenu}</div>` : '';
+        ? `<div class="node-children">${hasKids ? renderNodesEditable(node.children, depth+1, isHeading ? 0 : bl + (node.indent||0) + 1) : ''}${bottomAddMenu}</div>` : '';
 
       const nodeMainInner = `${mainContent}${collapsedCount}`;
 
@@ -4940,7 +4965,7 @@ function icon(name, size){
       // Photos keep their own small Upload/Replace controls inline since those need
       // to be reachable without knowing this pattern exists.
       return `
-      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
+      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl + (node.indent||0)}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
         <div class="node-row">
           <span class="drag-handle" draggable="true" title="Drag to move or nest">${icon('grip-vertical',14)}</span>
           ${collapseToggle}
@@ -5136,8 +5161,8 @@ function icon(name, size){
       const idx = (startIdx != null) ? startIdx : i;
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1, undefined, node.kind === 'heading' ? 0 : bl + 1)}</div>` : '';
-      return `<div class="p-node" data-kind="${node.kind}" data-bl="${bl}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
+      const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1, undefined, node.kind === 'heading' ? 0 : bl + (node.indent||0) + 1)}</div>` : '';
+      return `<div class="p-node" data-kind="${node.kind}" data-bl="${bl + (node.indent||0)}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
     }).join('');
   }
   // Pre-order flatten of the outline into one paginatable block per node. Indentation
@@ -5150,10 +5175,10 @@ function icon(name, size){
     nodes.forEach((node, idx)=>{
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const html = `<div class="p-node p-flat" data-kind="${node.kind}" data-bl="${bl}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
+      const html = `<div class="p-node p-flat" data-kind="${node.kind}" data-bl="${bl + (node.indent||0)}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
       out.push({ html, isSectionStart: depth === 0 && node.kind === 'heading' });
       if(node.children && node.children.length){
-        out = out.concat(flattenNodesFlat(node.children, depth+1, node.kind === 'heading' ? 0 : bl + 1));
+        out = out.concat(flattenNodesFlat(node.children, depth+1, node.kind === 'heading' ? 0 : bl + (node.indent||0) + 1));
       }
     });
     return out;
@@ -5184,29 +5209,45 @@ function icon(name, size){
     }
     return Math.max(320, Math.min(window.innerHeight * 0.7, 900));
   }
-  function measureBlockHeights(pageWidth, blockHtmls){
+  // Measuring probes must live inside the same container as the real page, otherwise CSS scoped to
+  // the presenter overlay (fonts, bullets, spacing) doesn't apply and every block measures too tall,
+  // which left each page only partly filled.
+  // The probe copies the live page's classes and inline style variables (font scale etc.) so it
+  // measures exactly what will be shown.
+  function makeProbe(pageWidth){
+    const surf = document.getElementById('previewSurface');
     const probe = document.createElement('div');
-    probe.className = 'preview-surface';
-    probe.style.cssText = `position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    probe.className = (surf ? surf.className : 'preview-surface').replace(/\bpaginated\b/, '').trim();
+    probe.style.cssText = (surf ? surf.style.cssText : '') + `;position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    return probe;
+  }
+  function probeHost(){
+    const surf = document.getElementById('previewSurface');
+    return (surf && surf.parentElement) || document.body;
+  }
+  const PAGE_SLACK = 40; // blocks are measured one by one; leave room for spacing between them
+  function measureBlockHeights(pageWidth, blockHtmls){
+    const probe = makeProbe(pageWidth);
     const bodyDiv = document.createElement('div');
     bodyDiv.className = 'ms-body';
     probe.appendChild(bodyDiv);
-    document.body.appendChild(probe);
+    probeHost().appendChild(probe);
     const heights = blockHtmls.map(html=>{
       bodyDiv.innerHTML = html;
-      return bodyDiv.getBoundingClientRect().height;
+      // Measure the content only: the body's own top/bottom padding is budgeted once per page,
+      // so counting it again for every block made pages look full when they were half empty.
+      const cs = window.getComputedStyle(bodyDiv);
+      return bodyDiv.getBoundingClientRect().height - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
     });
-    document.body.removeChild(probe);
+    probe.remove();
     return heights;
   }
   function measureBandHeight(pageWidth, bandHtml){
-    const probe = document.createElement('div');
-    probe.className = 'preview-surface';
-    probe.style.cssText = `position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    const probe = makeProbe(pageWidth);
     probe.innerHTML = bandHtml;
-    document.body.appendChild(probe);
+    probeHost().appendChild(probe);
     const h = probe.getBoundingClientRect().height;
-    document.body.removeChild(probe);
+    probe.remove();
     return h;
   }
   // Measures the real rendered top+bottom padding of an empty .ms-body, instead of
@@ -5214,17 +5255,15 @@ function icon(name, size){
   // a stale guess here was quietly shrinking how much content each page thought it
   // had room for, leaving pages looking under-filled even though space was available.
   function measureBodyVPadding(pageWidth, bodyClass){
-    const probe = document.createElement('div');
-    probe.className = 'preview-surface';
-    probe.style.cssText = `position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    const probe = makeProbe(pageWidth);
     const cls = 'ms-body' + (bodyClass ? ' ' + bodyClass : '');
     const bodyDiv = document.createElement('div');
     bodyDiv.className = cls;
     probe.appendChild(bodyDiv);
-    document.body.appendChild(probe);
+    probeHost().appendChild(probe);
     const cs = window.getComputedStyle(bodyDiv);
     const padding = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-    document.body.removeChild(probe);
+    probe.remove();
     return padding;
   }
   function paginateAndSetBook(bandHtml, blockHtmls, bodyClass){
@@ -5240,7 +5279,7 @@ function icon(name, size){
     let current = [];
     let currentHeight = 0;
     blockHtmls.forEach((html, i)=>{
-      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding;
+      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding - PAGE_SLACK;
       const h = heights[i];
       if(current.length && currentHeight + h > budget){
         pages.push(current);
@@ -5279,7 +5318,7 @@ function icon(name, size){
     let current = [];
     let currentHeight = 0;
     flatBlocks.forEach((block, i)=>{
-      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding;
+      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding - PAGE_SLACK;
       const h = heights[i];
       const forceBreak = forceSectionBreaks && block.isSectionStart && current.length > 0;
       if(forceBreak || (current.length && currentHeight + h > budget)){
@@ -7324,6 +7363,30 @@ function icon(name, size){
       targets.forEach(c=>ro.observe(c));
     }
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
+  })();
+
+  // ---------------- Page zoom (like Word's zoom slider) ----------------
+  (function pageZoom(){
+    let zoom = 100;
+    try{ const z = parseInt(localStorage.getItem(lsKey('page-zoom')), 10); if(z >= 50 && z <= 200) zoom = z; }catch(e){}
+    const range = document.getElementById('wsZoomRange'), pct = document.getElementById('wsZoomPct');
+    function apply(v, save){
+      zoom = Math.max(50, Math.min(200, Math.round(v / 5) * 5));
+      document.documentElement.style.setProperty('--page-zoom', String(zoom / 100));
+      range.value = zoom; pct.textContent = zoom + '%';
+      if(save){ try{ localStorage.setItem(lsKey('page-zoom'), String(zoom)); }catch(e){} }
+      requestAnimationFrame(()=> autosizeVisibleTextareas(mainTree));
+    }
+    apply(zoom, false);
+    range.addEventListener('input', ()=> apply(parseInt(range.value, 10), true));
+    document.getElementById('wsZoomOut').addEventListener('click', ()=> apply(zoom - 10, true));
+    document.getElementById('wsZoomIn').addEventListener('click', ()=> apply(zoom + 10, true));
+    pct.addEventListener('click', ()=> apply(100, true));
+    document.addEventListener('wheel', (e)=>{
+      if(!(e.ctrlKey || e.metaKey) || !e.target.closest || !e.target.closest('#panel-outline, .word-ribbon')) return;
+      e.preventDefault();
+      apply(zoom + (e.deltaY < 0 ? 10 : -10), true);
+    }, { passive:false });
   })();
 
   // Paste a screenshot / copied picture into the outline or Brainstorm: it becomes a photo line
