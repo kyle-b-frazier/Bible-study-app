@@ -2100,6 +2100,7 @@ function icon(name, size){
   let activePublishFilter = null; // set by the Publish chooser (Full/Handout/Custom); null = show everything unfiltered
   let pendingVerseParentId = null;
   let pendingVerseAfterId = null;
+  let pendingVerseReplaceId = null;
   let pendingPhotoNodeId = null;
   let pendingBrainstormParentId = null;
   const photoCache = {}; // photoRef -> data URL, kept in memory so rendering stays synchronous
@@ -4089,6 +4090,12 @@ function icon(name, size){
     { keys: 'T', label: "Add a Teacher's Note" },
     { keys: 'P', label: 'Add a Photo' },
     { keys: 'H', label: 'Add a Section' },
+    { keys: 'Ctrl Option S / Q / A / T / H', label: 'Turn the current line into a Statement, Question, Application, Teacher\'s Note or Section (works while typing)' },
+    { keys: 'Ctrl Option N', label: 'Add a new line after the current one (a Statement; use the keys above to change it)' },
+    { keys: 'Ctrl Option V', label: 'Add a Verse (replaces the current line if it\'s empty)' },
+    { keys: 'Ctrl Option P', label: 'Add a Photo' },
+    { keys: 'Ctrl Option O / L / B', label: 'New Lesson, My Lessons, Brainstorm' },
+    { keys: 'Ctrl Option M / D', label: 'Presenter Mode, Dark Mode' },
     { keys: '← / →', label: 'Turn pages in Presenter Mode (page-flip mode)' },
     { keys: '?', label: 'Show this shortcuts list' },
     { keys: 'Esc', label: 'Close the current dialog or menu' },
@@ -5461,13 +5468,19 @@ function icon(name, size){
     renderBookGrid();
     document.getElementById('verseModalOverlay').classList.add('open');
   }
-  function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; }
+  function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; pendingVerseReplaceId = null; }
   // When the ribbon's Insert > Verse opened the modal, move the new verse to sit right after the line the cursor was on.
   function placeVerseAfterCursor(newId){
     const afterId = pendingVerseAfterId;
     if(!afterId || afterId === newId || !findContext(afterId)) return;
     const node = removeNodeById(newId);
     if(node) insertRelative(afterId, node, 'after');
+    // A quick Verse key on an empty line: the verse takes that line's place.
+    const replaceCtx = pendingVerseReplaceId === afterId ? findContext(afterId) : null;
+    if(replaceCtx && isEmptyTextLine(replaceCtx.node)){
+      removeNodeById(afterId);
+      lastFocusedNodeId = newId;
+    }
   }
   function switchPickerTab(tab){
     document.getElementById('browsePane').style.display = tab==='browse' ? 'block' : 'none';
@@ -6301,6 +6314,18 @@ function icon(name, size){
     if((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'z'){
       if(document.querySelector('.modal-overlay.open')) return;
       e.preventDefault(); performRedo();
+    }
+    if(e.ctrlKey && e.altKey && !e.metaKey && !e.shiftKey && QUICK_LINE_KEYS[e.code] && lesson
+       && !document.querySelector('.modal-overlay.open')){
+      e.preventDefault();
+      quickLine(QUICK_LINE_KEYS[e.code]);
+      return;
+    }
+    if(e.ctrlKey && e.altKey && !e.metaKey && !e.shiftKey && QUICK_COMMAND_KEYS[e.code]
+       && !document.getElementById('appDialogOverlay').classList.contains('open')){
+      e.preventDefault();
+      runPaletteItem({ type:'command', id: QUICK_COMMAND_KEYS[e.code] });
+      return;
     }
     if(e.key === '?' && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName)){
       e.preventDefault(); openShortcutsModal();
@@ -7620,6 +7645,63 @@ function icon(name, size){
     await saveLesson();
     renderTree();
     focusNodeText(id, 'end');
+  }
+  // Quick line keys (Ctrl+Option+letter, see QUICK_LINE_KEYS; the Stream Dock page sends these).
+  // A kind key turns the current line into that kind; on a verse or photo, or with no line yet,
+  // it adds a new line of that kind instead. "Add" adds a statement after the current line, so
+  // Add then Question gives a new question. Verse opens the verse picker, and a picked verse
+  // replaces the current line when that line is still empty.
+  const QUICK_LINE_KEYS = { KeyS:'statement', KeyQ:'question', KeyV:'verse', KeyA:'application', KeyT:'teachernote', KeyH:'heading', KeyP:'photo', KeyN:'add' };
+  // Ctrl+Option keys for command-palette commands, so a key press runs them directly.
+  const QUICK_COMMAND_KEYS = { KeyO:'new-lesson', KeyL:'open-library', KeyB:'toggle-brainstorm', KeyM:'go-preview', KeyD:'toggle-theme' };
+  function isEmptyTextLine(node){
+    return !!node && (node.kind === 'heading' || FLOW_KINDS.includes(node.kind)) && !(node.text || '').trim()
+      && !(node.children && node.children.length);
+  }
+  // Adds a line right after the current one; inside a section heading it becomes the section's first line.
+  function addQuickLine(kind, ctx){
+    const node = makeNode(kind);
+    if(ctx && ctx.node.kind === 'heading' && kind !== 'heading'){
+      ctx.node.children = ctx.node.children || [];
+      ctx.node.children.unshift(node);
+      ctx.node.collapsed = false;
+    } else if(ctx){
+      ctx.arr.splice(ctx.idx + 1, 0, node);
+    } else {
+      lesson.outline.push(node);
+    }
+    return node.id;
+  }
+  async function quickLine(kind){
+    if(!lesson) return;
+    const ctx = currentRibbonNode();
+    if(kind === 'verse'){
+      const parentId = !ctx ? 'root' : (ctx.node.kind === 'heading' ? ctx.node.id : (ctx.parentNode ? ctx.parentNode.id : 'root'));
+      await openVerseModal(parentId);
+      pendingVerseAfterId = (ctx && ctx.node.kind !== 'heading') ? ctx.node.id : null;
+      pendingVerseReplaceId = (ctx && ctx.node.kind !== 'heading' && isEmptyTextLine(ctx.node)) ? ctx.node.id : null;
+      return;
+    }
+    const textLine = ctx && (ctx.node.kind === 'heading' || FLOW_KINDS.includes(ctx.node.kind));
+    if(kind !== 'add' && textLine && kind !== 'photo'){
+      if(ctx.node.kind === kind){ focusNodeText(ctx.node.id, 'end'); return; }
+      await changeNodeKind(ctx.node.id, kind);
+      return;
+    }
+    pushUndo();
+    let newId;
+    if(kind === 'photo' && ctx && isEmptyTextLine(ctx.node) && ctx.node.kind !== 'heading'){
+      // An empty line becomes the photo, rather than leaving a blank line above it.
+      Object.assign(ctx.node, makeNode('photo'), { id: ctx.node.id });
+      newId = ctx.node.id;
+    } else {
+      newId = addQuickLine(kind === 'add' ? 'statement' : kind, ctx);
+    }
+    lastFocusedNodeId = newId;
+    await saveLesson();
+    renderTree();
+    if(kind === 'photo'){ pendingPhotoNodeId = newId; photoFileInput.value = ''; photoFileInput.click(); }
+    else focusNodeText(newId, 'end');
   }
   function updateRibbonState(){
     const ribbon = document.getElementById('wordRibbon');
