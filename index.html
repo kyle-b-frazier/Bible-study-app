@@ -546,23 +546,44 @@
   hr.modal-rule{border:none; border-top:1px dashed var(--border); margin:16px 0;}
 
   /* ================= Brainstorm drawer (collapsible, closed by default) ================= */
+  /* It docks to one side (side-left/right/top/bottom). On a computer screen (.docked) the page moves
+     over to make room (the --dock-* variables, set by layoutBrainstormDrawer); on a phone it slides over the page. */
   .brainstorm-drawer{
     position:fixed; top:0; right:0; height:100vh; width:360px; max-width:90vw;
     background:var(--surface); border-left:1px solid var(--border); box-shadow:-16px 0 40px rgba(0,0,0,.12);
-    padding:18px 18px 20px; display:flex; flex-direction:column; overflow-y:auto;
-    transform:translateX(100%); transition:transform .2s ease; z-index:60;
+    display:flex; flex-direction:column; overflow:hidden;
+    transform:translateX(100%); visibility:hidden; transition:transform .2s ease, visibility 0s linear .2s; z-index:60;
   }
+  .drawer-body{flex:1; min-height:0; overflow-y:auto; padding:18px 18px 20px; display:flex; flex-direction:column;}
+  .brainstorm-drawer.side-left{right:auto; left:0; border-left:none; border-right:1px solid var(--border); box-shadow:16px 0 40px rgba(0,0,0,.12); transform:translateX(-100%);}
+  .brainstorm-drawer.side-top, .brainstorm-drawer.side-bottom{left:0; right:0; width:auto; max-width:none; height:300px; border-left:none;}
+  .brainstorm-drawer.side-top{border-bottom:1px solid var(--border); box-shadow:0 16px 40px rgba(0,0,0,.12); transform:translateY(-100%);}
+  .brainstorm-drawer.side-bottom{top:auto; bottom:0; border-top:1px solid var(--border); box-shadow:0 -16px 40px rgba(0,0,0,.12); transform:translateY(100%);}
+  .brainstorm-drawer.docked{box-shadow:none;}
+  .brainstorm-drawer.open{transform:none; visibility:visible; transition:transform .2s ease;}
   .brainstorm-drawer.resizing{ transition:none; }
   .drawer-resize-handle{
-    position:absolute; top:0; left:-3px; width:6px; height:100%; cursor:col-resize; z-index:65;
-    background:transparent;
+    position:absolute; top:0; left:0; width:6px; height:100%; cursor:col-resize; z-index:65;
+    background:transparent; touch-action:none;
   }
+  .side-left .drawer-resize-handle{left:auto; right:0;}
+  .side-top .drawer-resize-handle, .side-bottom .drawer-resize-handle{width:100%; height:6px; cursor:row-resize;}
+  .side-top .drawer-resize-handle{top:auto; bottom:0;}
   .drawer-resize-handle::after{
     content:''; position:absolute; top:0; left:2px; width:2px; height:100%;
     background:transparent; transition:background var(--dur-fast) var(--ease-standard);
   }
+  .side-top .drawer-resize-handle::after, .side-bottom .drawer-resize-handle::after{left:0; top:2px; width:100%; height:2px;}
   .drawer-resize-handle:hover::after, .drawer-resize-handle.active::after{ background:var(--accent); }
-  .brainstorm-drawer.open{transform:translateX(0);}
+  .drawer-dock{display:none; gap:2px; margin-left:auto;}
+  .brainstorm-drawer.docked .drawer-dock{display:flex;}
+  .brainstorm-drawer.docked .drawer-close{margin-left:4px;}
+  .drawer-dock button{background:transparent; border:1px solid transparent; color:var(--text-faint); padding:3px; border-radius:var(--radius-sm); display:flex; cursor:pointer;}
+  .drawer-dock button:hover{background:var(--bg); color:var(--text);}
+  .drawer-dock button.active{color:var(--accent); border-color:var(--accent-soft); background:var(--accent-soft);}
+  .drawer-dock svg{width:16px; height:16px;}
+  .drawer-dock svg rect{fill:none; stroke:currentColor; stroke-width:1.6;}
+  .drawer-dock svg rect.bar{fill:currentColor; stroke:none;}
   .drawer-head{display:flex; align-items:center; gap:var(--space-5); margin-bottom:var(--space-5);}
   .drawer-head b{font-size:1rem; font-weight:800;}
   .drawer-close{margin-left:auto; background:transparent; border:none; color:var(--text-dim); font-size:1rem; padding:5px 8px; border-radius:var(--radius-sm); transition:background .12s ease, color .12s ease;}
@@ -1334,6 +1355,11 @@
     }
     body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]{margin-top:18px;}
     .word-status{padding:2px 14px;}
+    /* Room for the docked Brainstorm panel (0 when it's closed). */
+    .app-shell{padding:var(--dock-t, 0px) var(--dock-r, 0px) var(--dock-b, 0px) var(--dock-l, 0px); transition:padding .2s ease;}
+    html.drawer-resizing .app-shell{transition:none;}
+    .word-ribbon{top:var(--dock-t, 0px);}
+    .word-status{bottom:var(--dock-b, 0px);}
   }
 </style>
 </head>
@@ -1549,8 +1575,15 @@
   <!-- BRAINSTORM (collapsible drawer, closed by default) -->
   <aside class="brainstorm-drawer no-print" id="brainstormDrawer">
     <div class="drawer-resize-handle" id="drawerResizeHandle" title="Drag to resize"></div>
+    <div class="drawer-body" id="brainstormDrawerBody">
     <div class="drawer-head">
       <b>Brainstorm</b>
+      <span class="drawer-dock" id="drawerDock" role="group" aria-label="Where the panel sits">
+        <button data-dock="left" title="Dock on the left"><svg viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><rect class="bar" x="3" y="4" width="4" height="8"/></svg></button>
+        <button data-dock="right" title="Dock on the right"><svg viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><rect class="bar" x="9" y="4" width="4" height="8"/></svg></button>
+        <button data-dock="top" title="Dock at the top"><svg viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><rect class="bar" x="3" y="4" width="10" height="3.5"/></svg></button>
+        <button data-dock="bottom" title="Dock at the bottom"><svg viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><rect class="bar" x="3" y="8.5" width="10" height="3.5"/></svg></button>
+      </span>
       <button class="drawer-close" id="btnCloseDrawer" title="Close">✕</button>
     </div>
     <p class="hint" style="margin-top:0;">Drop ideas in here without worrying about structure. Drag a card into the outline, or click its <strong>→</strong> button to insert it at the end.</p>
@@ -1588,6 +1621,7 @@
     </div>
     <div class="brainstorm-hint no-print">Drag the grip to rearrange (drop on the middle of a card to nest). Tab / Shift+Tab nests, Alt+↑/↓ moves, Enter adds a line.</div>
     <div class="outline-tree" id="brainstormList"></div>
+    </div>
   </aside>
   <div class="drawer-scrim no-print" id="drawerScrim"></div>
 
@@ -4193,7 +4227,7 @@ function icon(name, size){
   // was saved locally with whatever's in the cloud (newest `updatedAt` wins per lesson/folder),
   // so the same account works seamlessly across devices. Local storage remains the source of
   // truth the app always reads from instantly — Firestore is a mirror, not a dependency.
-  const CLOUD_SKIP_KEYS = new Set(['last-lesson-id', 'rail-expanded', 'theme', 'publish-view-mode']);
+  const CLOUD_SKIP_KEYS = new Set(['last-lesson-id', 'rail-expanded', 'theme', 'publish-view-mode', 'drawer-side', 'drawer-width', 'drawer-height']);
   let cloudSyncInProgress = false;
   let lastCloudSyncAt = null;
   let cloudSyncError = null;
@@ -4528,12 +4562,88 @@ function icon(name, size){
   }
 
   // ---------------- Brainstorm drawer ----------------
+  // On a computer screen the drawer docks beside the page (left, right, top or bottom, sized by
+  // dragging its inner edge) and the page moves over; on a phone it slides over the page from the right.
+  const DRAWER_SIDES = ['left','right','top','bottom'];
+  const DRAWER_SIZE = { width:{ min:260, def:360, max:()=>Math.min(900, window.innerWidth * 0.7) },
+                        height:{ min:160, def:300, max:()=>window.innerHeight * 0.75 } };
+  const drawerDesktopMQ = window.matchMedia('(min-width: 901px)');
+  function readDrawerPref(key, fallback){ try{ return localStorage.getItem(lsKey(key)) || fallback; }catch(e){ return fallback; } }
+  function writeDrawerPref(key, value){ try{ localStorage.setItem(lsKey(key), String(value)); }catch(e){} }
+  let drawerSide = readDrawerPref('drawer-side', 'right');
+  if(!DRAWER_SIDES.includes(drawerSide)) drawerSide = 'right';
+  const drawerSizes = { width: parseInt(readDrawerPref('drawer-width', ''), 10) || DRAWER_SIZE.width.def,
+                        height: parseInt(readDrawerPref('drawer-height', ''), 10) || DRAWER_SIZE.height.def };
+  function drawerAxis(side){ return (side === 'top' || side === 'bottom') ? 'height' : 'width'; }
+  function clampDrawerSize(axis, v){ const lim = DRAWER_SIZE[axis]; return Math.round(Math.max(lim.min, Math.min(lim.max(), v))); }
+  function layoutBrainstormDrawer(){
+    const drawer = document.getElementById('brainstormDrawer');
+    const docked = drawerDesktopMQ.matches;
+    const side = docked ? drawerSide : 'right';
+    const open = drawer.classList.contains('open');
+    DRAWER_SIDES.forEach(sd => drawer.classList.toggle('side-' + sd, sd === side));
+    drawer.classList.toggle('docked', docked);
+    document.querySelectorAll('#drawerDock [data-dock]').forEach(b => b.classList.toggle('active', b.dataset.dock === drawerSide));
+    const axis = drawerAxis(side);
+    const size = docked ? clampDrawerSize(axis, drawerSizes[axis]) : null;
+    // The icon sidebar stays put: a panel on the left, top or bottom starts just right of it.
+    const rail = document.getElementById('appRail');
+    const railW = (docked && rail) ? rail.getBoundingClientRect().width : 0;
+    drawer.style.width = (docked && axis === 'width') ? size + 'px' : '';
+    drawer.style.height = (docked && axis === 'height') ? size + 'px' : '';
+    drawer.style.left = (docked && side !== 'right') ? railW + 'px' : '';
+    const root = document.documentElement.style;
+    const room = { l: side === 'left', r: side === 'right', t: side === 'top', b: side === 'bottom' };
+    Object.keys(room).forEach(k => root.setProperty('--dock-' + k, (docked && open && room[k]) ? size + 'px' : '0px'));
+    document.getElementById('drawerScrim').classList.toggle('open', open && !docked);
+  }
+  function setBrainstormDrawerSide(side){
+    if(!DRAWER_SIDES.includes(side)) return;
+    const drawer = document.getElementById('brainstormDrawer');
+    // Jump straight to the new side rather than sliding across the page.
+    drawer.classList.add('resizing');
+    drawerSide = side;
+    writeDrawerPref('drawer-side', side);
+    layoutBrainstormDrawer();
+    requestAnimationFrame(()=> requestAnimationFrame(()=> drawer.classList.remove('resizing')));
+  }
   function toggleBrainstormDrawer(force){
     const drawer = document.getElementById('brainstormDrawer');
-    const scrim = document.getElementById('drawerScrim');
     const open = typeof force === 'boolean' ? force : !drawer.classList.contains('open');
     drawer.classList.toggle('open', open);
-    scrim.classList.toggle('open', open);
+    layoutBrainstormDrawer();
+  }
+  function wireBrainstormDrawerResize(){
+    const handle = document.getElementById('drawerResizeHandle');
+    const drawer = document.getElementById('brainstormDrawer');
+    let start = null;
+    handle.addEventListener('pointerdown', (e)=>{
+      if(!drawerDesktopMQ.matches || e.button !== 0) return;
+      e.preventDefault();
+      const axis = drawerAxis(drawerSide);
+      start = { x:e.clientX, y:e.clientY, axis, size: drawer.getBoundingClientRect()[axis] };
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add('active'); drawer.classList.add('resizing');
+      document.documentElement.classList.add('drawer-resizing');
+      document.body.style.userSelect = 'none';
+    });
+    handle.addEventListener('pointermove', (e)=>{
+      if(!start) return;
+      // Dragging the inner edge away from the panel's own side makes it bigger.
+      const delta = { left: e.clientX - start.x, right: start.x - e.clientX, top: e.clientY - start.y, bottom: start.y - e.clientY }[drawerSide];
+      drawerSizes[start.axis] = clampDrawerSize(start.axis, start.size + delta);
+      layoutBrainstormDrawer();
+    });
+    const end = ()=>{
+      if(!start) return;
+      writeDrawerPref('drawer-' + start.axis, drawerSizes[start.axis]);
+      start = null;
+      handle.classList.remove('active'); drawer.classList.remove('resizing');
+      document.documentElement.classList.remove('drawer-resizing');
+      document.body.style.userSelect = '';
+    };
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
   }
 
   // ---------------- Presenter Mode: full-screen teaching view ----------------
@@ -6284,7 +6394,14 @@ function icon(name, size){
     try{ saved = localStorage.getItem(lsKey('rail-expanded')); }catch(e){}
     if(saved === '1') toggleRailExpanded(true);
   })();
-  wirePanelResize('drawerResizeHandle', document.getElementById('brainstormDrawer'), { min:280, max:640, default:360, storeKey:'drawer-width', grow:'left' });
+  wireBrainstormDrawerResize();
+  document.getElementById('drawerDock').addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-dock]'); if(b) setBrainstormDrawerSide(b.dataset.dock);
+  });
+  window.addEventListener('resize', layoutBrainstormDrawer);
+  // The panel sits next to the sidebar, which can widen (expand) or narrow.
+  if(window.ResizeObserver) new ResizeObserver(layoutBrainstormDrawer).observe(document.getElementById('appRail'));
+  layoutBrainstormDrawer();
 
   // Command palette
   document.getElementById('paletteOverlay').addEventListener('click', (e)=>{ if(e.target.id==='paletteOverlay') closePalette(); });
@@ -6824,7 +6941,7 @@ function icon(name, size){
   brainstormList.addEventListener('dragover', (e)=>{
     if(!brainstormDragId()) return;
     e.preventDefault();
-    const drawer = document.getElementById('brainstormDrawer');
+    const drawer = document.getElementById('brainstormDrawerBody');
     const dr = drawer.getBoundingClientRect();
     if(e.clientY < dr.top + 50) drawer.scrollBy(0, -14); else if(e.clientY > dr.bottom - 50) drawer.scrollBy(0, 14);
     clearBrainstormDropIndicators();
@@ -8066,60 +8183,6 @@ function icon(name, size){
     wireModalFocusTrap(id);
   });
 
-  // ---------------- Resizable side panels (sidebar + brainstorm drawer) ----------------
-  function wirePanelResize(handleId, panelEl, opts){
-    const handle = document.getElementById(handleId);
-    if(!handle || !panelEl) return;
-    const min = opts.min, max = opts.max, storeKey = opts.storeKey, cssVar = opts.cssVar;
-    let saved = null;
-    try{ saved = localStorage.getItem(lsKey(storeKey)); }catch(e){}
-    if(saved){
-      const w = Math.max(min, Math.min(max, parseInt(saved,10) || opts.default));
-      if(cssVar) panelEl.style.setProperty(cssVar, w+'px');
-      panelEl.style.width = w+'px';
-      if(opts.minWidthToo) panelEl.style.minWidth = w+'px';
-    }
-    let dragging = false, startX = 0, startW = 0;
-    function onMove(e){
-      if(!dragging) return;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const delta = opts.grow === 'left' ? (startX - clientX) : (clientX - startX);
-      let w = Math.max(min, Math.min(max, startW + delta));
-      panelEl.style.width = w + 'px';
-      if(opts.minWidthToo) panelEl.style.minWidth = w + 'px';
-    }
-    function onUp(){
-      if(!dragging) return;
-      dragging = false;
-      panelEl.classList.remove('resizing');
-      handle.classList.remove('active');
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      try{ localStorage.setItem(lsKey(storeKey), parseInt(panelEl.style.width,10) || opts.default); }catch(e){}
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onUp);
-      // Preview pagination depends on panel width in some layouts — nudge a repaint.
-      if(document.getElementById('previewModalOverlay').classList.contains('open')) renderPreview();
-    }
-    function onDown(e){
-      dragging = true;
-      startX = e.touches ? e.touches[0].clientX : e.clientX;
-      startW = panelEl.getBoundingClientRect().width;
-      panelEl.classList.add('resizing');
-      handle.classList.add('active');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
-      window.addEventListener('touchmove', onMove, {passive:false});
-      window.addEventListener('touchend', onUp);
-      e.preventDefault();
-    }
-    handle.addEventListener('mousedown', onDown);
-    handle.addEventListener('touchstart', onDown, {passive:false});
-  }
   // ---------------- Init ----------------
   async function init(){
     initTheme();
