@@ -582,6 +582,16 @@
   #brainstormList .node{border:1px solid var(--border); border-radius:var(--radius-md); padding:var(--space-1); margin-bottom:var(--space-4); cursor:grab;}
   #brainstormList .node.dragging{opacity:.4;}
   #brainstormList .node-row{align-items:flex-start;}
+  #brainstormList .node-children{margin-left:12px; padding-left:8px; border-left:2px solid var(--accent-soft); margin-top:6px;}
+  #brainstormList .node-children > .node{margin-bottom:6px; background:var(--bg);}
+  #brainstormList .node-controls{max-width:104px; justify-content:flex-end;}
+  #brainstormList .node.drop-before > .node-row{box-shadow: inset 0 3px 0 var(--accent);}
+  #brainstormList .node.drop-after > .node-row{box-shadow: inset 0 -3px 0 var(--accent);}
+  #brainstormList.drop-end{box-shadow: inset 0 -3px 0 var(--accent);}
+  .b-toggle{background:transparent; border:none; color:var(--text-dim); cursor:pointer; padding:6px 2px 0; font-size:.8rem; flex-shrink:0;}
+  .b-toggle:hover{color:var(--accent);}
+  .brainstorm-search{width:100%; margin:0 0 10px; padding:7px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font-size:.85rem; font-family:inherit;}
+  .brainstorm-hint{font-size:.72rem; color:var(--text-faint); margin:0 0 10px;}
   .drawer-drag-handle{color:var(--text-faint); font-size:.9rem; padding:8px 0 0 4px; user-select:none; flex-shrink:0;}
   .btn.insert{color:var(--accent); border-color:var(--accent-soft); background:var(--accent-soft);}
   .btn.insert:hover{background:var(--accent); color:#fff;}
@@ -1479,6 +1489,7 @@
       <button class="b4" data-quick-kind="verse" title="Verse">✝<span class="txt">Verse</span></button>
       <button class="b4" data-quick-kind="photo" title="Photo">▣<span class="txt">Photo</span></button>
     </div>
+    <input type="search" id="brainstormSearch" class="brainstorm-search" placeholder="Search brainstorm…" aria-label="Search brainstorm">
     <div class="sort-toolbar no-print">
       <label>Show:
         <select id="brainstormFilter">
@@ -1501,6 +1512,7 @@
         </select>
       </label>
     </div>
+    <div class="brainstorm-hint no-print">Drag the grip to rearrange (drop on the middle of a card to nest). Tab / Shift+Tab nests, Alt+↑/↓ moves, Enter adds a line.</div>
     <div class="outline-tree" id="brainstormList"></div>
   </aside>
   <div class="drawer-scrim no-print" id="drawerScrim"></div>
@@ -3499,6 +3511,37 @@ function icon(name, size){
     await saveLesson();
     rerenderStructure();
   }
+  // Move any node (outline or Brainstorm) next to / inside any other node. Works across both
+  // lists, and any kind of item can hold children.
+  async function moveNodeTo(id, targetId, pos){
+    if(!id || !targetId || id === targetId || isDescendant(id, targetId)) return false;
+    if(!findContext(id) || !findContext(targetId)) return false;
+    pushUndo();
+    const node = removeNodeById(id); if(!node) return false;
+    const t = findContext(targetId);
+    delete node.indent;
+    if(pos === 'child'){
+      t.node.children = t.node.children || [];
+      t.node.children.push(node);
+      t.node.collapsed = false;
+    } else {
+      t.arr.splice(pos === 'before' ? t.idx : t.idx + 1, 0, node);
+    }
+    await saveLesson();
+    rerenderStructure();
+    return true;
+  }
+  // Alt+Up / Alt+Down: swap a line with its neighbour at the same level (it takes its children along).
+  async function moveNodeSibling(id, dir){
+    const ctx = findContext(id); if(!ctx) return false;
+    const j = ctx.idx + dir;
+    if(j < 0 || j >= ctx.arr.length) return false;
+    pushUndo();
+    const tmp = ctx.arr[j]; ctx.arr[j] = ctx.arr[ctx.idx]; ctx.arr[ctx.idx] = tmp;
+    await saveLesson();
+    rerenderStructure();
+    return true;
+  }
   function addNodeAfter(kind, afterId, extra){
     const node = makeNode(kind);
     if(extra) Object.assign(node, extra);
@@ -4668,9 +4711,27 @@ function icon(name, size){
   let brainstormSort = 'added';
   const KIND_ORDER = {heading:0, statement:1, question:2, application:3, teachernote:4, verse:5, photo:6};
 
+  let brainstormQuery = '';
+  function brainstormMatches(n, q){
+    if(((n.text||'') + ' ' + (n.ref||'') + ' ' + (n.caption||'')).toLowerCase().includes(q)) return true;
+    return !!(n.children && n.children.some(c=>brainstormMatches(c, q)));
+  }
+  // Rearranging only makes sense in the order the items are actually stored; if a sort, kind
+  // filter or search is hiding that order, switch back to it first.
+  function ensureManualBrainstormOrder(){
+    if(brainstormSort === 'added' && brainstormFilter === 'all' && !brainstormQuery) return true;
+    brainstormSort = 'added'; brainstormFilter = 'all'; brainstormQuery = '';
+    document.getElementById('brainstormSort').value = 'added';
+    document.getElementById('brainstormFilter').value = 'all';
+    const q = document.getElementById('brainstormSearch'); if(q) q.value = '';
+    renderBrainstormList();
+    showToast('Showing everything in the order added so you can rearrange.');
+    return false;
+  }
   function getFilteredSortedBrainstorm(){
     let items = lesson.brainstorm.map((node, idx)=>({node, idx}));
     if(brainstormFilter !== 'all') items = items.filter(x=>x.node.kind === brainstormFilter);
+    if(brainstormQuery) items = items.filter(x=>brainstormMatches(x.node, brainstormQuery));
     const previewText = n => n.kind==='verse' ? (n.ref||'') : n.kind==='photo' ? (n.caption||'') : (n.text||'');
     switch(brainstormSort){
       case 'newest': items.sort((a,b)=>(b.node.createdAt||0)-(a.node.createdAt||0)); break;
@@ -4695,6 +4756,7 @@ function icon(name, size){
   }
 
   function renderBrainstormItem(node){
+    const searching = !!brainstormQuery;
     const isVerse = node.kind === 'verse';
     const isPhoto = node.kind === 'photo';
     let content = '';
@@ -4717,14 +4779,21 @@ function icon(name, size){
     const photoExtra = isPhoto ? `
           <button class="btn small" data-action="upload-photo" data-id="${node.id}">${node.photoRef?'Replace':'Upload'}</button>
           ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}` : '';
-    const kids = (node.children && node.children.length) ? `<div class="node-children">${node.children.map(renderBrainstormItem).join('')}</div>` : '';
+    const hasKids = !!(node.children && node.children.length);
+    const shownKids = hasKids ? (searching ? node.children.filter(c=>brainstormMatches(c, brainstormQuery)) : node.children) : [];
+    const kids = (hasKids && (!node.collapsed || searching) && shownKids.length) ? `<div class="node-children">${shownKids.map(renderBrainstormItem).join('')}</div>` : '';
+    const toggle = hasKids ? `<button class="b-toggle" data-action="b-toggle" data-id="${node.id}" title="${node.collapsed ? 'Expand' : 'Collapse'}">${node.collapsed ? '▸' : '▾'}</button>` : '';
+    const hiddenCount = (hasKids && node.collapsed && !searching) ? `<span class="condensed-flag">(${countDescendants(node.children)} inside)</span>` : '';
     return `
     <div class="node" data-kind="${node.kind}" data-id="${node.id}" draggable="true"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
       <div class="node-row">
-        <span class="drawer-drag-handle" title="Drag into the outline">${icon('grip-vertical',14)}</span>
-        <div class="node-main"><span class="hint" style="margin:0 0 4px; display:block;">${KIND_LABEL[node.kind]}</span>${content}</div>
+        <span class="drawer-drag-handle" title="Drag to rearrange or into the outline">${icon('grip-vertical',14)}</span>
+        ${toggle}
+        <div class="node-main"><span class="hint" style="margin:0 0 4px; display:block;">${KIND_LABEL[node.kind]} ${hiddenCount}</span>${content}</div>
         <div class="node-controls">
           ${photoExtra}
+          <button class="btn small" data-action="b-outdent" data-id="${node.id}" title="Move out a level (Shift+Tab)">${icon('outdent',14)}</button>
+          <button class="btn small" data-action="b-indent" data-id="${node.id}" title="Nest under the item above (Tab)">${icon('indent',14)}</button>
           <button class="btn small insert" data-action="insert-to-outline" data-id="${node.id}" title="Insert into the outline">${icon('arrow-right',14)}</button>
           <button class="btn small danger" data-action="delete-node" data-id="${node.id}" title="Delete">${icon('x',14)}</button>
         </div>
@@ -6635,6 +6704,7 @@ function icon(name, size){
     });
   });
 
+  document.getElementById('brainstormSearch').addEventListener('input', (e)=>{ brainstormQuery = e.target.value.trim().toLowerCase(); renderBrainstormList(); });
   document.getElementById('brainstormFilter').addEventListener('change', (e)=>{ brainstormFilter = e.target.value; renderBrainstormList(); });
   document.getElementById('brainstormSort').addEventListener('change', (e)=>{ brainstormSort = e.target.value; renderBrainstormList(); });
 
@@ -6646,7 +6716,46 @@ function icon(name, size){
     try{ e.dataTransfer.setDragImage(row, 12, 12); }catch(err){}
     row.classList.add('dragging');
   });
+  function clearBrainstormDropIndicators(){
+    brainstormList.classList.remove('drop-end');
+    brainstormList.querySelectorAll('.node.drop-before, .node.drop-after, .node.drop-child').forEach(n=>{ n.classList.remove('drop-before','drop-after','drop-child'); delete n.dataset.dropPos; });
+  }
+  function brainstormDragId(){ return draggedFromBrainstormId || draggedNodeId; }
+  brainstormList.addEventListener('dragover', (e)=>{
+    if(!brainstormDragId()) return;
+    e.preventDefault();
+    const drawer = document.getElementById('brainstormDrawer');
+    const dr = drawer.getBoundingClientRect();
+    if(e.clientY < dr.top + 50) drawer.scrollBy(0, -14); else if(e.clientY > dr.bottom - 50) drawer.scrollBy(0, 14);
+    clearBrainstormDropIndicators();
+    const row = e.target.closest('.node');
+    if(!row){ brainstormList.classList.add('drop-end'); return; }
+    if(row.dataset.id === brainstormDragId() || isDescendant(brainstormDragId(), row.dataset.id)) return;
+    const rect = row.querySelector(':scope > .node-row').getBoundingClientRect();
+    const ratio = (e.clientY - rect.top) / rect.height;
+    const pos = ratio < 0.3 ? 'before' : (ratio > 0.7 ? 'after' : 'child');
+    row.classList.add('drop-' + pos);
+    row.dataset.dropPos = pos;
+  });
+  brainstormList.addEventListener('dragleave', (e)=>{ if(!brainstormList.contains(e.relatedTarget)) clearBrainstormDropIndicators(); });
+  brainstormList.addEventListener('drop', async (e)=>{
+    const id = brainstormDragId();
+    if(!id) return;
+    e.preventDefault(); e.stopPropagation();
+    const row = e.target.closest('.node');
+    const targetId = row && row.dataset.id, pos = (row && row.dataset.dropPos) || 'after';
+    clearBrainstormDropIndicators();
+    draggedFromBrainstormId = null; draggedNodeId = null;
+    if(!ensureManualBrainstormOrder()) return;
+    if(targetId){ await moveNodeTo(id, targetId, pos); return; }
+    // Dropped on empty space: send it to the end of the brainstorm list.
+    const ctx = findContext(id); if(!ctx) return;
+    pushUndo();
+    const node = removeNodeById(id); delete node.indent; lesson.brainstorm.push(node);
+    await saveLesson(); rerenderStructure();
+  });
   brainstormList.addEventListener('dragend', ()=>{
+    clearBrainstormDropIndicators();
     brainstormList.querySelectorAll('.node.dragging').forEach(n=>n.classList.remove('dragging'));
     document.getElementById('mainTree').classList.remove('drawer-drop-target');
     clearDropIndicators();
@@ -6654,6 +6763,18 @@ function icon(name, size){
   });
 
   brainstormList.addEventListener('click', async (e)=>{
+    const bToggle = e.target.closest('[data-action="b-toggle"]');
+    if(bToggle){
+      const c = findContext(bToggle.dataset.id);
+      if(c){ c.node.collapsed = !c.node.collapsed; await saveLesson(); renderBrainstormList(); }
+      return;
+    }
+    const bIndent = e.target.closest('[data-action="b-indent"], [data-action="b-outdent"]');
+    if(bIndent){
+      if(!ensureManualBrainstormOrder()) return;
+      if(bIndent.dataset.action === 'b-indent') await indentNode(bIndent.dataset.id); else await outdentNode(bIndent.dataset.id);
+      return;
+    }
     const uploadBtn = e.target.closest('[data-action="upload-photo"]');
     if(uploadBtn){ pendingPhotoNodeId = uploadBtn.dataset.id; photoFileInput.value=''; photoFileInput.click(); return; }
     const removeBtn = e.target.closest('[data-action="remove-photo"]');
@@ -6691,7 +6812,7 @@ function icon(name, size){
       const tabCtx = tabId && findContext(tabId, lesson.brainstorm || [], null);
       if(tabCtx){
         e.preventDefault();
-        if(brainstormSort !== 'added' || brainstormFilter !== 'all'){ showToast('Set Show to "All kinds" and Sort to "Order added" to nest items.'); return; }
+        if(!ensureManualBrainstormOrder()) return;
         const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
         if(isText) tabCtx.node.text = t.value;
         const selStart = t.selectionStart, selEnd = t.selectionEnd;
@@ -6703,11 +6824,40 @@ function icon(name, size){
         return;
       }
     }
+    if((t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+      const rowEl = t.closest('.node'); const mvId = rowEl && rowEl.dataset.id;
+      if(mvId && findContext(mvId, lesson.brainstorm || [], null)){
+        e.preventDefault();
+        if(!ensureManualBrainstormOrder()) return;
+        if(await moveNodeSibling(mvId, e.key === 'ArrowUp' ? -1 : 1)){
+          requestAnimationFrame(()=>{
+            const el = brainstormList.querySelector(`.node[data-id="${mvId}"] > .node-row textarea, .node[data-id="${mvId}"] > .node-row input`);
+            if(el){ editSessionActive = true; el.focus(); }
+          });
+        }
+        return;
+      }
+    }
     if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
-      await saveLesson();
-      t.blur();
+      const ctx = findContext(t.dataset.id, lesson.brainstorm || [], null);
+      if(!ctx){ await saveLesson(); t.blur(); return; }
+      ctx.node.text = t.value;
+      // Enter on an empty nested line steps out a level; on an empty top-level line it just finishes.
+      if(!t.value.trim()){
+        if(ctx.parentNode || ctx.node.indent > 0){ if(ensureManualBrainstormOrder()) await outdentNode(ctx.node.id); }
+        else { await saveLesson(); t.blur(); }
+        return;
+      }
+      // Otherwise start the next line right below (first child if this line already has some).
+      if(!ensureManualBrainstormOrder()) return;
+      pushUndo();
+      const nn = makeNode('statement');
+      if(ctx.node.children && ctx.node.children.length && !ctx.node.collapsed) ctx.node.children.unshift(nn);
+      else ctx.arr.splice(ctx.idx + 1, 0, nn);
+      await saveLesson(); renderBrainstormList();
+      requestAnimationFrame(()=>{ const el = brainstormList.querySelector(`textarea[data-id="${nn.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
     }
   });
 
@@ -6975,6 +7125,15 @@ function icon(name, size){
     const id = t.dataset.id;
     const ctx = findContext(id);
     if(!ctx) return;
+
+    if(e.altKey && !e.metaKey && !e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+      e.preventDefault();
+      ctx.node.text = t.value;
+      if(await moveNodeSibling(id, e.key === 'ArrowUp' ? -1 : 1)){
+        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`textarea[data-id="${id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+      }
+      return;
+    }
 
     if((e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
       e.preventDefault();
