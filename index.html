@@ -105,7 +105,7 @@
   html[data-theme="dark"] .preview-surface{ box-shadow: var(--shadow-lg); }
   html[data-theme="dark"] ::selection{ background: var(--accent-soft); color: var(--accent-hover); }
   html{ transition: background var(--dur-slow) var(--ease-standard); }
-  body, .sidebar, .app-header, .btn, .outline-tree, .modal, .node-row, .brainstorm-drawer, textarea.node-text, input, select{
+  body, .sidebar, .app-header, .btn, .outline-tree, .modal, .node-row, .brainstorm-drawer, :is(textarea,div).node-text, input, select{
     transition-property: background-color, border-color, color, box-shadow, transform;
     transition-duration: var(--dur-fast);
     transition-timing-function: var(--ease-standard);
@@ -277,7 +277,7 @@
     background: var(--accent-soft);
     border-left-width: 6px;
   }
-  .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text.full-only{
+  .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text.full-only{
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 1.0rem;
@@ -334,7 +334,7 @@
 
   /* Freeform "flowing" thought lines within a section — statement/question/application/teacher-note */
   .thought-row{display:flex; gap:var(--space-4); align-items:flex-start;}
-  .thought-row textarea.node-text{flex:1; min-width:0; width:auto;}
+  .thought-row :is(textarea,div).node-text{flex:1; min-width:0; width:auto;}
   select.kind-select-inline{
     font-size:0.66rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:700;
     border:none; background:transparent; color:var(--text-dim); padding:7px 4px 0 0; flex-shrink:0;
@@ -343,22 +343,22 @@
   .node[data-kind="question"] select.kind-select-inline{color:var(--accent);}
   .node[data-kind="application"] select.kind-select-inline{color:#5C7A32;}
   .node[data-kind="teachernote"] select.kind-select-inline{color:var(--danger);}
-  textarea.node-text.flow-text{
+  :is(textarea,div).node-text.flow-text{
     border:none !important; border-bottom:1px solid transparent !important; background:transparent !important; border-radius:0 !important; padding:5px 2px !important;
   }
-  textarea.node-text.flow-text:hover, textarea.node-text.flow-text:focus{border-bottom-color: var(--border) !important; background:var(--bg) !important;}
+  :is(textarea,div).node-text.flow-text:hover, :is(textarea,div).node-text.flow-text:focus{border-bottom-color: var(--border) !important; background:var(--bg) !important;}
 
   .verse-ref-chip{font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.78rem; background: var(--accent); color:#fff; padding:2px 8px; border-radius:var(--radius-lg); display:inline-block; margin-bottom:var(--space-2);}
   .time-badge{font-family:'JetBrains Mono', monospace; font-size:0.72rem; background: var(--accent-soft); color: var(--accent-hover); border:1px solid transparent; border-radius:var(--radius-lg); padding:2px 9px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; font-variant-numeric:tabular-nums;}
   input.minutes-input{width:52px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px 5px; font-size:0.78rem; background:var(--surface); color:var(--text);}
 
-  textarea.node-text{width:100%; border:1px solid var(--border); background:var(--surface); color: var(--text); border-radius:var(--radius-sm); padding:8px 10px; font-size:0.92rem; line-height:1.5; resize:none; overflow:hidden; min-height:38px; font-family:'Inter', sans-serif;}
-  .node[data-kind="heading"] > .node-row > .node-main > textarea.node-text{font-weight:700; font-size:1.02rem;}
-  .node[data-kind="question"] > .node-row > .node-main textarea.node-text{font-style:italic;}
+  :is(textarea,div).node-text{width:100%; border:1px solid var(--border); background:var(--surface); color: var(--text); border-radius:var(--radius-sm); padding:8px 10px; font-size:0.92rem; line-height:1.5; resize:none; overflow:hidden; min-height:38px; font-family:'Inter', sans-serif;}
+  .node[data-kind="heading"] > .node-row > .node-main > :is(textarea,div).node-text{font-weight:700; font-size:1.02rem;}
+  .node[data-kind="question"] > .node-row > .node-main :is(textarea,div).node-text{font-style:italic;}
   .node[data-kind="application"] > .node-row{border-left:3px solid #6E8C3E;}
-  .node[data-kind="application"] > .node-row > .node-main textarea.node-text{font-style:italic;}
+  .node[data-kind="application"] > .node-row > .node-main :is(textarea,div).node-text{font-style:italic;}
   .node[data-kind="teachernote"] > .node-row{border-left:3px solid var(--danger); background: var(--danger-soft);}
-  .node[data-kind="teachernote"] > .node-row > .node-main textarea.node-text{font-size:0.86rem;}
+  .node[data-kind="teachernote"] > .node-row > .node-main :is(textarea,div).node-text{font-size:0.86rem;}
 
   .condensed-flag{font-size:0.68rem; color: var(--text-faint); font-style:italic;}
   .photo-placeholder{padding:10px 0;}
@@ -388,26 +388,26 @@
   #mainTree.doc-view .node-row:hover{background:transparent;}
   #mainTree.doc-view .node[data-kind="teachernote"] > .node-row{background:transparent;}
   #mainTree.doc-view .node-children{margin-left:22px; padding-left:14px;}
-  #mainTree.doc-view textarea.node-text{
+  #mainTree.doc-view :is(textarea,div).node-text{
     border:none !important; background:transparent !important; color:#1F2420; padding:2px 0;
     font-family:inherit; font-size:1rem; line-height:1.65; box-shadow:none;
   }
-  #mainTree.doc-view textarea.node-text::placeholder{color:#B7B2A4;}
+  #mainTree.doc-view :is(textarea,div).node-text::placeholder{color:#B7B2A4;}
   #mainTree.doc-view .node-main > .hint{display:none;} /* the small kind label above each field, e.g. "Statement" — redundant once styled typographically */
-  #mainTree.doc-view .node[data-kind="heading"] > .node-row textarea.node-text{font-weight:700; font-family:'Space Grotesk','Inter',sans-serif;}
-  #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.55rem; letter-spacing:-0.01em;}
-  #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.25rem;}
-  #mainTree.doc-view .node[data-depth="2"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.1rem;}
-  #mainTree.doc-view .node[data-kind="heading"]:not([data-depth="0"]):not([data-depth="1"]):not([data-depth="2"]) > .node-row textarea.node-text{font-size:1.02rem;}
+  #mainTree.doc-view .node[data-kind="heading"] > .node-row :is(textarea,div).node-text{font-weight:700; font-family:'Space Grotesk','Inter',sans-serif;}
+  #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.55rem; letter-spacing:-0.01em;}
+  #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.25rem;}
+  #mainTree.doc-view .node[data-depth="2"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.1rem;}
+  #mainTree.doc-view .node[data-kind="heading"]:not([data-depth="0"]):not([data-depth="1"]):not([data-depth="2"]) > .node-row :is(textarea,div).node-text{font-size:1.02rem;}
   #mainTree.doc-view .node[data-depth="0"][data-kind="heading"]{margin-top:34px;}
   #mainTree.doc-view .node[data-depth="0"][data-kind="heading"]:first-child{margin-top:0;}
-  #mainTree.doc-view .node[data-kind="question"] > .node-row textarea.node-text{font-style:italic; color:#3D4A3E;}
-  #mainTree.doc-view .node[data-kind="application"] > .node-row textarea.node-text{font-style:italic;}
-  #mainTree.doc-view .node[data-kind="teachernote"] > .node-row textarea.node-text{font-size:0.9rem; color:#7A6F5C;}
+  #mainTree.doc-view .node[data-kind="question"] > .node-row :is(textarea,div).node-text{font-style:italic; color:#3D4A3E;}
+  #mainTree.doc-view .node[data-kind="application"] > .node-row :is(textarea,div).node-text{font-style:italic;}
+  #mainTree.doc-view .node[data-kind="teachernote"] > .node-row :is(textarea,div).node-text{font-size:0.9rem; color:#7A6F5C;}
   #mainTree.doc-view .node[data-kind="teachernote"] > .node-row::before{content:"Teacher's Note"; display:block; font-family:'Inter',sans-serif; font-size:0.66rem; text-transform:uppercase; letter-spacing:.06em; color:#B7AE98; margin-bottom:2px;}
   #mainTree.doc-view .node[data-kind="verse"] > .node-row{border-left:2px solid #C9BFA0 !important; padding-left:14px;}
   #mainTree.doc-view .verse-ref-chip{font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; color:#8C6A2F; letter-spacing:.03em; background:transparent; padding:0;}
-  #mainTree.doc-view .node[data-kind="verse"] textarea.node-text.full-only{font-style:italic; color:#4A4636;}
+  #mainTree.doc-view .node[data-kind="verse"] :is(textarea,div).node-text.full-only{font-style:italic; color:#4A4636;}
   #mainTree.doc-view .drag-handle,
   #mainTree.doc-view button[data-action="toggle-collapse"],
   #mainTree.doc-view .node-add-bottom{opacity:0; pointer-events:none; transition:opacity .12s ease;}
@@ -435,7 +435,7 @@
   body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row{background:transparent;}
   body.outline-style-classic #mainTree .node-children{margin-left:22px; padding-left:0; border-left:none;}
   body.outline-style-classic #mainTree .node-main > .hint{display:none;}
-  body.outline-style-classic #mainTree textarea.node-text{font-family:'Calibri','Segoe UI','Inter',sans-serif; color:var(--text); line-height:1.5;}
+  body.outline-style-classic #mainTree :is(textarea,div).node-text{font-family:'Calibri','Segoe UI','Inter',sans-serif; color:var(--text); line-height:1.5;}
   body.outline-style-classic #mainTree .drag-handle,
   body.outline-style-classic #mainTree button[data-action="toggle-collapse"],
   body.outline-style-classic #mainTree .node-add-bottom{opacity:0; pointer-events:none; transition:opacity .12s ease;}
@@ -445,10 +445,10 @@
   body.outline-style-classic #mainTree .node-children:focus-within > .node-add-bottom{opacity:1; pointer-events:auto;}
   /* Headings: bold plain text, no bullet */
   body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row > .node-number{display:none;}
-  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row textarea.node-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif;}
-  body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.4rem;}
-  body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.18rem;}
-  body.outline-style-classic #mainTree .node[data-depth="2"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.06rem;}
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row :is(textarea,div).node-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif;}
+  body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.4rem;}
+  body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.18rem;}
+  body.outline-style-classic #mainTree .node[data-depth="2"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.06rem;}
   body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]{margin-top:28px;}
   body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]:first-child{margin-top:0;}
   /* Non-heading rows: a plain bullet cycling by depth, no per-kind label/italics — Statement/
@@ -460,25 +460,25 @@
   body.outline-style-classic #mainTree .node[data-depth="1"]:not([data-kind="heading"]) > .node-row > .node-number::before{content:"○"; font-size:0.55rem;}
   body.outline-style-classic #mainTree .node[data-depth="2"]:not([data-kind="heading"]) > .node-row > .node-number::before,
   body.outline-style-classic #mainTree .node[data-depth="3"]:not([data-kind="heading"]) > .node-row > .node-number::before{content:"▪"; font-size:0.5rem;}
-  body.outline-style-classic #mainTree .node[data-kind="statement"] > .node-row textarea.node-text,
-  body.outline-style-classic #mainTree .node[data-kind="question"] > .node-row textarea.node-text,
-  body.outline-style-classic #mainTree .node[data-kind="application"] > .node-row textarea.node-text{font-style:normal; color:var(--text);}
+  body.outline-style-classic #mainTree .node[data-kind="statement"] > .node-row :is(textarea,div).node-text,
+  body.outline-style-classic #mainTree .node[data-kind="question"] > .node-row :is(textarea,div).node-text,
+  body.outline-style-classic #mainTree .node[data-kind="application"] > .node-row :is(textarea,div).node-text{font-style:normal; color:var(--text);}
   /* Verse: subtle block-quote cue */
   body.outline-style-classic #mainTree .node[data-kind="verse"] > .node-row{border-left:2px solid var(--border) !important; padding-left:14px;}
   body.outline-style-classic #mainTree .node[data-kind="verse"] .verse-ref-chip{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:0.72rem; font-weight:700; color:var(--text-dim); letter-spacing:.02em; background:transparent; padding:0;}
-  body.outline-style-classic #mainTree .node[data-kind="verse"] textarea.node-text.full-only{font-style:italic; color:var(--text);}
+  body.outline-style-classic #mainTree .node[data-kind="verse"] :is(textarea,div).node-text.full-only{font-style:italic; color:var(--text);}
   /* Photo: small inline thumbnail instead of a large block */
   body.outline-style-classic #mainTree .node-photo{max-width:120px; max-height:90px; object-fit:cover;}
   /* Teacher's Note: subtle muted aside, not a loud flagged card */
-  body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row textarea.node-text{font-size:0.88rem; font-style:italic; color:var(--text-dim);}
+  body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row :is(textarea,div).node-text{font-size:0.88rem; font-style:italic; color:var(--text-dim);}
   body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row::before{content:"Note — "; display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:0.72rem; font-weight:600; color:var(--text-faint); padding-top:6px;}
   @media (max-width: 720px){
     body.outline-style-classic #mainTree{padding:24px 16px 60px; border-radius:0; border-left:none; border-right:none;}
   }
   @media (max-width: 480px){
     body.outline-style-classic #mainTree{padding:18px 14px 60px; border:none; box-shadow:none; max-width:100%;}
-    body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.22rem;}
-    body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.08rem;}
+    body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.22rem;}
+    body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.08rem;}
     body.outline-style-classic #mainTree .node-children{margin-left:14px;}
   }
   @media (max-width: 720px){
@@ -490,8 +490,8 @@
        and shrink the reserved rail width too so the reading column isn't squeezed
        down to a sliver. */
     #mainTree.doc-view{padding:18px 14px 60px; border:none; box-shadow:none; max-width:100%;}
-    #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.3rem;}
-    #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.12rem;}
+    #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.3rem;}
+    #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.12rem;}
     #mainTree.doc-view .node-children{margin-left:10px; padding-left:8px;}
     .rail{width:48px;}
     .rail.expanded{width:188px;}
@@ -1275,18 +1275,18 @@
   /* Questions: always italic, marked with "Q:" in place of the number/bullet (editor, brainstorm, previews). */
   html body #mainTree .node[data-kind="question"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--accent) !important;}
   html body #mainTree .node[data-kind="question"] > .node-row > .node-number::before{content:"Q:" !important; font-size:.8rem !important; font-weight:700 !important; font-style:italic !important; font-family:'Inter',sans-serif !important; color:var(--accent) !important;}
-  html body #mainTree .node[data-kind="question"] > .node-row textarea.node-text,
-  html body #brainstormList .node[data-kind="question"] textarea.node-text{font-style:italic !important;}
+  html body #mainTree .node[data-kind="question"] > .node-row :is(textarea,div).node-text,
+  html body #brainstormList .node[data-kind="question"] :is(textarea,div).node-text{font-style:italic !important;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-number{visibility:hidden;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-text{font-style:italic !important;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-text::before{content:"Q: " !important; display:inline !important; font-style:italic !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
   /* Tighter spacing so nested points read as a group (not stacked on top of each other). */
-  body.outline-style-classic #mainTree textarea.node-text{min-height:0;}
+  body.outline-style-classic #mainTree :is(textarea,div).node-text{min-height:0;}
   #mainTree .node-children > .node{margin:0;}
   body.outline-style-classic #mainTree .node-children > .node:not([data-kind="heading"]) > .node-row{padding-top:1px; padding-bottom:1px;}
   /* Multi-line selection highlight */
   html body .node-row.block-selected{background:var(--accent-soft) !important; box-shadow:inset 0 0 0 1px var(--accent);}
-  html body .node-row.block-selected textarea.node-text{background:transparent !important;}
+  html body .node-row.block-selected :is(textarea,div).node-text{background:transparent !important;}
   html body .node-row.block-selected ::selection{background:transparent;}
   /* Bullets change with each nesting level (under a section: ● ○ ■ – ›) so you can tell the levels apart. */
   body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"●" !important; font-size:.5rem !important; color:var(--text-dim) !important;}
@@ -1305,8 +1305,8 @@
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before,
   #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:.95rem !important;}
   /* Statements are never italic (overrides any leftover per-line italic formatting). */
-  html body #mainTree .node[data-kind="statement"] > .node-row textarea.node-text,
-  html body #brainstormList .node[data-kind="statement"] > .node-row textarea.node-text{font-style:normal !important;}
+  html body #mainTree .node[data-kind="statement"] > .node-row :is(textarea,div).node-text,
+  html body #brainstormList .node[data-kind="statement"] > .node-row :is(textarea,div).node-text{font-style:normal !important;}
   /* Brainstorm / Scripture / Presenter Mode / Set time live at the right end of the sticky ribbon. */
   .rb-actions{display:flex; align-items:center; gap:6px; margin-left:auto; padding-left:12px; flex-shrink:0; background:var(--surface);}
   .rb-actions .action-card{padding:3px 11px 3px 4px;}
@@ -1445,8 +1445,8 @@
   html[data-theme="dark"]{--apply:#F2A65A;}
   html body #mainTree .node[data-kind="application"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--apply) !important;}
   html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"]) > .node-row > .node-number::before{content:"A:" !important; font-size:.8rem !important; font-weight:700 !important; font-family:'Inter',sans-serif !important; color:var(--apply) !important; white-space:pre;}
-  html body #mainTree .node[data-kind="application"] > .node-row textarea.node-text,
-  html body #brainstormList .node[data-kind="application"] textarea.node-text{color:var(--apply) !important;}
+  html body #mainTree .node[data-kind="application"] > .node-row :is(textarea,div).node-text,
+  html body #brainstormList .node[data-kind="application"] :is(textarea,div).node-text{color:var(--apply) !important;}
   html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"• A:" !important;}
   html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .node-row > .node-number::before{content:"◦ A:" !important;}
   html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .node-row > .node-number::before{content:"▪ A:" !important;}
@@ -1455,6 +1455,13 @@
   html body .p-node[data-kind="application"] > .p-node-row > .p-number{visibility:hidden;}
   html body .p-node[data-kind="application"] > .p-node-row > .p-text{color:#B45309 !important;}
   html body .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:"A: " !important; display:inline !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
+
+  /* Rich (partly formattable) text boxes behave like the old text areas. */
+  .rt-edit.node-text{white-space:pre-wrap; overflow-wrap:anywhere; cursor:text; min-height:1.5em; display:block; box-sizing:border-box; outline:none;}
+  .rt-edit.node-text[data-empty]::before{content:attr(data-ph); color:var(--text-faint); pointer-events:none;}
+  .rt-edit.node-text:focus{border-color:var(--accent);}
+  .rt-edit .rt-run{white-space:pre-wrap;}
+  @media (max-width:1560px){ .rb-font{max-width:96px;} .rb-sz-step{display:none;} }
 </style>
 </head>
 <body>
@@ -3540,6 +3547,142 @@ function icon(name, size){
     times:"'Times New Roman',Times,serif", garamond:"Garamond,'Palatino Linotype',Georgia,serif", verdana:"Verdana,Geneva,sans-serif",
     trebuchet:"'Trebuchet MS','Lucida Grande',sans-serif", courier:"'Courier New',Courier,monospace"
   };
+
+  // ---------------- Rich text inside a line ----------------
+  // node.text stays plain text (search, counts, exports all keep working). node.runs holds formatting for
+  // parts of it: [{s, e, b, i, u, pt, font, color}] with character offsets into node.text.
+  const RUN_KEYS = ['b','i','u','pt','font','color'];
+  const isRT = el => !!(el && el.classList && el.classList.contains('rt-edit'));
+  const isTA = el => !!el && (el.tagName === 'TEXTAREA' || isRT(el));
+  function runCss(r){
+    let c = '';
+    if(r.b !== undefined) c += 'font-weight:' + (r.b ? '700' : '400') + ';';
+    if(r.i !== undefined) c += 'font-style:' + (r.i ? 'italic' : 'normal') + ';';
+    if(r.u !== undefined) c += 'text-decoration:' + (r.u ? 'underline' : 'none') + ';';
+    if(r.pt) c += 'font-size:' + r.pt + 'pt;';
+    if(r.font && FONT_FAMILIES[r.font]) c += 'font-family:' + FONT_FAMILIES[r.font] + ';';
+    if(r.color) c += 'color:' + r.color + ';';
+    return c;
+  }
+  function runProps(r){ const p = {}; RUN_KEYS.forEach(k=>{ if(r[k] !== undefined && r[k] !== '' && r[k] !== null) p[k] = r[k]; }); return p; }
+  function runsToHtml(text, runs){
+    text = text || '';
+    const esc = t => escapeHtml(t).replace(/\n/g, '<br>');
+    let out = '', pos = 0;
+    (runs || []).slice().sort((a,b)=>a.s-b.s).forEach(r=>{
+      const s = Math.max(pos, r.s), e = Math.min(text.length, r.e);
+      if(e <= s) return;
+      if(s > pos) out += esc(text.slice(pos, s));
+      out += `<span class="rt-run" data-r="${escapeHtml(JSON.stringify(runProps(r)))}" style="${escapeHtml(runCss(r))}">${esc(text.slice(s, e))}</span>`;
+      pos = e;
+    });
+    if(pos < text.length) out += esc(text.slice(pos));
+    if(text.endsWith('\n')) out += '<br>';
+    return out;
+  }
+  function sameProps(a, b){ return RUN_KEYS.every(k=>a[k] === b[k]); }
+  // Read an editable box back into plain text + runs.
+  function readRT(el){
+    let text = '';
+    const runs = [];
+    const add = (str, props)=>{
+      if(!str) return;
+      const s = text.length; text += str;
+      if(Object.keys(props).length){
+        const last = runs[runs.length - 1];
+        if(last && last.e === s && sameProps(last, props)) last.e = text.length;
+        else runs.push(Object.assign({s, e: text.length}, props));
+      }
+    };
+    (function walk(node, props){
+      node.childNodes.forEach(c=>{
+        if(c.nodeType === 3) add(c.nodeValue.replace(/​/g, ''), props);
+        else if(c.nodeName === 'BR'){ if(!(c.parentNode === el && c === el.lastChild)) add('\n', props); }
+        else if(c.nodeType === 1){
+          let p = props;
+          if(c.dataset && c.dataset.r){ try{ p = Object.assign({}, props, JSON.parse(c.dataset.r)); }catch(err){} }
+          if((c.nodeName === 'DIV' || c.nodeName === 'P') && text && !text.endsWith('\n')) add('\n', props);
+          walk(c, p);
+        }
+      });
+    })(el, {});
+    return { text, runs };
+  }
+  function clipRuns(runs, a, b, shift){
+    const out = [];
+    (runs || []).forEach(r=>{
+      const s = Math.max(a, r.s), e = Math.min(b, r.e);
+      if(e > s) out.push(Object.assign({}, r, { s: s + shift, e: e + shift }));
+    });
+    return out;
+  }
+  function setNodeRuns(node, runs){ if(runs && runs.length) node.runs = runs; else delete node.runs; }
+  // Plain-text offset <-> DOM position inside an editable box (a <br> counts as one character).
+  function rtTextLength(frag){
+    let n = 0;
+    (function walk(node){ node.childNodes.forEach(c=>{ if(c.nodeType === 3) n += c.nodeValue.replace(/​/g, '').length; else if(c.nodeName === 'BR') n += 1; else walk(c); }); })(frag);
+    return n;
+  }
+  function rtOffsetOf(el, node, off){
+    if(!el.contains(node)) return 0;
+    const r = document.createRange(); r.setStart(el, 0);
+    try{ r.setEnd(node, off); }catch(err){ return 0; }
+    return rtTextLength(r.cloneContents());
+  }
+  function rtDomPos(el, off){
+    let acc = 0;
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
+    let n;
+    while((n = w.nextNode())){
+      if(n.nodeType === 3){
+        const L = n.nodeValue.length;
+        if(off <= acc + L) return [n, off - acc];
+        acc += L;
+      } else if(n.nodeName === 'BR'){
+        if(off === acc) return [n.parentNode, Array.prototype.indexOf.call(n.parentNode.childNodes, n)];
+        acc += 1;
+      }
+    }
+    return [el, el.childNodes.length];
+  }
+  function rtSelRange(el){
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount || !el.contains(sel.anchorNode) || !el.contains(sel.focusNode)) return null;
+    const a = rtOffsetOf(el, sel.anchorNode, sel.anchorOffset), b = rtOffsetOf(el, sel.focusNode, sel.focusOffset);
+    return [Math.min(a, b), Math.max(a, b)];
+  }
+  // Make the editable boxes answer like text areas (value / selectionStart / selectionEnd / setSelectionRange).
+  Object.defineProperty(HTMLDivElement.prototype, 'value', { configurable: true,
+    get(){ return isRT(this) ? readRT(this).text : undefined; },
+    set(v){ if(isRT(this)) this.innerHTML = runsToHtml(String(v), []); } });
+  Object.defineProperty(HTMLDivElement.prototype, 'selectionStart', { configurable: true,
+    get(){ if(!isRT(this)) return undefined; const r = rtSelRange(this); return r ? r[0] : 0; } });
+  Object.defineProperty(HTMLDivElement.prototype, 'selectionEnd', { configurable: true,
+    get(){ if(!isRT(this)) return undefined; const r = rtSelRange(this); return r ? r[1] : 0; } });
+  HTMLDivElement.prototype.setSelectionRange = function(a, b){
+    if(!isRT(this)) return;
+    const s = rtDomPos(this, a), e = rtDomPos(this, b === undefined ? a : b);
+    const range = document.createRange(); range.setStart(s[0], s[1]); range.setEnd(e[0], e[1]);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  };
+  // Apply a change to part of a line's text: the runs in [a,b) get patched; the rest stay as they are.
+  function patchRuns(node, a, b, patchFn, readFn){
+    let runs = (node.runs || []).map(r=>Object.assign({}, r));
+    const split = pos=>{ for(let i=0;i<runs.length;i++){ const r = runs[i]; if(r.s < pos && pos < r.e){ runs.splice(i, 1, Object.assign({}, r, {e: pos}), Object.assign({}, r, {s: pos})); break; } } };
+    split(a); split(b);
+    runs.sort((x,y)=>x.s-y.s);
+    const inside = runs.filter(r=>r.s >= a && r.e <= b), outside = runs.filter(r=>!(r.s >= a && r.e <= b));
+    let pos = a; const segs = [];
+    inside.forEach(r=>{ if(r.s > pos) segs.push({s: pos, e: r.s}); segs.push(r); pos = r.e; });
+    if(pos < b) segs.push({s: pos, e: b});
+    if(readFn) readFn(segs);
+    segs.forEach(patchFn);
+    let out = outside.concat(segs).filter(r=>r.e > r.s && Object.keys(runProps(r)).length).sort((x,y)=>x.s-y.s);
+    out = out.map(r=>Object.assign({s: r.s, e: r.e}, runProps(r)));
+    const merged = [];
+    out.forEach(r=>{ const l = merged[merged.length-1]; if(l && l.e === r.s && sameProps(l, r)) l.e = r.e; else merged.push(r); });
+    setNodeRuns(node, merged);
+  }
   const FONT_PT_MIN = 6, FONT_PT_MAX = 144;
   function clampPt(v){ v = Math.round(parseFloat(v) * 2) / 2; return isNaN(v) ? null : Math.min(FONT_PT_MAX, Math.max(FONT_PT_MIN, v)); }
   function styleObjToCssText(style){
@@ -5137,7 +5280,7 @@ function icon(name, size){
           mainContent = `<div class="photo-placeholder"><button class="btn small brass" data-action="upload-photo" data-id="${node.id}">Upload Photo</button></div>`;
         }
       } else {
-        mainContent = `<textarea class="node-text full-only" data-field="text" data-id="${node.id}" placeholder="${placeholderFor(node.kind)}" style="${escapeHtml(styleObjToCssText(node.style))}">${escapeHtml(node.text)}</textarea>`;
+        mainContent = `<div class="node-text full-only rt-edit" contenteditable="true" spellcheck="true" role="textbox" data-field="text" data-id="${node.id}" data-ph="${escapeHtml(placeholderFor(node.kind))}"${node.text ? '' : ' data-empty="1"'} style="${escapeHtml(styleObjToCssText(node.style))}">${runsToHtml(node.text, node.runs)}</div>`;
       }
 
       const photoExtra = isPhoto ? `
@@ -5348,7 +5491,7 @@ function icon(name, size){
         ? `<img class="node-photo" src="${dataUrl}" alt=""><div>${escapeHtml(node.caption||'')}</div>`
         : '<em>(no photo yet)</em>';
     } else {
-      body = `<span style="${styleCss}">${escapeHtml(node.text || '(empty)')}</span>`;
+      body = `<span style="${styleCss}">${node.text ? runsToHtml(node.text, node.runs) : '(empty)'}</span>`;
     }
     let timeBadge = '';
     if(node.kind==='heading' && pubStyle.showTimeBadges !== false){
@@ -6426,14 +6569,14 @@ function icon(name, size){
   function armFieldUndoTracking(container){
     container.addEventListener('focusin', (e)=>{
       const t = e.target;
-      if(!editSessionActive && (t.tagName==='TEXTAREA' || t.tagName==='INPUT' || t.tagName==='SELECT')){
+      if(!editSessionActive && (isTA(t) || t.tagName==='INPUT' || t.tagName==='SELECT')){
         pushUndo();
         editSessionActive = true;
       }
     });
     container.addEventListener('focusout', (e)=>{
       const t = e.target;
-      if(t.tagName==='TEXTAREA' || t.tagName==='INPUT' || t.tagName==='SELECT') editSessionActive = false;
+      if(isTA(t) || t.tagName==='INPUT' || t.tagName==='SELECT') editSessionActive = false;
     });
   }
 
@@ -6593,11 +6736,11 @@ function icon(name, size){
       if(document.querySelector('.modal-overlay.open')) return;
       e.preventDefault(); performRedo();
     }
-    if(e.key === '?' && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName)){
+    if(e.key === '?' && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName) && !isTA(document.activeElement)){
       e.preventDefault(); openShortcutsModal();
     }
     if(!e.metaKey && !e.ctrlKey && !e.altKey
-       && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName)
+       && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName) && !isTA(document.activeElement)
        && !document.activeElement.isContentEditable
        && !document.querySelector('.modal-overlay.open') && lesson){
       const QUICK_ADD_KIND = { s:'statement', q:'question', v:'verse', a:'application', t:'teachernote', p:'photo', h:'heading' };
@@ -6611,7 +6754,7 @@ function icon(name, size){
         const newId = addNodeAfter(QUICK_ADD_KIND[key], lastFocusedNodeId);
         saveLesson().then(()=>{
           renderTree();
-          requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+          requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`.node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
         });
         lastFocusedNodeId = newId;
       }
@@ -7030,7 +7173,7 @@ function icon(name, size){
     const newId = addNode('heading', 'root');
     await saveLesson();
     renderTree();
-    requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+    requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree .node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
   });
   document.getElementById('outlineViewSegmented').addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-level]');
@@ -7066,7 +7209,7 @@ function icon(name, size){
       await saveLesson();
       renderBrainstormList();
       if(kind === 'photo'){ pendingPhotoNodeId = node.id; photoFileInput.value=''; photoFileInput.click(); }
-      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#brainstormList textarea[data-id="${node.id}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
+      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#brainstormList .node-text[data-id="${node.id}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
     });
   });
 
@@ -7159,6 +7302,7 @@ function icon(name, size){
     const t = e.target;
     if(t.dataset && t.dataset.field){
       updateNodeField(t.dataset.id, t.dataset.field, t.value);
+      if(t.dataset.field === 'text'){ const bc = findContext(t.dataset.id, lesson.brainstorm || [], null); if(bc) delete bc.node.runs; }
       if(t.tagName==='TEXTAREA'){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
       scheduleAutosave();
     }
@@ -7168,43 +7312,43 @@ function icon(name, size){
     if(t.dataset && t.dataset.field){ updateNodeField(t.dataset.id, t.dataset.field, t.value); await saveLesson(); }
   });
   brainstormList.addEventListener('blur', async (e)=>{
-    if(e.target.tagName==='TEXTAREA' || e.target.tagName==='INPUT') await saveLesson();
+    if(isTA(e.target) || e.target.tagName==='INPUT') await saveLesson();
   }, true);
   brainstormList.addEventListener('keydown', async (e)=>{
     const t = e.target;
-    if(e.key === 'Tab' && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if(e.key === 'Tab' && (isTA(t) || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
       const rowEl = t.closest('.node');
       const tabId = rowEl && rowEl.dataset.id;
       const tabCtx = tabId && findContext(tabId, lesson.brainstorm || [], null);
       if(tabCtx){
         e.preventDefault();
         if(!ensureManualBrainstormOrder()) return;
-        const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
+        const isText = isTA(t) && t.dataset.field === 'text';
         if(isText) tabCtx.node.text = t.value;
         const selStart = t.selectionStart, selEnd = t.selectionEnd;
         if(e.shiftKey) await outdentNode(tabId); else await indentNode(tabId);
         requestAnimationFrame(()=>{
-          const el = brainstormList.querySelector(`.node[data-id="${tabId}"] > .node-row textarea, .node[data-id="${tabId}"] > .node-row input`);
+          const el = brainstormList.querySelector(`.node[data-id="${tabId}"] > .node-row .node-text, .node[data-id="${tabId}"] > .node-row input`);
           if(el){ editSessionActive = true; el.focus(); try{ if(isText) el.setSelectionRange(selStart, selEnd); }catch(err){} }
         });
         return;
       }
     }
-    if((t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+    if((isTA(t) || t.tagName === 'INPUT') && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
       const rowEl = t.closest('.node'); const mvId = rowEl && rowEl.dataset.id;
       if(mvId && findContext(mvId, lesson.brainstorm || [], null)){
         e.preventDefault();
         if(!ensureManualBrainstormOrder()) return;
         if(await moveNodeSibling(mvId, e.key === 'ArrowUp' ? -1 : 1)){
           requestAnimationFrame(()=>{
-            const el = brainstormList.querySelector(`.node[data-id="${mvId}"] > .node-row textarea, .node[data-id="${mvId}"] > .node-row input`);
+            const el = brainstormList.querySelector(`.node[data-id="${mvId}"] > .node-row .node-text, .node[data-id="${mvId}"] > .node-row input`);
             if(el){ editSessionActive = true; el.focus(); }
           });
         }
         return;
       }
     }
-    if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
+    if(!isTA(t) || !t.dataset || t.dataset.field !== 'text') return;
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
       const ctx = findContext(t.dataset.id, lesson.brainstorm || [], null);
@@ -7217,7 +7361,7 @@ function icon(name, size){
       if(ctx.node.children && ctx.node.children.length && !ctx.node.collapsed) ctx.node.children.unshift(nn);
       else ctx.arr.splice(ctx.idx + 1, 0, nn);
       await saveLesson(); renderBrainstormList();
-      requestAnimationFrame(()=>{ const el = brainstormList.querySelector(`textarea[data-id="${nn.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+      requestAnimationFrame(()=>{ const el = brainstormList.querySelector(`.node-text[data-id="${nn.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
     }
   });
 
@@ -7285,7 +7429,7 @@ function icon(name, size){
     if(ta){ editSessionActive = true; ta.focus(); }
   });
   mainTree.addEventListener('focusin', (e)=>{
-    const ta = e.target.closest && e.target.closest('textarea.node-text[data-id]');
+    const ta = e.target.closest && e.target.closest('.node-text[data-id]');
     if(ta) lastFocusedNodeId = ta.dataset.id;
     else { const row = e.target.closest && e.target.closest('.node[data-id]'); if(row) lastFocusedNodeId = row.dataset.id; }
     updateRibbonState();
@@ -7340,7 +7484,7 @@ function icon(name, size){
         style[key] = !style[key];
         await saveLesson();
         fmtBtn.classList.toggle('active', style[key]);
-        const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
+        const ta = mainTree.querySelector(`.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
       }
       return;
@@ -7355,7 +7499,7 @@ function icon(name, size){
         await saveLesson();
         const menu = fmtColorBtn.closest('.format-menu');
         menu.querySelectorAll('[data-fmt-color]').forEach(b=> b.classList.toggle('active', b.dataset.fmtColor === style.color));
-        const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
+        const ta = mainTree.querySelector(`.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
       }
       return;
@@ -7404,7 +7548,7 @@ function icon(name, size){
       await saveLesson();
       renderTree();
       if(kind === 'photo'){ pendingPhotoNodeId = newId; photoFileInput.value=''; photoFileInput.click(); }
-      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
+      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree .node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
       return;
     }
     const uploadBtn = e.target.closest('[data-action="upload-photo"]');
@@ -7478,7 +7622,7 @@ function icon(name, size){
     blockSel = { container, anchorId, headId };
     paintBlockSel();
     const ae = document.activeElement;
-    if(ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && container.contains(ae)){ try{ ae.setSelectionRange(ae.selectionEnd, ae.selectionEnd); }catch(err){} }
+    if(ae && (isTA(ae) || ae.tagName === 'INPUT') && container.contains(ae)){ try{ ae.setSelectionRange(ae.selectionEnd, ae.selectionEnd); }catch(err){} }
   }
   function clearBlockSel(){ if(!blockSel) return; blockSel = null; paintBlockSel(); }
   function blockNodeDepth(el){ let d = 0, n = el.parentElement; while(n){ if(n.classList && n.classList.contains('node')) d++; n = n.parentElement; } return d; }
@@ -7516,6 +7660,8 @@ function icon(name, size){
   }
   document.addEventListener('mousedown', (e)=>{
     const row = e.target.closest ? e.target.closest('#mainTree .node, #brainstormList .node') : null;
+    // Clicking the ribbon (bold, size, colour…) keeps the highlighted lines so the change applies to all of them.
+    if(blockSel && e.target.closest && e.target.closest('#wordRibbon')){ blockDrag = null; return; }
     if(blockSel && !(e.shiftKey && row)) clearBlockSel();
     blockDrag = null;
     if(!row || e.button !== 0 || e.target.closest('button, .drag-handle, .drawer-drag-handle, .add-menu, .node-controls')) return;
@@ -7542,7 +7688,7 @@ function icon(name, size){
     const t = e.target;
     const row = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
     const mod = e.metaKey || e.ctrlKey;
-    if(blockSel){
+    if(blockSel && !(t && t.closest && t.closest('#wordRibbon'))){
       if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); clearBlockSel(); return; }
       if(e.key === 'Delete' || e.key === 'Backspace'){ e.preventDefault(); e.stopPropagation(); deleteBlockSelection(); return; }
       if(e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
@@ -7561,7 +7707,7 @@ function icon(name, size){
         return;
       }
     }
-    if(!row || (t.tagName !== 'TEXTAREA' && t.tagName !== 'INPUT')) return;
+    if(!row || (!isTA(t) && t.tagName !== 'INPUT')) return;
     const container = row.closest('#mainTree, #brainstormList');
     if(mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'a'){
       const ids = blockVisibleNodes(container).map(n=>n.dataset.id);
@@ -7571,7 +7717,7 @@ function icon(name, size){
       }
       return;
     }
-    if(e.shiftKey && !mod && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && t.tagName === 'TEXTAREA'){
+    if(e.shiftKey && !mod && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && isTA(t)){
       const atEdge = e.key === 'ArrowUp' ? t.selectionStart === 0 : t.selectionEnd === t.value.length;
       if(!atEdge) return;
       const ids = blockVisibleNodes(container).map(n=>n.dataset.id);
@@ -7598,10 +7744,14 @@ function icon(name, size){
   document.addEventListener('paste', async (e)=>{
     const cd = e.clipboardData; if(!cd) return;
     const t = e.target;
-    if(!t || t.tagName !== 'TEXTAREA' || t.dataset.field !== 'text' || t.readOnly) return;
+    if(!t || !isTA(t) || t.dataset.field !== 'text' || t.readOnly) return;
     const row = t.closest('#mainTree .node, #brainstormList .node'); if(!row) return;
     const raw = cd.getData('text/plain').replace(/\r\n?/g, '\n').replace(/\n+$/, '');
-    if(!raw.includes('\n')) return;
+    if(!raw.includes('\n')){
+      // Single-line paste into a rich box: plain text only (never bring another page's fonts along).
+      if(raw && isRT(t)){ e.preventDefault(); document.execCommand('insertText', false, raw); }
+      return;
+    }
     e.preventDefault();
     const ctx = findContext(row.dataset.id); if(!ctx) return;
     const parsed = raw.split('\n').filter(l=>l.trim()).map(l=>{
@@ -7615,6 +7765,7 @@ function icon(name, size){
     const before = t.value.slice(0, t.selectionStart), after = t.value.slice(t.selectionEnd);
     const base = parsed[0].level;
     ctx.node.text = before + parsed[0].text;
+    setNodeRuns(ctx.node, clipRuns(ctx.node.runs, 0, before.length, 0));
     let pos = ctx.idx + 1, stack = [], last = ctx.node;
     parsed.slice(1).forEach(({level, text})=>{
       const nn = makeNode('statement'); nn.text = text;
@@ -7634,7 +7785,7 @@ function icon(name, size){
     updateActionCardsAndChips();
     const inBrainstorm = !!row.closest('#brainstormList');
     requestAnimationFrame(()=>{
-      const el = (inBrainstorm ? document.getElementById('brainstormList') : mainTree).querySelector(`textarea[data-id="${last.id}"]`);
+      const el = (inBrainstorm ? document.getElementById('brainstormList') : mainTree).querySelector(`.node-text[data-id="${last.id}"]`);
       if(el){ editSessionActive = true; el.focus(); const pos2 = (last.text || '').length - after.length; try{ el.setSelectionRange(pos2, pos2); }catch(err){} }
     });
   });
@@ -7694,7 +7845,7 @@ function icon(name, size){
     const t = e.target;
     const rowEl = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
     const drawerOpen = document.getElementById('brainstormDrawer').classList.contains('open');
-    const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT');
+    const typing = t && (isTA(t) || t.tagName === 'INPUT');
     if(!rowEl && (typing || !drawerOpen)) return; // some other field (title, search, modal): leave it alone
     const file = imgItem.getAsFile(); if(!file) return;
     e.preventDefault();
@@ -7724,7 +7875,14 @@ function icon(name, size){
   }
   mainTree.addEventListener('input', (e)=>{
     const t = e.target;
-    if(t.dataset && t.dataset.field){
+    if(isRT(t) && t.dataset.field === 'text'){
+      const rd = readRT(t);
+      const nctx = findContext(t.dataset.id);
+      if(nctx){ nctx.node.text = rd.text; setNodeRuns(nctx.node, rd.runs); }
+      if(rd.text) t.removeAttribute('data-empty'); else t.setAttribute('data-empty', '1');
+      scheduleAutosave();
+      scheduleWordStatus();
+    } else if(t.dataset && t.dataset.field){
       updateNodeField(t.dataset.id, t.dataset.field, t.value);
       if(t.tagName==='TEXTAREA'){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
       scheduleAutosave();
@@ -7741,7 +7899,7 @@ function icon(name, size){
         const style = ensureStyle(ctx.node);
         style.size = t.value; delete style.pt;
         await saveLesson();
-        const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
+        const ta = mainTree.querySelector(`.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
       }
       return;
@@ -7767,7 +7925,7 @@ function icon(name, size){
     }
   });
   mainTree.addEventListener('blur', async (e)=>{
-    if(e.target.tagName==='TEXTAREA' || e.target.tagName==='INPUT'){
+    if(isTA(e.target) || e.target.tagName==='INPUT'){
       if(autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
       await saveLesson();
     }
@@ -7777,30 +7935,30 @@ function icon(name, size){
     const t = e.target;
     // Tab / Shift+Tab indent or outdent from any row's field: text, read-only verse
     // text, or a photo caption — not just editable text areas.
-    if(e.key === 'Tab' && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if(e.key === 'Tab' && (isTA(t) || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
       const rowEl = t.closest('.node');
       const tabId = rowEl && rowEl.dataset.id;
       const tabCtx = tabId && findContext(tabId);
       if(tabCtx){
         e.preventDefault();
-        const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
+        const isText = isTA(t) && t.dataset.field === 'text';
         if(isText) tabCtx.node.text = t.value;
         const selStart = t.selectionStart, selEnd = t.selectionEnd;
         if(e.shiftKey) await outdentNode(tabId); else await indentNode(tabId);
         requestAnimationFrame(()=>{
-          const el = mainTree.querySelector(`.node[data-id="${tabId}"] > .node-row textarea, .node[data-id="${tabId}"] > .node-row input`);
+          const el = mainTree.querySelector(`.node[data-id="${tabId}"] > .node-row .node-text, .node[data-id="${tabId}"] > .node-row input`);
           if(el){ editSessionActive = true; el.focus(); try{ if(isText) el.setSelectionRange(selStart, selEnd); }catch(err){} }
         });
         return;
       }
     }
-    if(t.tagName === 'TEXTAREA' && t.readOnly && t.dataset.id && (e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
+    if(isTA(t) && t.readOnly && t.dataset.id && (e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
       e.preventDefault();
       await toggleNodeFormat(t.dataset.id, {b:'bold', i:'italic', u:'underline'}[e.key.toLowerCase()]);
       return;
     }
     // Enter on a verse starts a new statement right below it (inside it if it already has lines nested under it).
-    if(t.tagName === 'TEXTAREA' && t.readOnly && t.dataset.id && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if(isTA(t) && t.readOnly && t.dataset.id && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey){
       const vctx = findContext(t.dataset.id);
       if(vctx && vctx.node.kind === 'verse'){
         e.preventDefault();
@@ -7813,7 +7971,7 @@ function icon(name, size){
         return;
       }
     }
-    if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
+    if(!isTA(t) || !t.dataset || t.dataset.field !== 'text') return;
     const id = t.dataset.id;
     const ctx = findContext(id);
     if(!ctx) return;
@@ -7822,7 +7980,7 @@ function icon(name, size){
       e.preventDefault();
       ctx.node.text = t.value;
       if(await moveNodeSibling(id, e.key === 'ArrowUp' ? -1 : 1)){
-        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`textarea[data-id="${id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`.node-text[data-id="${id}"]`); if(el){ editSessionActive = true; el.focus(); } });
       }
       return;
     }
@@ -7833,6 +7991,8 @@ function icon(name, size){
       return;
     }
 
+    if(e.key === 'Enter' && e.shiftKey && isRT(t)){ e.preventDefault(); document.execCommand('insertLineBreak'); return; }
+
     const caretAtStart = t.selectionStart === 0 && t.selectionEnd === 0;
     const caretAtEnd = t.selectionStart === t.value.length && t.selectionEnd === t.value.length;
 
@@ -7840,6 +8000,7 @@ function icon(name, size){
       e.preventDefault();
       pushUndo();
       ctx.node.text = t.value;
+      if(isRT(t)) setNodeRuns(ctx.node, readRT(t).runs);
 
       // Section heading: Enter starts the section's first line, like typing under a heading in Word.
       if(ctx.node.kind === 'heading'){
@@ -7856,15 +8017,19 @@ function icon(name, size){
       if(FLOW_KINDS.includes(ctx.node.kind)){
         // Enter always starts another line right below (even from an empty one); use Shift+Tab to step out.
         // Split at the cursor: text after it moves to the new line.
-        const before = t.value.slice(0, t.selectionStart);
-        const after = t.value.slice(t.selectionEnd);
+        const selA = t.selectionStart, selB = t.selectionEnd;
+        const before = t.value.slice(0, selA);
+        const after = t.value.slice(selB);
+        const allRuns = isRT(t) ? readRT(t).runs : [];
         ctx.node.text = before;
+        setNodeRuns(ctx.node, clipRuns(allRuns, 0, selA, 0));
         // Sync the old box too: the browser fires a late 'change' from it while the tree re-renders.
         t.value = before;
         const auto = autoClassifyKind(before);
         if(auto && !ctx.node.kindManual) ctx.node.kind = auto;
         const newNode = makeNode('statement');
         newNode.text = after;
+        setNodeRuns(newNode, clipRuns(allRuns, selB, Infinity, -selB));
         const autoNew = autoClassifyKind(after);
         if(autoNew) newNode.kind = autoNew;
         newNode.style = Object.assign({}, ensureStyle(ctx.node), { italic:false });
@@ -7906,7 +8071,9 @@ function icon(name, size){
         e.preventDefault();
         pushUndo();
         const joinAt = (prevSib.text || '').length;
+        const curRuns = isRT(t) ? readRT(t).runs : [];
         prevSib.text = (prevSib.text || '') + t.value;
+        setNodeRuns(prevSib, (prevSib.runs || []).concat(clipRuns(curRuns, 0, Infinity, joinAt)));
         removeNodeById(id);
         await saveLesson();
         renderTree();
@@ -7935,7 +8102,7 @@ function icon(name, size){
 
   // ---------------- Word-style ribbon + status bar ----------------
   function visibleNodeTexts(){
-    return Array.from(mainTree.querySelectorAll('textarea.node-text[data-field="text"]')).filter(x=>x.offsetParent !== null);
+    return Array.from(mainTree.querySelectorAll('.node-text[data-field="text"]')).filter(x=>x.offsetParent !== null);
   }
   function adjacentNodeText(fromEl, dir){
     const all = visibleNodeTexts();
@@ -7944,7 +8111,7 @@ function icon(name, size){
   }
   function focusNodeText(nodeId, caret){
     requestAnimationFrame(()=>{
-      const ta = mainTree.querySelector(`textarea.node-text[data-field="text"][data-id="${nodeId}"]`);
+      const ta = mainTree.querySelector(`.node-text[data-field="text"][data-id="${nodeId}"]`);
       if(!ta) return;
       editSessionActive = true;
       ta.focus();
@@ -7974,7 +8141,59 @@ function icon(name, size){
       applyStyleObjToEl(mainTree.querySelector(`.node-text.full-only[data-id="${i}"]`), st);
     });
   }
+  // A highlighted piece of text inside one line (remembered while focus is in the ribbon's size / font boxes).
+  let lastRTSel = null;
+  function rtSelection(){
+    if(blockSel) return null;
+    const ae = document.activeElement;
+    if(isRT(ae) && mainTree.contains(ae)){
+      const r = rtSelRange(ae);
+      return (r && r[1] > r[0]) ? { id: ae.dataset.id, a: r[0], b: r[1] } : null;
+    }
+    return (lastRTSel && lastRTSel.id === lastFocusedNodeId) ? lastRTSel : null;
+  }
+  async function formatSelection(sel, key, value){
+    const ctx = findContext(sel.id); if(!ctx) return;
+    const el = mainTree.querySelector(`.rt-edit[data-id="${sel.id}"]`); if(!el) return;
+    const rd = readRT(el); ctx.node.text = rd.text; setNodeRuns(ctx.node, rd.runs);
+    pushUndo();
+    const nodeStyle = ensureStyle(ctx.node);
+    let all = true;
+    const k = {bold:'b', italic:'i', underline:'u'}[key] || key;
+    const base = !!nodeStyle[key];
+    patchRuns(ctx.node, sel.a, sel.b,
+      sg=>{
+        if(value === undefined) sg[k] = !all;
+        else if(value === '' || value === null) delete sg[k];
+        else sg[k] = value;
+      },
+      segs=>{ if(value === undefined) all = segs.every(sg=> sg[k] !== undefined ? sg[k] : base); });
+    el.innerHTML = runsToHtml(ctx.node.text, ctx.node.runs);
+    el.focus();
+    el.setSelectionRange(sel.a, sel.b);
+    lastRTSel = { id: sel.id, a: sel.a, b: sel.b };
+    await saveLesson();
+    updateRibbonState();
+  }
+  // Formatting goes to every highlighted line when several are selected, otherwise to the line you're in.
+  function formatTargetIds(fallbackId){
+    if(blockSel && blockSel.container === mainTree){
+      const ids = blockSelectedIds().filter(i=>{ const c = findContext(i); return c && isFormattableNode(c.node); });
+      if(ids.length) return ids;
+    }
+    return fallbackId ? [fallbackId] : [];
+  }
+  function applyStyleToIds(ids, fn){
+    ids.forEach(i=>{
+      const c = findContext(i); if(!c || !isFormattableNode(c.node)) return;
+      const st = ensureStyle(c.node);
+      fn(st, c.node);
+      applyStyleObjToEl(mainTree.querySelector(`.node-text.full-only[data-id="${i}"]`), st);
+    });
+  }
   async function toggleNodeFormat(id, key){
+    const rs = rtSelection();
+    if(rs){ await formatSelection(rs, key); return; }
     const ids = formatTargetIds(id);
     if(!ids.length) return;
     pushUndo();
@@ -7984,6 +8203,8 @@ function icon(name, size){
     updateRibbonState();
   }
   async function setNodeStyleField(id, key, value){
+    const rs = rtSelection();
+    if(rs && ['pt','font','color'].includes(key)){ await formatSelection(rs, key, value || ''); return; }
     const ids = formatTargetIds(id);
     if(!ids.length) return;
     pushUndo();
@@ -8038,6 +8259,17 @@ function icon(name, size){
     fontSel.disabled = !formattable;
     fontSel.value = (style.font && FONT_FAMILIES[style.font]) ? style.font : '';
     ribbon.querySelectorAll('[data-rb-fmt]').forEach(b=>{ b.disabled = !formattable; b.classList.toggle('active', !!style[b.dataset.rbFmt]); });
+    const aeRT = document.activeElement;
+    if(isRT(aeRT) && mainTree.contains(aeRT)){
+      const sel = window.getSelection();
+      let n = sel && sel.anchorNode; if(n && n.nodeType === 3) n = n.parentElement;
+      if(n && aeRT.contains(n)){
+        const cs = getComputedStyle(n);
+        sizeSel.value = String(Math.round(parseFloat(cs.fontSize) * 0.75 * 2) / 2);
+        const on = { bold: (parseInt(cs.fontWeight, 10) || 400) >= 600, italic: cs.fontStyle === 'italic', underline: (cs.textDecorationLine || '').includes('underline') };
+        ribbon.querySelectorAll('[data-rb-fmt]').forEach(b=>b.classList.toggle('active', !!on[b.dataset.rbFmt]));
+      }
+    }
     document.getElementById('rbColorBtn').disabled = !formattable;
     document.getElementById('rbColorBar').style.background = style.color || 'var(--text)';
     document.getElementById('rbIndent').disabled = !node;
@@ -8069,6 +8301,15 @@ function icon(name, size){
   let wordStatusScrollRaf = null;
   window.addEventListener('scroll', ()=>{ cancelAnimationFrame(wordStatusScrollRaf); wordStatusScrollRaf = requestAnimationFrame(updateWordStatus); }, {passive:true});
 
+  let ribbonRaf = null;
+  document.addEventListener('selectionchange', ()=>{
+    const ae = document.activeElement;
+    if(isRT(ae) && mainTree.contains(ae)){
+      const r = rtSelRange(ae);
+      lastRTSel = (r && r[1] > r[0]) ? { id: ae.dataset.id, a: r[0], b: r[1] } : null;
+      cancelAnimationFrame(ribbonRaf); ribbonRaf = requestAnimationFrame(updateRibbonState);
+    } else if(!(ae && ae.closest && ae.closest('#wordRibbon'))) lastRTSel = null;
+  });
   (function wireRibbon(){
     const ribbon = document.getElementById('wordRibbon');
     document.getElementById('rbIndent').innerHTML = icon('indent', 16);
@@ -8113,10 +8354,11 @@ function icon(name, size){
       if(e.target.id === 'rbStyle') await changeNodeKind(lastFocusedNodeId, e.target.value);
       else if(e.target.id === 'rbSize'){
         const pt = clampPt(e.target.value);
+        const had = !!rtSelection();
         if(pt) await setNodeStyleField(lastFocusedNodeId, 'pt', pt);
-        focusNodeText(lastFocusedNodeId, 'end');
+        if(!had) focusNodeText(lastFocusedNodeId, 'end');
       }
-      else if(e.target.id === 'rbFont'){ await setNodeStyleField(lastFocusedNodeId, 'font', e.target.value); focusNodeText(lastFocusedNodeId, 'end'); }
+      else if(e.target.id === 'rbFont'){ const had = !!rtSelection(); await setNodeStyleField(lastFocusedNodeId, 'font', e.target.value); if(!had) focusNodeText(lastFocusedNodeId, 'end'); }
     });
     // A − / + step through the usual word-processor sizes.
     const PT_STEPS = [8,9,10,11,12,14,16,18,20,24,28,32,36,48,60,72];
@@ -8124,8 +8366,9 @@ function icon(name, size){
       if(!lastFocusedNodeId) return;
       const cur = parseFloat(document.getElementById('rbSize').value) || 11;
       const next = dir > 0 ? (PT_STEPS.find(x=>x > cur) || PT_STEPS[PT_STEPS.length-1]) : ([...PT_STEPS].reverse().find(x=>x < cur) || PT_STEPS[0]);
+      const had = !!rtSelection();
       await setNodeStyleField(lastFocusedNodeId, 'pt', next);
-      focusNodeText(lastFocusedNodeId, 'end');
+      if(!had) focusNodeText(lastFocusedNodeId, 'end');
     }
     document.getElementById('rbSizeUp').addEventListener('click', ()=>stepSize(1));
     document.getElementById('rbSizeDown').addEventListener('click', ()=>stepSize(-1));
@@ -8309,7 +8552,7 @@ function icon(name, size){
       await saveLesson();
       closeNodeContextMenu();
       renderTree();
-      requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+      requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`.node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
       lastFocusedNodeId = newId;
       return;
     }
