@@ -313,7 +313,10 @@
      teacher's notes/photos) wherever it occurs — this is a pure CSS filter, kept
      separate from each node's own collapsed/expanded state, so switching view
      levels never overwrites a section's manually-chosen collapse state. */
-  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]){display:none;}
+  /* Subsections view: hide the lines themselves, but keep any section nested inside one of them visible. */
+  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]) > .node-row{display:none;}
+  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]):not(:has(.node[data-kind="heading"])){display:none;}
+  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]) > .node-children{margin-left:0; padding-left:0; border-left:none;}
 
   /* Mobile swipe-to-indent: drag a row right to nest it under the section above,
      left to pull it back out a level. Mirrors Tab/Shift+Tab and the right-click
@@ -3495,8 +3498,7 @@ function icon(name, size){
     mainTree.classList.toggle('hide-leaf-nodes', level === 'subsections');
     function walk(nodes){
       nodes.forEach(node=>{
-        if(node.kind !== 'heading') return;
-        node.collapsed = (level === 'sections');
+        if(node.kind === 'heading' || (node.children && node.children.length)) node.collapsed = (level === 'sections');
         if(node.children && node.children.length) walk(node.children);
       });
     }
