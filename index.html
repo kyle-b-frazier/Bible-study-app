@@ -105,7 +105,7 @@
   html[data-theme="dark"] .preview-surface{ box-shadow: var(--shadow-lg); }
   html[data-theme="dark"] ::selection{ background: var(--accent-soft); color: var(--accent-hover); }
   html{ transition: background var(--dur-slow) var(--ease-standard); }
-  body, .sidebar, .app-header, .btn, .outline-tree, .modal, .node-row, .brainstorm-drawer, textarea.node-text, input, select{
+  body, .sidebar, .app-header, .btn, .outline-tree, .modal, .node-row, .brainstorm-drawer, :is(textarea,div).node-text, input, select{
     transition-property: background-color, border-color, color, box-shadow, transform;
     transition-duration: var(--dur-fast);
     transition-timing-function: var(--ease-standard);
@@ -277,7 +277,7 @@
     background: var(--accent-soft);
     border-left-width: 6px;
   }
-  .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text.full-only{
+  .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text.full-only{
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 1.0rem;
@@ -313,7 +313,10 @@
      teacher's notes/photos) wherever it occurs — this is a pure CSS filter, kept
      separate from each node's own collapsed/expanded state, so switching view
      levels never overwrites a section's manually-chosen collapse state. */
-  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]){display:none;}
+  /* Subsections view: hide the lines themselves, but keep any section nested inside one of them visible. */
+  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]) > .node-row{display:none;}
+  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]):not(:has(.node[data-kind="heading"])){display:none;}
+  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]) > .node-children{margin-left:0; padding-left:0; border-left:none;}
 
   /* Mobile swipe-to-indent: drag a row right to nest it under the section above,
      left to pull it back out a level. Mirrors Tab/Shift+Tab and the right-click
@@ -331,7 +334,7 @@
 
   /* Freeform "flowing" thought lines within a section — statement/question/application/teacher-note */
   .thought-row{display:flex; gap:var(--space-4); align-items:flex-start;}
-  .thought-row textarea.node-text{flex:1; min-width:0; width:auto;}
+  .thought-row :is(textarea,div).node-text{flex:1; min-width:0; width:auto;}
   select.kind-select-inline{
     font-size:0.66rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:700;
     border:none; background:transparent; color:var(--text-dim); padding:7px 4px 0 0; flex-shrink:0;
@@ -340,22 +343,22 @@
   .node[data-kind="question"] select.kind-select-inline{color:var(--accent);}
   .node[data-kind="application"] select.kind-select-inline{color:#5C7A32;}
   .node[data-kind="teachernote"] select.kind-select-inline{color:var(--danger);}
-  textarea.node-text.flow-text{
+  :is(textarea,div).node-text.flow-text{
     border:none !important; border-bottom:1px solid transparent !important; background:transparent !important; border-radius:0 !important; padding:5px 2px !important;
   }
-  textarea.node-text.flow-text:hover, textarea.node-text.flow-text:focus{border-bottom-color: var(--border) !important; background:var(--bg) !important;}
+  :is(textarea,div).node-text.flow-text:hover, :is(textarea,div).node-text.flow-text:focus{border-bottom-color: var(--border) !important; background:var(--bg) !important;}
 
   .verse-ref-chip{font-family:'JetBrains Mono', monospace; font-weight:700; font-size:0.78rem; background: var(--accent); color:#fff; padding:2px 8px; border-radius:var(--radius-lg); display:inline-block; margin-bottom:var(--space-2);}
   .time-badge{font-family:'JetBrains Mono', monospace; font-size:0.72rem; background: var(--accent-soft); color: var(--accent-hover); border:1px solid transparent; border-radius:var(--radius-lg); padding:2px 9px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; font-variant-numeric:tabular-nums;}
   input.minutes-input{width:52px; border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px 5px; font-size:0.78rem; background:var(--surface); color:var(--text);}
 
-  textarea.node-text{width:100%; border:1px solid var(--border); background:var(--surface); color: var(--text); border-radius:var(--radius-sm); padding:8px 10px; font-size:0.92rem; line-height:1.5; resize:none; overflow:hidden; min-height:38px; font-family:'Inter', sans-serif;}
-  .node[data-kind="heading"] > .node-row > .node-main > textarea.node-text{font-weight:700; font-size:1.02rem;}
-  .node[data-kind="question"] > .node-row > .node-main textarea.node-text{font-style:italic;}
+  :is(textarea,div).node-text{width:100%; border:1px solid var(--border); background:var(--surface); color: var(--text); border-radius:var(--radius-sm); padding:8px 10px; font-size:0.92rem; line-height:1.5; resize:none; overflow:hidden; min-height:38px; font-family:'Inter', sans-serif;}
+  .node[data-kind="heading"] > .node-row > .node-main > :is(textarea,div).node-text{font-weight:700; font-size:1.02rem;}
+  .node[data-kind="question"] > .node-row > .node-main :is(textarea,div).node-text{font-style:italic;}
   .node[data-kind="application"] > .node-row{border-left:3px solid #6E8C3E;}
-  .node[data-kind="application"] > .node-row > .node-main textarea.node-text{font-style:italic;}
+  .node[data-kind="application"] > .node-row > .node-main :is(textarea,div).node-text{font-style:italic;}
   .node[data-kind="teachernote"] > .node-row{border-left:3px solid var(--danger); background: var(--danger-soft);}
-  .node[data-kind="teachernote"] > .node-row > .node-main textarea.node-text{font-size:0.86rem;}
+  .node[data-kind="teachernote"] > .node-row > .node-main :is(textarea,div).node-text{font-size:0.86rem;}
 
   .condensed-flag{font-size:0.68rem; color: var(--text-faint); font-style:italic;}
   .photo-placeholder{padding:10px 0;}
@@ -385,26 +388,26 @@
   #mainTree.doc-view .node-row:hover{background:transparent;}
   #mainTree.doc-view .node[data-kind="teachernote"] > .node-row{background:transparent;}
   #mainTree.doc-view .node-children{margin-left:22px; padding-left:14px;}
-  #mainTree.doc-view textarea.node-text{
+  #mainTree.doc-view :is(textarea,div).node-text{
     border:none !important; background:transparent !important; color:#1F2420; padding:2px 0;
     font-family:inherit; font-size:1rem; line-height:1.65; box-shadow:none;
   }
-  #mainTree.doc-view textarea.node-text::placeholder{color:#B7B2A4;}
+  #mainTree.doc-view :is(textarea,div).node-text::placeholder{color:#B7B2A4;}
   #mainTree.doc-view .node-main > .hint{display:none;} /* the small kind label above each field, e.g. "Statement" — redundant once styled typographically */
-  #mainTree.doc-view .node[data-kind="heading"] > .node-row textarea.node-text{font-weight:700; font-family:'Space Grotesk','Inter',sans-serif;}
-  #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.55rem; letter-spacing:-0.01em;}
-  #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.25rem;}
-  #mainTree.doc-view .node[data-depth="2"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.1rem;}
-  #mainTree.doc-view .node[data-kind="heading"]:not([data-depth="0"]):not([data-depth="1"]):not([data-depth="2"]) > .node-row textarea.node-text{font-size:1.02rem;}
+  #mainTree.doc-view .node[data-kind="heading"] > .node-row :is(textarea,div).node-text{font-weight:700; font-family:'Space Grotesk','Inter',sans-serif;}
+  #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.55rem; letter-spacing:-0.01em;}
+  #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.25rem;}
+  #mainTree.doc-view .node[data-depth="2"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.1rem;}
+  #mainTree.doc-view .node[data-kind="heading"]:not([data-depth="0"]):not([data-depth="1"]):not([data-depth="2"]) > .node-row :is(textarea,div).node-text{font-size:1.02rem;}
   #mainTree.doc-view .node[data-depth="0"][data-kind="heading"]{margin-top:34px;}
   #mainTree.doc-view .node[data-depth="0"][data-kind="heading"]:first-child{margin-top:0;}
-  #mainTree.doc-view .node[data-kind="question"] > .node-row textarea.node-text{font-style:italic; color:#3D4A3E;}
-  #mainTree.doc-view .node[data-kind="application"] > .node-row textarea.node-text{font-style:italic;}
-  #mainTree.doc-view .node[data-kind="teachernote"] > .node-row textarea.node-text{font-size:0.9rem; color:#7A6F5C;}
+  #mainTree.doc-view .node[data-kind="question"] > .node-row :is(textarea,div).node-text{font-style:italic; color:#3D4A3E;}
+  #mainTree.doc-view .node[data-kind="application"] > .node-row :is(textarea,div).node-text{font-style:italic;}
+  #mainTree.doc-view .node[data-kind="teachernote"] > .node-row :is(textarea,div).node-text{font-size:0.9rem; color:#7A6F5C;}
   #mainTree.doc-view .node[data-kind="teachernote"] > .node-row::before{content:"Teacher's Note"; display:block; font-family:'Inter',sans-serif; font-size:0.66rem; text-transform:uppercase; letter-spacing:.06em; color:#B7AE98; margin-bottom:2px;}
   #mainTree.doc-view .node[data-kind="verse"] > .node-row{border-left:2px solid #C9BFA0 !important; padding-left:14px;}
   #mainTree.doc-view .verse-ref-chip{font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; color:#8C6A2F; letter-spacing:.03em; background:transparent; padding:0;}
-  #mainTree.doc-view .node[data-kind="verse"] textarea.node-text.full-only{font-style:italic; color:#4A4636;}
+  #mainTree.doc-view .node[data-kind="verse"] :is(textarea,div).node-text.full-only{font-style:italic; color:#4A4636;}
   #mainTree.doc-view .drag-handle,
   #mainTree.doc-view button[data-action="toggle-collapse"],
   #mainTree.doc-view .node-add-bottom{opacity:0; pointer-events:none; transition:opacity .12s ease;}
@@ -432,7 +435,7 @@
   body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row{background:transparent;}
   body.outline-style-classic #mainTree .node-children{margin-left:22px; padding-left:0; border-left:none;}
   body.outline-style-classic #mainTree .node-main > .hint{display:none;}
-  body.outline-style-classic #mainTree textarea.node-text{font-family:'Calibri','Segoe UI','Inter',sans-serif; color:var(--text); line-height:1.5;}
+  body.outline-style-classic #mainTree :is(textarea,div).node-text{font-family:'Calibri','Segoe UI','Inter',sans-serif; color:var(--text); line-height:1.5;}
   body.outline-style-classic #mainTree .drag-handle,
   body.outline-style-classic #mainTree button[data-action="toggle-collapse"],
   body.outline-style-classic #mainTree .node-add-bottom{opacity:0; pointer-events:none; transition:opacity .12s ease;}
@@ -442,10 +445,10 @@
   body.outline-style-classic #mainTree .node-children:focus-within > .node-add-bottom{opacity:1; pointer-events:auto;}
   /* Headings: bold plain text, no bullet */
   body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row > .node-number{display:none;}
-  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row textarea.node-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif;}
-  body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.4rem;}
-  body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.18rem;}
-  body.outline-style-classic #mainTree .node[data-depth="2"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.06rem;}
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row :is(textarea,div).node-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif;}
+  body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.4rem;}
+  body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.18rem;}
+  body.outline-style-classic #mainTree .node[data-depth="2"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.06rem;}
   body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]{margin-top:28px;}
   body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]:first-child{margin-top:0;}
   /* Non-heading rows: a plain bullet cycling by depth, no per-kind label/italics — Statement/
@@ -457,25 +460,25 @@
   body.outline-style-classic #mainTree .node[data-depth="1"]:not([data-kind="heading"]) > .node-row > .node-number::before{content:"○"; font-size:0.55rem;}
   body.outline-style-classic #mainTree .node[data-depth="2"]:not([data-kind="heading"]) > .node-row > .node-number::before,
   body.outline-style-classic #mainTree .node[data-depth="3"]:not([data-kind="heading"]) > .node-row > .node-number::before{content:"▪"; font-size:0.5rem;}
-  body.outline-style-classic #mainTree .node[data-kind="statement"] > .node-row textarea.node-text,
-  body.outline-style-classic #mainTree .node[data-kind="question"] > .node-row textarea.node-text,
-  body.outline-style-classic #mainTree .node[data-kind="application"] > .node-row textarea.node-text{font-style:normal; color:var(--text);}
+  body.outline-style-classic #mainTree .node[data-kind="statement"] > .node-row :is(textarea,div).node-text,
+  body.outline-style-classic #mainTree .node[data-kind="question"] > .node-row :is(textarea,div).node-text,
+  body.outline-style-classic #mainTree .node[data-kind="application"] > .node-row :is(textarea,div).node-text{font-style:normal; color:var(--text);}
   /* Verse: subtle block-quote cue */
   body.outline-style-classic #mainTree .node[data-kind="verse"] > .node-row{border-left:2px solid var(--border) !important; padding-left:14px;}
   body.outline-style-classic #mainTree .node[data-kind="verse"] .verse-ref-chip{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:0.72rem; font-weight:700; color:var(--text-dim); letter-spacing:.02em; background:transparent; padding:0;}
-  body.outline-style-classic #mainTree .node[data-kind="verse"] textarea.node-text.full-only{font-style:italic; color:var(--text);}
+  body.outline-style-classic #mainTree .node[data-kind="verse"] :is(textarea,div).node-text.full-only{font-style:italic; color:var(--text);}
   /* Photo: small inline thumbnail instead of a large block */
   body.outline-style-classic #mainTree .node-photo{max-width:120px; max-height:90px; object-fit:cover;}
   /* Teacher's Note: subtle muted aside, not a loud flagged card */
-  body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row textarea.node-text{font-size:0.88rem; font-style:italic; color:var(--text-dim);}
+  body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row :is(textarea,div).node-text{font-size:0.88rem; font-style:italic; color:var(--text-dim);}
   body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row::before{content:"Note — "; display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:0.72rem; font-weight:600; color:var(--text-faint); padding-top:6px;}
   @media (max-width: 720px){
     body.outline-style-classic #mainTree{padding:24px 16px 60px; border-radius:0; border-left:none; border-right:none;}
   }
   @media (max-width: 480px){
     body.outline-style-classic #mainTree{padding:18px 14px 60px; border:none; box-shadow:none; max-width:100%;}
-    body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.22rem;}
-    body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.08rem;}
+    body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.22rem;}
+    body.outline-style-classic #mainTree .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.08rem;}
     body.outline-style-classic #mainTree .node-children{margin-left:14px;}
   }
   @media (max-width: 720px){
@@ -487,8 +490,8 @@
        and shrink the reserved rail width too so the reading column isn't squeezed
        down to a sliver. */
     #mainTree.doc-view{padding:18px 14px 60px; border:none; box-shadow:none; max-width:100%;}
-    #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.3rem;}
-    #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row textarea.node-text{font-size:1.12rem;}
+    #mainTree.doc-view .node[data-depth="0"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.3rem;}
+    #mainTree.doc-view .node[data-depth="1"][data-kind="heading"] > .node-row :is(textarea,div).node-text{font-size:1.12rem;}
     #mainTree.doc-view .node-children{margin-left:10px; padding-left:8px;}
     .rail{width:48px;}
     .rail.expanded{width:188px;}
@@ -702,6 +705,16 @@
   .picker-grid button{background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:var(--radius-sm); padding:8px 4px; font-size:0.8rem; text-align:center;}
   .picker-grid button:hover{background: var(--accent-soft); border-color: var(--accent);}
   .picker-grid button.ot{border-left:3px solid var(--accent);}
+  #bookGrid{display:block; max-height:360px;}
+  .book-filter{width:100%; box-sizing:border-box; margin:0 0 10px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface); color:var(--text); font-size:.85rem;}
+  .book-section-label{font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:10px 2px 6px;}
+  .book-row{display:flex; flex-wrap:wrap; gap:6px;}
+  #bookGrid .book-row button{width:auto; padding:6px 11px; border-radius:999px; font-size:.8rem; border-left-width:1px;}
+  #chapterGrid.picker-grid{grid-template-columns:repeat(auto-fill, minmax(46px, 1fr)); max-height:360px;}
+  #chapterGrid .chap{padding:12px 0; font-size:.9rem; font-weight:600; font-variant-numeric:tabular-nums;}
+  .chapter-head{grid-column:1/-1; display:flex; align-items:center; gap:12px; margin-bottom:4px;}
+  .chapter-head button{padding:6px 12px; font-weight:600;}
+  .chapter-head span{color:var(--text-faint); font-size:.78rem;}
   .verse-check-row{display:flex; gap:var(--space-4); align-items:flex-start; padding:8px 11px; border-bottom:1px solid var(--border); font-size:0.85rem; cursor:pointer; transition:background .12s ease;}
   .verse-check-row:last-child{border-bottom:none;}
   .verse-check-row:hover{background: var(--bg);}
@@ -794,35 +807,35 @@
     width:26px; height:26px; min-width:26px; border-radius:var(--radius-sm); text-align:center; padding-top:0;
     display:flex; align-items:center; justify-content:center;
   }
-  .p-node[data-kind="heading"] .p-text{
+  .p-node[data-kind="heading"] > .p-node-row > .p-text{
     font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:var(--pub-heading-weight, 600); font-size:calc(1.0rem * var(--pub-scale, 1));
     text-transform: var(--pub-heading-transform, none); letter-spacing:0; border-bottom:1px solid var(--ms-line); padding:3px 0 8px; display:block; color:var(--ms-ink);
   }
-  .p-node[data-kind="question"] .p-text{font-style:normal;}
-  .p-node[data-kind="question"] .p-text::before{content:"Q "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-gold); margin-right:var(--space-2);}
-  .p-node[data-kind="application"] .p-text{font-style:normal; color:var(--ms-ink);}
-  .p-node[data-kind="application"] .p-text::before{content:"Apply "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-navy); margin-right:var(--space-2);}
-  .p-node[data-kind="teachernote"] .p-text{font-size:0.86rem; color: var(--text-dim);}
-  .p-node[data-kind="teachernote"] .p-text::before{content:"Teacher's Note — "; font-weight:700; color: var(--danger);}
+  .p-node[data-kind="question"] > .p-node-row > .p-text{font-style:normal;}
+  .p-node[data-kind="question"] > .p-node-row > .p-text::before{content:"Q "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-gold); margin-right:var(--space-2);}
+  .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal; color:var(--ms-ink);}
+  .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:"Apply "; font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ms-navy); margin-right:var(--space-2);}
+  .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-size:0.86rem; color: var(--text-dim);}
+  .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Teacher's Note — "; font-weight:700; color: var(--danger);}
   .p-node[data-kind="verse"] > .p-node-row{border-left:3px solid var(--ms-gold); padding-left:11px; margin-left:-14px;}
-  .p-node[data-kind="verse"] .p-text{font-style:italic; color:var(--ms-ink);}
+  .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic; color:var(--ms-ink);}
   .p-verse-ref{font-family: var(--pub-heading-font, 'Space Grotesk', 'Inter', sans-serif); font-weight:700; font-size:0.72rem; text-transform:uppercase; letter-spacing:.03em; color:var(--ms-gold); font-style:normal; display:block; margin-bottom:3px;}
   .p-children{margin-left:26px; border-left:1px solid var(--ms-line); padding-left:12px;}
 
   /* Per-element-kind advanced overrides (Preferences → Publish Style → Advanced Output
      Settings). Placed after the base rules above so these take precedence; blank
      fields fall back to the existing base font/color/size via the var() fallback. */
-  .p-node[data-kind="heading"] .p-text{ font-family: var(--pk-heading-font, var(--pub-heading-font)); color: var(--pk-heading-color, var(--ms-ink)); font-size: calc(var(--pk-heading-scale, 1) * 1.0rem * var(--pub-scale, 1)); font-style: var(--pk-heading-italic, normal); font-weight: var(--pk-heading-bold, var(--pub-heading-weight, 600)); }
+  .p-node[data-kind="heading"] > .p-node-row > .p-text{ font-family: var(--pk-heading-font, var(--pub-heading-font)); color: var(--pk-heading-color, var(--ms-ink)); font-size: calc(var(--pk-heading-scale, 1) * 1.0rem * var(--pub-scale, 1)); font-style: var(--pk-heading-italic, normal); font-weight: var(--pk-heading-bold, var(--pub-heading-weight, 600)); }
   .p-node[data-kind="heading"] > .p-node-row{ background: var(--pk-heading-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="statement"] .p-text{ font-family: var(--pk-statement-font, var(--pub-body-font)); color: var(--pk-statement-color, var(--ms-ink)); font-size: calc(var(--pk-statement-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-statement-italic, normal); font-weight: var(--pk-statement-bold, 400); }
+  .p-node[data-kind="statement"] > .p-node-row > .p-text{ font-family: var(--pk-statement-font, var(--pub-body-font)); color: var(--pk-statement-color, var(--ms-ink)); font-size: calc(var(--pk-statement-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-statement-italic, normal); font-weight: var(--pk-statement-bold, 400); }
   .p-node[data-kind="statement"] > .p-node-row{ background: var(--pk-statement-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="question"] .p-text{ font-family: var(--pk-question-font, var(--pub-body-font)); color: var(--pk-question-color, var(--ms-ink)); font-size: calc(var(--pk-question-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-question-italic, normal); font-weight: var(--pk-question-bold, 400); }
+  .p-node[data-kind="question"] > .p-node-row > .p-text{ font-family: var(--pk-question-font, var(--pub-body-font)); color: var(--pk-question-color, var(--ms-ink)); font-size: calc(var(--pk-question-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-question-italic, normal); font-weight: var(--pk-question-bold, 400); }
   .p-node[data-kind="question"] > .p-node-row{ background: var(--pk-question-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="application"] .p-text{ font-family: var(--pk-application-font, var(--pub-body-font)); color: var(--pk-application-color, var(--ms-ink)); font-size: calc(var(--pk-application-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-application-italic, normal); font-weight: var(--pk-application-bold, 400); }
+  .p-node[data-kind="application"] > .p-node-row > .p-text{ font-family: var(--pk-application-font, var(--pub-body-font)); color: var(--pk-application-color, var(--ms-ink)); font-size: calc(var(--pk-application-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-application-italic, normal); font-weight: var(--pk-application-bold, 400); }
   .p-node[data-kind="application"] > .p-node-row{ background: var(--pk-application-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="teachernote"] .p-text{ font-family: var(--pk-teachernote-font, var(--pub-body-font)); color: var(--pk-teachernote-color, var(--text-dim)); font-size: calc(var(--pk-teachernote-scale, 1) * 0.86rem * var(--pub-scale, 1)); font-style: var(--pk-teachernote-italic, normal); font-weight: var(--pk-teachernote-bold, 400); }
+  .p-node[data-kind="teachernote"] > .p-node-row > .p-text{ font-family: var(--pk-teachernote-font, var(--pub-body-font)); color: var(--pk-teachernote-color, var(--text-dim)); font-size: calc(var(--pk-teachernote-scale, 1) * 0.86rem * var(--pub-scale, 1)); font-style: var(--pk-teachernote-italic, normal); font-weight: var(--pk-teachernote-bold, 400); }
   .p-node[data-kind="teachernote"] > .p-node-row{ background: var(--pk-teachernote-bg, transparent); border-radius: var(--radius-sm); }
-  .p-node[data-kind="verse"] .p-text{ font-family: var(--pk-verse-font, var(--pub-body-font)); color: var(--pk-verse-color, var(--ms-ink)); font-size: calc(var(--pk-verse-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-verse-italic, italic); font-weight: var(--pk-verse-bold, 400); }
+  .p-node[data-kind="verse"] > .p-node-row > .p-text{ font-family: var(--pk-verse-font, var(--pub-body-font)); color: var(--pk-verse-color, var(--ms-ink)); font-size: calc(var(--pk-verse-scale, 1) * 0.98rem * var(--pub-scale, 1)); font-style: var(--pk-verse-italic, italic); font-weight: var(--pk-verse-bold, 400); }
   .p-node[data-kind="verse"] > .p-node-row{ background: var(--pk-verse-bg, transparent); border-radius: var(--radius-sm); }
 
 
@@ -837,18 +850,18 @@
   body.outline-style-classic .p-children .p-number::before{content:"○"; font-size:0.55rem;}
   body.outline-style-classic .p-children .p-children .p-number::before{content:"▪"; font-size:0.5rem;}
   body.outline-style-classic .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
-  body.outline-style-classic .p-node[data-kind="heading"] .p-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-style:normal;}
-  body.outline-style-classic .p-node[data-kind="question"] .p-text::before,
-  body.outline-style-classic .p-node[data-kind="application"] .p-text::before{content:none;}
-  body.outline-style-classic .p-node[data-kind="statement"] .p-text,
-  body.outline-style-classic .p-node[data-kind="question"] .p-text,
-  body.outline-style-classic .p-node[data-kind="application"] .p-text{font-style:normal; color:var(--ms-ink);}
+  body.outline-style-classic .p-node[data-kind="heading"] > .p-node-row > .p-text{font-weight:700; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-style:normal;}
+  body.outline-style-classic .p-node[data-kind="question"] > .p-node-row > .p-text::before,
+  body.outline-style-classic .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:none;}
+  body.outline-style-classic .p-node[data-kind="statement"] > .p-node-row > .p-text,
+  body.outline-style-classic .p-node[data-kind="question"] > .p-node-row > .p-text,
+  body.outline-style-classic .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal; color:var(--ms-ink);}
   body.outline-style-classic .p-node[data-kind="verse"] > .p-node-row{border-left:2px solid var(--ms-line) !important;}
-  body.outline-style-classic .p-node[data-kind="verse"] .p-text{font-style:italic;}
+  body.outline-style-classic .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic;}
   body.outline-style-classic .p-verse-ref{color:var(--text-dim);}
   body.outline-style-classic .p-node[data-kind="photo"] .node-photo{max-width:130px; max-height:100px; object-fit:cover;}
-  body.outline-style-classic .p-node[data-kind="teachernote"] .p-text{font-style:italic; color:var(--text-dim);}
-  body.outline-style-classic .p-node[data-kind="teachernote"] .p-text::before{content:"Note — "; font-weight:600; color:var(--text-faint);}
+  body.outline-style-classic .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-style:italic; color:var(--text-dim);}
+  body.outline-style-classic .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Note — "; font-weight:600; color:var(--text-faint);}
 
 
   /* ================= In-app dialog (replaces native alert/prompt/confirm) ================= */
@@ -1040,6 +1053,10 @@
   .rb-select{height:30px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--text); font:inherit; font-size:.82rem; padding:0 6px;}
   .rb-style{width:150px;}
   .rb-select:disabled{opacity:.45;}
+  .rb-size{width:44px; text-align:center; padding:0 2px;}
+  .rb-font{max-width:130px;}
+  .rb-size-wrap{display:flex; align-items:center; gap:2px;}
+  .rb-sz-step{width:22px; padding:0; font-size:1rem; line-height:1;}
   .rb-color-wrap{position:relative;}
   .rb-color-a{font-weight:700; line-height:1; display:block;}
   #rbColorBtn{flex-direction:column; gap:1px;}
@@ -1093,21 +1110,21 @@
   #previewModalOverlay .preview-surface .p-number::before{content:"●"; font-size:0.42rem;}
   #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
   /* section headings: bold, top level in capitals, like the editor */
-  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
   #previewModalOverlay .preview-surface .p-node[data-kind="heading"][style*="margin-left:0px"] .p-text{text-transform:uppercase; font-size:1.2rem; letter-spacing:.01em;}
   /* timing: quiet grey text after the heading instead of a pill */
   #previewModalOverlay .preview-surface .time-badge{background:transparent !important; border:none !important; padding:0 0 0 8px; color:#8A8F86; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:400; font-size:.8rem; text-transform:none; letter-spacing:0;}
   #previewModalOverlay .preview-surface .time-badge svg{display:none;}
   /* verses: small grey reference, italic text, no side bar */
   #previewModalOverlay .preview-surface .p-verse-ref{display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.02em; color:#6E7469; background:none; border:none; padding:0; margin-bottom:2px;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="verse"] .p-text{font-style:italic;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="question"] .p-text::before,
-  #previewModalOverlay .preview-surface .p-node[data-kind="application"] .p-text::before{content:none;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="statement"] .p-text,
-  #previewModalOverlay .preview-surface .p-node[data-kind="question"] .p-text,
-  #previewModalOverlay .preview-surface .p-node[data-kind="application"] .p-text{font-style:normal;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] .p-text{font-style:italic; color:#6E7469;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text::before,
+  #previewModalOverlay .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:none;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="statement"] > .p-node-row > .p-text,
+  #previewModalOverlay .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text,
+  #previewModalOverlay .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-style:italic; color:#6E7469;}
+  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
   html[data-theme="dark"] #previewModalOverlay .preview-surface{background:#FFFFFF; color:#1F2320;}
   #previewModalOverlay .publish-body{background:#FFFFFF;}
 
@@ -1279,18 +1296,18 @@
   /* Questions: always italic, marked with "Q:" in place of the number/bullet (editor, brainstorm, previews). */
   html body #mainTree .node[data-kind="question"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--accent) !important;}
   html body #mainTree .node[data-kind="question"] > .node-row > .node-number::before{content:"Q:" !important; font-size:.8rem !important; font-weight:700 !important; font-style:italic !important; font-family:'Inter',sans-serif !important; color:var(--accent) !important;}
-  html body #mainTree .node[data-kind="question"] > .node-row textarea.node-text,
-  html body #brainstormList .node[data-kind="question"] textarea.node-text{font-style:italic !important;}
+  html body #mainTree .node[data-kind="question"] > .node-row :is(textarea,div).node-text,
+  html body #brainstormList .node[data-kind="question"] :is(textarea,div).node-text{font-style:italic !important;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-number{visibility:hidden;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-text{font-style:italic !important;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-text::before{content:"Q: " !important; display:inline !important; font-style:italic !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
   /* Tighter spacing so nested points read as a group (not stacked on top of each other). */
-  body.outline-style-classic #mainTree textarea.node-text{min-height:0;}
+  body.outline-style-classic #mainTree :is(textarea,div).node-text{min-height:0;}
   #mainTree .node-children > .node{margin:0;}
   body.outline-style-classic #mainTree .node-children > .node:not([data-kind="heading"]) > .node-row{padding-top:1px; padding-bottom:1px;}
   /* Multi-line selection highlight */
   html body .node-row.block-selected{background:var(--accent-soft) !important; box-shadow:inset 0 0 0 1px var(--accent);}
-  html body .node-row.block-selected textarea.node-text{background:transparent !important;}
+  html body .node-row.block-selected :is(textarea,div).node-text{background:transparent !important;}
   html body .node-row.block-selected ::selection{background:transparent;}
   /* Bullets change with each nesting level (under a section: ● ○ ■ – ›) so you can tell the levels apart. */
   body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"●" !important; font-size:.5rem !important; color:var(--text-dim) !important;}
@@ -1309,8 +1326,8 @@
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before,
   #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:.95rem !important;}
   /* Statements are never italic (overrides any leftover per-line italic formatting). */
-  html body #mainTree .node[data-kind="statement"] > .node-row textarea.node-text,
-  html body #brainstormList .node[data-kind="statement"] > .node-row textarea.node-text{font-style:normal !important;}
+  html body #mainTree .node[data-kind="statement"] > .node-row :is(textarea,div).node-text,
+  html body #brainstormList .node[data-kind="statement"] > .node-row :is(textarea,div).node-text{font-style:normal !important;}
   /* Brainstorm / Scripture / Presenter Mode / Set time live at the right end of the sticky ribbon. */
   .rb-actions{display:flex; align-items:center; gap:6px; margin-left:auto; padding-left:12px; flex-shrink:0; background:var(--surface);}
   .rb-actions .action-card{padding:3px 11px 3px 4px;}
@@ -1361,6 +1378,134 @@
     .word-ribbon{top:var(--dock-t, 0px);}
     .word-status{bottom:var(--dock-b, 0px);}
   }
+  /* Presenter: no guide lines, calmer bullets. */
+  #previewModalOverlay .preview-surface .p-children{border-left:none !important; padding-left:0 !important; margin-left:22px;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.62rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.7rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.5rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:1rem !important;}
+  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:1rem !important;}
+  /* Zoom (editor page) */
+  #panel-outline #mainTree{zoom:var(--page-zoom, 1);}
+  /* The whole page (box and text) scales together; when it grows wider than the window it scrolls sideways. */
+  .page-scroller{overflow-x:auto; overflow-y:hidden;}
+  html body #panel-outline #mainTree{width:var(--page-w, 100%) !important; max-width:none !important; margin-left:auto; margin-right:auto; box-sizing:border-box;}
+  .ws-zoom{display:flex; align-items:center; gap:4px; margin-left:12px;}
+  .ws-zoom button{border:none; background:transparent; color:var(--text-dim); width:22px; height:22px; border-radius:4px; font-size:1rem; line-height:1; cursor:pointer; padding:0;}
+  .ws-zoom button:hover{background:var(--bg); color:var(--text);}
+  .ws-zoom input[type=range]{width:90px; accent-color:var(--accent);}
+  #wsZoomPct{min-width:40px; text-align:right; font-variant-numeric:tabular-nums; cursor:pointer;}
+  @media (max-width: 900px){ .ws-zoom input[type=range]{display:none;} }
+  /* Hierarchy: sections show their outline number (I. / A. / 1.) in the same column as bullets, so a
+     section and the lines under it line up, and a section's level is readable at a glance. */
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row{align-items:center;}
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-row > .node-number{
+    display:block !important; min-width:30px; text-align:right; padding-top:0; color:var(--text-faint) !important;
+    font-family:'Inter',sans-serif; font-size:.78rem !important; font-weight:700;
+  }
+  body.outline-style-classic #mainTree .node-children > .node[data-kind="heading"]{margin-top:10px;}
+  body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-children{border-left:1px solid var(--border); margin-left:14px; padding-left:8px;}
+  .ws-path{max-width:46vw; overflow:hidden; text-overflow:ellipsis; color:var(--text); font-weight:600;}
+  .ws-path:empty{display:none;}
+  @media (max-width: 900px){ .ws-path{display:none;} }
+  /* No vertical guide lines or side bars in the editor. */
+  html body.outline-style-classic #mainTree .node-children,
+  html body #mainTree.doc-view .node-children,
+  html body #brainstormList .node-children{border-left:none !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="verse"] > .node-row,
+  html body #mainTree.doc-view .node[data-kind="verse"] > .node-row{border-left:none !important;}
+  /* Row controls (drag grip, collapse arrow) appear only for the single line under the pointer, not for every parent above it. */
+  html body.outline-style-classic #mainTree .node:hover > .node-row .drag-handle,
+  html body.outline-style-classic #mainTree .node:hover > .node-row button[data-action="toggle-collapse"],
+  html body #mainTree.doc-view .node:hover > .node-row .drag-handle,
+  html body #mainTree.doc-view .node:hover > .node-row button[data-action="toggle-collapse"]{opacity:0; pointer-events:none;}
+  html body.outline-style-classic #mainTree .node > .node-row:hover .drag-handle,
+  html body.outline-style-classic #mainTree .node > .node-row:hover button[data-action="toggle-collapse"],
+  html body #mainTree.doc-view .node > .node-row:hover .drag-handle,
+  html body #mainTree.doc-view .node > .node-row:hover button[data-action="toggle-collapse"]{opacity:1; pointer-events:auto;}
+  /* Lines (non-sections) show no dropdown arrow; only a collapsed one keeps a small arrow so it can be reopened. */
+  html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle{display:none !important;}
+  html body #mainTree .node:not([data-kind="heading"]) > .node-row button.nh-toggle[title="Expand section"]{display:inline-flex !important;}
+  /* The collapse arrow floats in the gutter so a section with lines under it lines up with one without. */
+  html body.outline-style-classic #mainTree .node > .node-row > button[data-action="toggle-collapse"]{position:absolute !important; left:-30px; top:50%; transform:translateY(-50%); margin:0 !important;}
+  /* Verse picker: books | chapters | verses on one screen */
+  .modal.vp-modal{max-width:920px;}
+  .vp-goto{display:flex; gap:8px; margin-bottom:12px;}
+  .vp-goto input{flex:1; margin:0; padding:10px 14px; border-radius:999px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:.9rem;}
+  .vp-cols{display:grid; grid-template-columns:190px 170px 1fr; gap:12px; height:min(380px, 50vh);}
+  .vp-col{display:flex; flex-direction:column; min-height:0; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); padding:8px;}
+  .vp-col-title{display:flex; align-items:center; justify-content:space-between; font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); padding:2px 4px 8px;}
+  .vp-all{display:flex; gap:4px;} .vp-all .btn{padding:2px 8px; font-size:.7rem; text-transform:none; letter-spacing:0;}
+  .vp-col .book-filter{margin:0 0 6px;}
+  #bookGrid, #chapterGrid, #verseChecklist{flex:1; min-height:0; overflow-y:auto;}
+  #bookGrid{display:block !important; max-height:none !important; padding:0;}
+  #bookGrid .book-section-label{margin:8px 4px 4px;}
+  #bookGrid .bk{display:block; width:100%; text-align:left; background:transparent; border:none; border-left:none; border-radius:6px; padding:6px 10px; font-size:.84rem; color:var(--text);}
+  #bookGrid .bk:hover{background:var(--accent-soft);}
+  #bookGrid .bk.sel{background:var(--accent); color:#fff; font-weight:600;}
+  #chapterGrid{display:grid !important; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:6px; align-content:start; max-height:none !important; padding:2px; margin:0;}
+  #chapterGrid .chap{padding:9px 0; font-size:.85rem; font-weight:600; font-variant-numeric:tabular-nums; border-radius:8px;}
+  #chapterGrid .chap.sel{background:var(--accent); color:#fff; border-color:var(--accent);}
+  #verseChecklist{display:block !important;}
+  #verseList{max-height:none !important; border:none;}
+  .verse-check-row{border-radius:8px; border-bottom:none; margin-bottom:2px; padding:7px 9px;}
+  .verse-check-row.on{background:var(--accent-soft);}
+  .vp-empty{color:var(--text-faint); font-size:.85rem; padding:14px 8px; text-align:center;}
+  .vp-foot{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px;}
+  .vp-summary{font-size:.85rem; color:var(--text-faint);}
+  .vp-summary.has{color:var(--text); font-weight:700; font-size:1rem;}
+  @media (max-width:760px){ .vp-cols{grid-template-columns:1fr; height:auto;} .vp-col{max-height:200px;} .vp-col.vp-verses{max-height:300px;} }
+  /* Every kind of line sits on the same grid: same left edge at the same level (verses and notes used to sit further right). */
+  html body.outline-style-classic #mainTree .node:not([data-kind="heading"]) > .node-row,
+  html body #mainTree.doc-view .node:not([data-kind="heading"]) > .node-row{padding-left:0 !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row::before,
+  html body #mainTree.doc-view .node[data-kind="teachernote"] > .node-row::before{position:absolute; right:100%; top:10px; margin:0 8px 0 0; white-space:nowrap; font-size:.62rem !important;}
+  /* A question's Q: also carries its level's bullet, so questions at different depths don't look identical. */
+  html body #mainTree .node[data-kind="question"][data-bl="0"] > .node-row > .node-number::before{content:"• Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="1"] > .node-row > .node-number::before{content:"◦ Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="2"] > .node-row > .node-number::before{content:"▪ Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="3"] > .node-row > .node-number::before{content:"– Q:" !important; white-space:pre;}
+  html body #mainTree .node[data-kind="question"][data-bl="4"] > .node-row > .node-number::before{content:"› Q:" !important; white-space:pre;}
+  /* Applications: their own colour and an "A:" marker, like questions get "Q:". */
+  :root{--apply:#B45309;}
+  html[data-theme="dark"]{--apply:#F2A65A;}
+  html body #mainTree .node[data-kind="application"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--apply) !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"]) > .node-row > .node-number::before{content:"A:" !important; font-size:.8rem !important; font-weight:700 !important; font-family:'Inter',sans-serif !important; color:var(--apply) !important; white-space:pre;}
+  html body #mainTree .node[data-kind="application"] > .node-row :is(textarea,div).node-text,
+  html body #brainstormList .node[data-kind="application"] :is(textarea,div).node-text{color:var(--apply) !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"• A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .node-row > .node-number::before{content:"◦ A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .node-row > .node-number::before{content:"▪ A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .node-row > .node-number::before{content:"– A:" !important;}
+  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .node-row > .node-number::before{content:"› A:" !important;}
+  html body .p-node[data-kind="application"] > .p-node-row > .p-number{visibility:hidden;}
+  html body .p-node[data-kind="application"] > .p-node-row > .p-text{color:#B45309 !important;}
+  html body .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:"A: " !important; display:inline !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
+
+  /* Rich (partly formattable) text boxes behave like the old text areas. */
+  .rt-edit.node-text{white-space:pre-wrap; overflow-wrap:anywhere; cursor:text; min-height:1.5em; display:block; box-sizing:border-box; outline:none;}
+  .rt-edit.node-text[data-empty]::before{content:attr(data-ph); color:var(--text-faint); pointer-events:none;}
+  .rt-edit.node-text:focus{border-color:var(--accent);}
+  .rt-edit .rt-run{white-space:pre-wrap;}
+  @media (max-width:1560px){ .rb-font{max-width:96px;} .rb-sz-step{display:none;} }
+
+  /* Photos: sized and cropped frame */
+  .photo-wrap{max-width:100%;}
+  .photo-frame{position:relative; overflow:hidden; display:block; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--bg); line-height:0;}
+  .photo-frame .photo-img{display:block; user-select:none; -webkit-user-drag:none; pointer-events:none;}
+  .photo-grip{position:absolute; right:3px; bottom:3px; width:16px; height:16px; border-radius:4px; background:var(--accent); border:2px solid #fff; cursor:nwse-resize; opacity:0; transition:opacity .12s; touch-action:none; box-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .photo-frame:hover .photo-grip, .photo-frame.resizing .photo-grip{opacity:1;}
+  @media (hover:none){ .photo-grip{opacity:1;} }
+  .photo-frame.resizing{outline:2px solid var(--accent);}
+  .photo-frame.cropping{overflow:hidden; cursor:default; touch-action:none;}
+  .crop-box{position:absolute; border:2px solid #fff; box-shadow:0 0 0 9999px rgba(0,0,0,.5); cursor:move; touch-action:none;}
+  .crop-box::before,.crop-box::after{content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(#fff6 1px,transparent 1px) 0 33.33%/100% 33.34% repeat-y, linear-gradient(90deg,#fff6 1px,transparent 1px) 33.33% 0/33.34% 100% repeat-x;}
+  .crop-h{position:absolute; width:12px; height:12px; background:#fff; border:2px solid var(--accent); border-radius:3px; touch-action:none;}
+  .crop-h[data-h="nw"]{left:-7px; top:-7px; cursor:nwse-resize;} .crop-h[data-h="n"]{left:calc(50% - 6px); top:-7px; cursor:ns-resize;}
+  .crop-h[data-h="ne"]{right:-7px; top:-7px; cursor:nesw-resize;} .crop-h[data-h="e"]{right:-7px; top:calc(50% - 6px); cursor:ew-resize;}
+  .crop-h[data-h="se"]{right:-7px; bottom:-7px; cursor:nwse-resize;} .crop-h[data-h="s"]{left:calc(50% - 6px); bottom:-7px; cursor:ns-resize;}
+  .crop-h[data-h="sw"]{left:-7px; bottom:-7px; cursor:nesw-resize;} .crop-h[data-h="w"]{left:-7px; top:calc(50% - 6px); cursor:ew-resize;}
+  .p-node .photo-frame{border:none; border-radius:4px; margin:4px 0;}
 </style>
 </head>
 <body>
@@ -1505,12 +1650,23 @@
           <option value="verse" disabled>Verse</option>
           <option value="photo" disabled>Photo</option>
         </select>
-        <select class="rb-select rb-size" id="rbSize" title="Text size">
-          <option value="small">Small</option>
-          <option value="normal">Normal</option>
-          <option value="large">Large</option>
-          <option value="xlarge">X-Large</option>
+        <select class="rb-select rb-font" id="rbFont" title="Font">
+          <option value="">Default font</option>
+          <option value="calibri">Calibri</option>
+          <option value="arial">Arial</option>
+          <option value="georgia">Georgia</option>
+          <option value="times">Times New Roman</option>
+          <option value="garamond">Garamond</option>
+          <option value="verdana">Verdana</option>
+          <option value="trebuchet">Trebuchet MS</option>
+          <option value="courier">Courier New</option>
         </select>
+        <div class="rb-size-wrap">
+          <button class="rb-btn rb-sz-step" id="rbSizeDown" title="Decrease font size">−</button>
+          <input class="rb-select rb-size" id="rbSize" list="rbSizeList" inputmode="numeric" autocomplete="off" title="Font size">
+          <button class="rb-btn rb-sz-step" id="rbSizeUp" title="Increase font size">+</button>
+          <datalist id="rbSizeList"><option value="8"><option value="9"><option value="10"><option value="11"><option value="12"><option value="14"><option value="16"><option value="18"><option value="20"><option value="24"><option value="28"><option value="32"><option value="36"><option value="48"><option value="60"><option value="72"></datalist>
+        </div>
       </div>
       <div class="rb-grp">
         <button class="rb-btn rb-fmt" data-rb-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
@@ -1553,13 +1709,20 @@
       </button>
       </div>
     </div>
-    <div class="outline-tree" id="mainTree"></div>
+    <div class="page-scroller" id="pageScroller"><div class="outline-tree" id="mainTree"></div></div>
   </section>
     </main>
     <div class="word-status no-print" id="wordStatus">
+      <span id="wsPath" class="ws-path" title="Where you are in the outline"></span>
       <span id="wsPage">Page 1 of 1</span>
       <span id="wsWords">0 words</span>
       <span id="wsVerses">0 verses</span>
+      <span class="ws-zoom" title="Zoom (Ctrl + scroll also works)">
+        <button type="button" id="wsZoomOut" aria-label="Zoom out">−</button>
+        <input type="range" id="wsZoomRange" min="50" max="200" step="5" value="100" aria-label="Zoom">
+        <button type="button" id="wsZoomIn" aria-label="Zoom in">+</button>
+        <span id="wsZoomPct" title="Reset to 100%">100%</span>
+      </span>
       <span class="ws-hint">Enter for a new line · Tab to indent · right-click a line for more</span>
       <span class="view-level-wrap ws-view" title="Quickly collapse the outline down to just section titles, or down to section + subsection titles">
         <div class="segmented" id="outlineViewSegmented">
@@ -1705,7 +1868,7 @@
 
 <!-- Verse modal -->
 <div class="modal-overlay" id="verseModalOverlay">
-  <div class="modal">
+  <div class="modal vp-modal">
     <button class="modal-x" id="xCloseVerse" title="Close">✕</button>
     <h3>Insert a Verse</h3>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
@@ -1713,20 +1876,32 @@
       <button class="btn small ghost" id="pickerTabManual">Paste manually</button>
     </div>
     <div id="browsePane">
-      <div id="browseBreadcrumb" class="hint" style="margin-top:0;"></div>
-      <div id="bookGrid" class="picker-grid"></div>
-      <div id="chapterGrid" class="picker-grid" style="display:none;"></div>
-      <div id="verseChecklist" style="display:none;">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
-          <button class="btn ghost small" id="btnSelectAllVerses">Select whole chapter</button>
+      <div class="vp-goto">
+        <input type="text" id="vpGoto" placeholder="Jump to a passage — e.g. 1 Pet 3:1-7, John 3:16, Ps 23" autocomplete="off">
+        <button class="btn small brass" id="vpGotoBtn">Go</button>
+      </div>
+      <div class="vp-cols">
+        <div class="vp-col vp-books">
+          <div class="vp-col-title">Book</div>
+          <input type="search" class="book-filter" id="bookFilter" placeholder="Filter books…" autocomplete="off">
+          <div id="bookGrid"></div>
         </div>
-        <div id="verseList" class="lib-list" style="max-height:260px;"></div>
-        <div class="modal-actions" style="justify-content:space-between;">
-          <button class="btn ghost small" id="btnBackToChapters">← Back to chapters</button>
-          <button class="btn brass" id="btnInsertSelectedVerses" disabled>Insert Selected</button>
+        <div class="vp-col vp-chaps">
+          <div class="vp-col-title" id="vpChapTitle">Chapter</div>
+          <div id="chapterGrid"></div>
+        </div>
+        <div class="vp-col vp-verses">
+          <div class="vp-col-title"><span id="browseBreadcrumb">Verses</span>
+            <span class="vp-all"><button class="btn ghost small" id="btnSelectAllVerses">All</button><button class="btn ghost small" id="btnClearVerses">None</button></span>
+          </div>
+          <div id="verseChecklist"><div id="verseList"></div></div>
         </div>
       </div>
       <p class="hint" id="browseStatus"></p>
+      <div class="vp-foot">
+        <div id="vpSummary" class="vp-summary">Pick a book, chapter and verse(s). Shift-click selects a range.</div>
+        <button class="btn brass" id="btnInsertSelectedVerses" disabled>Insert</button>
+      </div>
     </div>
     <div id="manualPane" style="display:none;">
       <p class="hint" style="margin-top:0;">Paste a passage in yourself.</p>
@@ -2134,7 +2309,6 @@ function icon(name, size){
   let activePublishFilter = null; // set by the Publish chooser (Full/Handout/Custom); null = show everything unfiltered
   let pendingVerseParentId = null;
   let pendingVerseAfterId = null;
-  let pendingVerseReplaceId = null;
   let pendingPhotoNodeId = null;
   let pendingBrainstormParentId = null;
   const photoCache = {}; // photoRef -> data URL, kept in memory so rendering stays synchronous
@@ -3108,9 +3282,11 @@ function icon(name, size){
     printLessonPdf(f);
   }
 
-  async function saveLesson(){
+  // keepTime: saves that aren't a user edit (opening, migrations) must not look like "newest" to cloud sync,
+  // or a stale copy on a second device would overwrite the real, newer one.
+  async function saveLesson(opts){
     if(!lesson) return;
-    lesson.updatedAt = Date.now();
+    if(!(opts && opts.keepTime)) lesson.updatedAt = Date.now();
     flashSavedIndicator('saving');
     const ok = await safeSet('lesson:'+lesson.id, JSON.stringify(lesson), false);
     if(!ok){
@@ -3141,6 +3317,24 @@ function icon(name, size){
     if(!l.tags) l.tags = [];
     if(l.folderId === undefined) l.folderId = null;
     delete l.aiSummary; // leftover from the removed AI Summary feature
+    // Sections are never shifted sideways by hand (that left same-numbered sections at different indents).
+    const unshift = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'heading') delete n.indent; unshift(n.children); });
+    unshift(l.outline); unshift(l.brainstorm);
+    // Sections only live at the top level or inside other sections; one tabbed under a statement is lifted back out.
+    const pull = (n, out)=>{
+      if(!n.children) return;
+      const keep = [];
+      n.children.forEach(c=>{ if(c.kind === 'heading') out.push(c); else { pull(c, out); keep.push(c); } });
+      if(keep.length) n.children = keep; else delete n.children;
+    };
+    const lift = arr=>{
+      for(let i=0;i<arr.length;i++){
+        const n = arr[i];
+        if(n.kind === 'heading') lift(n.children || []);
+        else { const out = []; pull(n, out); if(out.length) arr.splice(i+1, 0, ...out); }
+      }
+    };
+    lift(l.outline);
     // Statements are never italic; older lines picked it up by copying the style of the line above.
     const strip = nodes=>(nodes||[]).forEach(n=>{ if(n.kind === 'statement' && n.style) n.style.italic = false; strip(n.children); });
     strip(l.outline); strip(l.brainstorm);
@@ -3293,6 +3487,53 @@ function icon(name, size){
   }
   async function deletePhotoData(key){ await safeDelete(key, false); delete photoCache[key]; }
 
+
+  // ---------------- Photos: size + crop ----------------
+  // node.imgW = display width in px; node.crop = {x,y,w,h} as fractions of the original picture (what stays visible);
+  // node.natW / natH = the picture's own pixel size (needed to keep the shape while resizing / cropping).
+  const FULL_CROP = { x:0, y:0, w:1, h:1 };
+  let cropEditingId = null, cropDraft = null;
+  function imageNaturalSize(dataUrl){
+    return new Promise(resolve=>{
+      const im = new Image();
+      im.onload = ()=> resolve({ w: im.naturalWidth, h: im.naturalHeight });
+      im.onerror = ()=> resolve(null);
+      im.src = dataUrl;
+    });
+  }
+  async function ensurePhotoDims(node){
+    if(node.natW && node.natH) return;
+    const url = node.photoRef ? photoCache[node.photoRef] : null;
+    if(!url) return;
+    const sz = await imageNaturalSize(url);
+    if(sz){ node.natW = sz.w; node.natH = sz.h; }
+  }
+  function photoGeom(node){
+    const nw = node.natW || 0, nh = node.natH || 0;
+    if(!nw || !nh) return null;
+    const c = node.crop || FULL_CROP;
+    return { c, ratio: (c.w * nw) / (c.h * nh), w: node.imgW || Math.round(Math.min(c.w * nw, 420)) };
+  }
+  // mode: 'edit' (resize grip), 'crop' (whole picture with a movable crop box) or 'static' (presenter / print)
+  function photoFrameHtml(node, dataUrl, mode){
+    const g = photoGeom(node);
+    if(!g) return `<img class="photo-img-plain" src="${dataUrl}" alt="" style="max-width:100%;height:auto;display:block">`;
+    const imgBase = 'position:absolute;max-width:none;max-height:none;';
+    if(mode === 'crop'){
+      const full = Math.round(g.w / g.c.w);
+      const d = cropDraft || g.c;
+      return `<div class="photo-frame cropping" data-photo-frame="${node.id}" style="width:min(${full}px,100%);aspect-ratio:${node.natW}/${node.natH}">
+        <img class="photo-img" src="${dataUrl}" alt="" draggable="false" style="${imgBase}left:0;top:0;width:100%;height:100%">
+        <div class="crop-box" data-crop-box style="left:${d.x*100}%;top:${d.y*100}%;width:${d.w*100}%;height:${d.h*100}%">
+          ${['nw','n','ne','e','se','s','sw','w'].map(h=>`<span class="crop-h" data-h="${h}"></span>`).join('')}
+        </div></div>`;
+    }
+    const c = g.c;
+    const grip = mode === 'edit' ? '<span class="photo-grip" data-photo-grip title="Drag to resize"></span>' : '';
+    return `<div class="photo-frame" data-photo-frame="${node.id}" style="width:${g.w}px;max-width:100%;aspect-ratio:${g.ratio}">`
+      + `<img class="photo-img" src="${dataUrl}" alt="" draggable="false" style="${imgBase}left:${-c.x/c.w*100}%;top:${-c.y/c.h*100}%;width:${100/c.w}%;height:${100/c.h}%">${grip}</div>`;
+  }
+
   async function migrateEmbeddedPhotos(nodes){
     for(const node of nodes){
       if(node.kind === 'photo' && node.imageData){
@@ -3306,7 +3547,7 @@ function icon(name, size){
   }
   async function prefetchPhotos(nodes){
     for(const node of nodes){
-      if(node.kind === 'photo' && node.photoRef) await loadPhotoData(node.photoRef);
+      if(node.kind === 'photo' && node.photoRef){ await loadPhotoData(node.photoRef); await ensurePhotoDims(node); }
       if(node.children && node.children.length) await prefetchPhotos(node.children);
     }
   }
@@ -3328,7 +3569,7 @@ function icon(name, size){
     lesson = ensureLessonDefaults(l);
     await migrateEmbeddedPhotos(lesson.outline);
     await migrateEmbeddedPhotos(lesson.brainstorm);
-    await saveLesson();
+    await saveLesson({ keepTime: true });
     updateLiveShareSubscription();
     await prefetchPhotos(lesson.outline);
     await prefetchPhotos(lesson.brainstorm);
@@ -3402,13 +3643,158 @@ function icon(name, size){
     return node.style;
   }
   const FONT_SIZE_MAP = { small:'0.82rem', normal:'', large:'1.15rem', xlarge:'1.35rem' };
+  const FONT_FAMILIES = {
+    calibri:"'Calibri','Segoe UI','Inter',sans-serif", arial:"Arial,'Helvetica Neue',sans-serif", georgia:"Georgia,'Times New Roman',serif",
+    times:"'Times New Roman',Times,serif", garamond:"Garamond,'Palatino Linotype',Georgia,serif", verdana:"Verdana,Geneva,sans-serif",
+    trebuchet:"'Trebuchet MS','Lucida Grande',sans-serif", courier:"'Courier New',Courier,monospace"
+  };
+
+  // ---------------- Rich text inside a line ----------------
+  // node.text stays plain text (search, counts, exports all keep working). node.runs holds formatting for
+  // parts of it: [{s, e, b, i, u, pt, font, color}] with character offsets into node.text.
+  const RUN_KEYS = ['b','i','u','pt','font','color'];
+  const isRT = el => !!(el && el.classList && el.classList.contains('rt-edit'));
+  const isTA = el => !!el && (el.tagName === 'TEXTAREA' || isRT(el));
+  function runCss(r){
+    let c = '';
+    if(r.b !== undefined) c += 'font-weight:' + (r.b ? '700' : '400') + ';';
+    if(r.i !== undefined) c += 'font-style:' + (r.i ? 'italic' : 'normal') + ';';
+    if(r.u !== undefined) c += 'text-decoration:' + (r.u ? 'underline' : 'none') + ';';
+    if(r.pt) c += 'font-size:' + r.pt + 'pt;';
+    if(r.font && FONT_FAMILIES[r.font]) c += 'font-family:' + FONT_FAMILIES[r.font] + ';';
+    if(r.color) c += 'color:' + r.color + ';';
+    return c;
+  }
+  function runProps(r){ const p = {}; RUN_KEYS.forEach(k=>{ if(r[k] !== undefined && r[k] !== '' && r[k] !== null) p[k] = r[k]; }); return p; }
+  function runsToHtml(text, runs){
+    text = text || '';
+    const esc = t => escapeHtml(t).replace(/\n/g, '<br>');
+    let out = '', pos = 0;
+    (runs || []).slice().sort((a,b)=>a.s-b.s).forEach(r=>{
+      const s = Math.max(pos, r.s), e = Math.min(text.length, r.e);
+      if(e <= s) return;
+      if(s > pos) out += esc(text.slice(pos, s));
+      out += `<span class="rt-run" data-r="${escapeHtml(JSON.stringify(runProps(r)))}" style="${escapeHtml(runCss(r))}">${esc(text.slice(s, e))}</span>`;
+      pos = e;
+    });
+    if(pos < text.length) out += esc(text.slice(pos));
+    if(text.endsWith('\n')) out += '<br>';
+    return out;
+  }
+  function sameProps(a, b){ return RUN_KEYS.every(k=>a[k] === b[k]); }
+  // Read an editable box back into plain text + runs.
+  function readRT(el){
+    let text = '';
+    const runs = [];
+    const add = (str, props)=>{
+      if(!str) return;
+      const s = text.length; text += str;
+      if(Object.keys(props).length){
+        const last = runs[runs.length - 1];
+        if(last && last.e === s && sameProps(last, props)) last.e = text.length;
+        else runs.push(Object.assign({s, e: text.length}, props));
+      }
+    };
+    (function walk(node, props){
+      node.childNodes.forEach(c=>{
+        if(c.nodeType === 3) add(c.nodeValue.replace(/​/g, ''), props);
+        else if(c.nodeName === 'BR'){ if(!(c.parentNode === el && c === el.lastChild)) add('\n', props); }
+        else if(c.nodeType === 1){
+          let p = props;
+          if(c.dataset && c.dataset.r){ try{ p = Object.assign({}, props, JSON.parse(c.dataset.r)); }catch(err){} }
+          if((c.nodeName === 'DIV' || c.nodeName === 'P') && text && !text.endsWith('\n')) add('\n', props);
+          walk(c, p);
+        }
+      });
+    })(el, {});
+    return { text, runs };
+  }
+  function clipRuns(runs, a, b, shift){
+    const out = [];
+    (runs || []).forEach(r=>{
+      const s = Math.max(a, r.s), e = Math.min(b, r.e);
+      if(e > s) out.push(Object.assign({}, r, { s: s + shift, e: e + shift }));
+    });
+    return out;
+  }
+  function setNodeRuns(node, runs){ if(runs && runs.length) node.runs = runs; else delete node.runs; }
+  // Plain-text offset <-> DOM position inside an editable box (a <br> counts as one character).
+  function rtTextLength(frag){
+    let n = 0;
+    (function walk(node){ node.childNodes.forEach(c=>{ if(c.nodeType === 3) n += c.nodeValue.replace(/​/g, '').length; else if(c.nodeName === 'BR') n += 1; else walk(c); }); })(frag);
+    return n;
+  }
+  function rtOffsetOf(el, node, off){
+    if(!el.contains(node)) return 0;
+    const r = document.createRange(); r.setStart(el, 0);
+    try{ r.setEnd(node, off); }catch(err){ return 0; }
+    return rtTextLength(r.cloneContents());
+  }
+  function rtDomPos(el, off){
+    let acc = 0;
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
+    let n;
+    while((n = w.nextNode())){
+      if(n.nodeType === 3){
+        const L = n.nodeValue.length;
+        if(off <= acc + L) return [n, off - acc];
+        acc += L;
+      } else if(n.nodeName === 'BR'){
+        if(off === acc) return [n.parentNode, Array.prototype.indexOf.call(n.parentNode.childNodes, n)];
+        acc += 1;
+      }
+    }
+    return [el, el.childNodes.length];
+  }
+  function rtSelRange(el){
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount || !el.contains(sel.anchorNode) || !el.contains(sel.focusNode)) return null;
+    const a = rtOffsetOf(el, sel.anchorNode, sel.anchorOffset), b = rtOffsetOf(el, sel.focusNode, sel.focusOffset);
+    return [Math.min(a, b), Math.max(a, b)];
+  }
+  // Make the editable boxes answer like text areas (value / selectionStart / selectionEnd / setSelectionRange).
+  Object.defineProperty(HTMLDivElement.prototype, 'value', { configurable: true,
+    get(){ return isRT(this) ? readRT(this).text : undefined; },
+    set(v){ if(isRT(this)) this.innerHTML = runsToHtml(String(v), []); } });
+  Object.defineProperty(HTMLDivElement.prototype, 'selectionStart', { configurable: true,
+    get(){ if(!isRT(this)) return undefined; const r = rtSelRange(this); return r ? r[0] : 0; } });
+  Object.defineProperty(HTMLDivElement.prototype, 'selectionEnd', { configurable: true,
+    get(){ if(!isRT(this)) return undefined; const r = rtSelRange(this); return r ? r[1] : 0; } });
+  HTMLDivElement.prototype.setSelectionRange = function(a, b){
+    if(!isRT(this)) return;
+    const s = rtDomPos(this, a), e = rtDomPos(this, b === undefined ? a : b);
+    const range = document.createRange(); range.setStart(s[0], s[1]); range.setEnd(e[0], e[1]);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  };
+  // Apply a change to part of a line's text: the runs in [a,b) get patched; the rest stay as they are.
+  function patchRuns(node, a, b, patchFn, readFn){
+    let runs = (node.runs || []).map(r=>Object.assign({}, r));
+    const split = pos=>{ for(let i=0;i<runs.length;i++){ const r = runs[i]; if(r.s < pos && pos < r.e){ runs.splice(i, 1, Object.assign({}, r, {e: pos}), Object.assign({}, r, {s: pos})); break; } } };
+    split(a); split(b);
+    runs.sort((x,y)=>x.s-y.s);
+    const inside = runs.filter(r=>r.s >= a && r.e <= b), outside = runs.filter(r=>!(r.s >= a && r.e <= b));
+    let pos = a; const segs = [];
+    inside.forEach(r=>{ if(r.s > pos) segs.push({s: pos, e: r.s}); segs.push(r); pos = r.e; });
+    if(pos < b) segs.push({s: pos, e: b});
+    if(readFn) readFn(segs);
+    segs.forEach(patchFn);
+    let out = outside.concat(segs).filter(r=>r.e > r.s && Object.keys(runProps(r)).length).sort((x,y)=>x.s-y.s);
+    out = out.map(r=>Object.assign({s: r.s, e: r.e}, runProps(r)));
+    const merged = [];
+    out.forEach(r=>{ const l = merged[merged.length-1]; if(l && l.e === r.s && sameProps(l, r)) l.e = r.e; else merged.push(r); });
+    setNodeRuns(node, merged);
+  }
+  const FONT_PT_MIN = 6, FONT_PT_MAX = 144;
+  function clampPt(v){ v = Math.round(parseFloat(v) * 2) / 2; return isNaN(v) ? null : Math.min(FONT_PT_MAX, Math.max(FONT_PT_MIN, v)); }
   function styleObjToCssText(style){
     if(!style) return '';
     let css = '';
     if(style.bold) css += 'font-weight:700;';
     if(style.italic) css += 'font-style:italic;';
     if(style.underline) css += 'text-decoration:underline;';
-    if(style.size && FONT_SIZE_MAP[style.size]) css += 'font-size:' + FONT_SIZE_MAP[style.size] + ';';
+    if(style.pt) css += 'font-size:' + style.pt + 'pt;';
+    else if(style.size && FONT_SIZE_MAP[style.size]) css += 'font-size:' + FONT_SIZE_MAP[style.size] + ';';
+    if(style.font && FONT_FAMILIES[style.font]) css += 'font-family:' + FONT_FAMILIES[style.font] + ';';
     if(style.color) css += 'color:' + style.color + ';';
     return css;
   }
@@ -3417,7 +3803,8 @@ function icon(name, size){
     el.style.fontWeight = style.bold ? '700' : '';
     el.style.fontStyle = style.italic ? 'italic' : '';
     el.style.textDecoration = style.underline ? 'underline' : '';
-    el.style.fontSize = (style.size && FONT_SIZE_MAP[style.size]) ? FONT_SIZE_MAP[style.size] : '';
+    el.style.fontSize = style.pt ? style.pt + 'pt' : ((style.size && FONT_SIZE_MAP[style.size]) ? FONT_SIZE_MAP[style.size] : '');
+    el.style.fontFamily = (style.font && FONT_FAMILIES[style.font]) ? FONT_FAMILIES[style.font] : '';
     el.style.color = style.color || '';
   }
   const FORMAT_COLORS = [
@@ -3490,8 +3877,7 @@ function icon(name, size){
     mainTree.classList.toggle('hide-leaf-nodes', level === 'subsections');
     function walk(nodes){
       nodes.forEach(node=>{
-        if(node.kind !== 'heading') return;
-        node.collapsed = (level === 'sections');
+        if(node.kind === 'heading' || (node.children && node.children.length)) node.collapsed = (level === 'sections');
         if(node.children && node.children.length) walk(node.children);
       });
     }
@@ -3579,8 +3965,17 @@ function icon(name, size){
   async function indentNode(id){
     const ctx = findContext(id);
     if(!ctx) return;
-    pushUndo();
     const prevSibling = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
+    if(!prevSibling && ctx.node.kind === 'heading'){
+      // A section's level is always real structure (never just shifted sideways), so numbers and indents agree.
+      showToast('Nothing above this section to nest it under.');
+      return;
+    }
+    if(prevSibling && ctx.node.kind === 'heading' && prevSibling.kind !== 'heading'){
+      showToast('A section can only nest under another section.');
+      return;
+    }
+    pushUndo();
     if(prevSibling){
       // Nest under the item directly above (whatever its kind) as its last child.
       ctx.arr.splice(ctx.idx, 1);
@@ -3693,7 +4088,7 @@ function icon(name, size){
     const node = ctx.node;
     const isHeading = node.kind === 'heading';
     const isFlow = FLOW_KINDS.includes(node.kind);
-    const canFormat = isHeading || isFlow;
+    const canFormat = isHeading || isFlow || node.kind === 'verse';
     let html = '';
 
     if(canFormat){
@@ -3724,6 +4119,10 @@ function icon(name, size){
         html += `<button data-action="set-kind" data-kind="${k}" class="${k===node.kind?'active':''}">${KIND_LABEL[k]}</button>`;
       });
       html += `<div class="ctx-divider"></div>`;
+    }
+
+    if(node.kind === 'verse'){
+      html += `<button data-action="edit-verse">${icon('book-open',14)} Edit verses…</button><div class="ctx-divider"></div>`;
     }
 
     {
@@ -4266,6 +4665,8 @@ function icon(name, size){
   }
   function syncKeyToCloud(key, value){
     if(!FIREBASE_ENABLED || !currentUser || !firebaseDb || CLOUD_SKIP_KEYS.has(key)) return;
+    // Until this device has reconciled with the cloud once, pushing could overwrite newer data from another device.
+    if(cloudSyncInProgress || (!lastCloudSyncAt && !cloudSyncError)) return;
     cloudSet(key, value).then(()=> updateSyncIndicator());
   }
   function syncKeyDeleteToCloud(key){
@@ -4278,6 +4679,38 @@ function icon(name, size){
 
   // Full reconcile, run once right after sign-in. Merges the lesson index, every individual
   // lesson, the folder tree, and publish preferences — newer `updatedAt` wins per item.
+  async function pullMissingPhotos(nodes){
+    for(const n of (nodes || [])){
+      if(n.photoRef && !(await safeGet(n.photoRef, false))){
+        const v = await cloudGet(n.photoRef);
+        if(v) await writeLocalOnly(n.photoRef, v);
+      }
+      if(n.children && n.children.length) await pullMissingPhotos(n.children);
+    }
+  }
+  // If the lesson on screen was updated from the cloud — or it's only the built-in sample / a blank page and
+  // real lessons just arrived — show the newer one instead of leaving a stale copy that would later overwrite it.
+  async function refreshOpenLessonAfterSync(pulledIds, mergedIndex){
+    if(!lesson) return;
+    const untouched = l=> l.id === EXAMPLE_LESSON_ID || ((!l.outline || !l.outline.length) && (!l.brainstorm || !l.brainstorm.length));
+    let targetId = null;
+    if(pulledIds.includes(lesson.id)) targetId = lesson.id;
+    else if(untouched(lesson)){
+      const newest = mergedIndex.filter(e=>e.id !== EXAMPLE_LESSON_ID && e.id !== lesson.id).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+      if(newest) targetId = newest.id;
+    }
+    if(!targetId) return;
+    if(typeof autosaveTimer !== 'undefined' && autosaveTimer && targetId === lesson.id) return; // unsaved typing here wins
+    const l = await loadLesson(targetId);
+    if(!l) return;
+    if(typeof autosaveTimer !== 'undefined' && autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
+    lesson = ensureLessonDefaults(l);
+    await prefetchPhotos(lesson.outline); await prefetchPhotos(lesson.brainstorm);
+    await safeSet('last-lesson-id', lesson.id, false);
+    undoStack = []; redoStack = []; updateUndoRedoButtons();
+    updateLiveShareSubscription();
+    renderShell();
+  }
   async function performCloudSync(){
     if(!FIREBASE_ENABLED || !currentUser || !firebaseDb || cloudSyncInProgress) return;
     cloudSyncInProgress = true;
@@ -4296,6 +4729,7 @@ function icon(name, size){
       });
       const mergedIndex = Array.from(byId.values());
 
+      const pulledIds = [];
       for(const entry of mergedIndex){
         const key = 'lesson:'+entry.id;
         const localRaw = await safeGet(key, false);
@@ -4305,7 +4739,8 @@ function icon(name, size){
         try{ cloudLesson = cloudRaw ? JSON.parse(cloudRaw) : null; }catch(e){}
         if(cloudLesson && (!localLesson || (cloudLesson.updatedAt||0) > (localLesson.updatedAt||0))){
           await writeLocalOnly(key, cloudRaw);
-          pulled++;
+          pulled++; pulledIds.push(entry.id);
+          await pullMissingPhotos(cloudLesson.outline); await pullMissingPhotos(cloudLesson.brainstorm);
         } else if(localLesson && (!cloudLesson || (localLesson.updatedAt||0) > (cloudLesson.updatedAt||0))){
           await cloudSet(key, localRaw);
           pushed++;
@@ -4342,6 +4777,7 @@ function icon(name, size){
 
       lastCloudSyncAt = Date.now();
       cloudSyncError = null;
+      await refreshOpenLessonAfterSync(pulledIds, mergedIndex);
       if(pulled || pushed){
         const parts = [];
         if(pulled) parts.push(`pulled ${pulled} lesson${pulled===1?'':'s'}`);
@@ -4362,6 +4798,17 @@ function icon(name, size){
       updateSyncIndicator();
     }
   }
+  // Pick up edits made on another device when you come back to this one.
+  let lastForegroundSync = 0;
+  function syncOnReturn(){
+    if(!FIREBASE_ENABLED || !currentUser || document.visibilityState === 'hidden') return;
+    if(Date.now() - lastForegroundSync < 20000) return;
+    lastForegroundSync = Date.now();
+    performCloudSync();
+  }
+  document.addEventListener('visibilitychange', syncOnReturn);
+  window.addEventListener('online', syncOnReturn);
+  window.addEventListener('focus', syncOnReturn);
   async function signInWithGoogle(){
     if(!FIREBASE_ENABLED){
       await appAlert("Google sign-in isn't set up yet. Once a Firebase project is connected (apiKey, authDomain, projectId, etc. pasted into FIREBASE_CONFIG near the top of the file), this button will sign you in and start syncing your lessons and preferences to the cloud. Until then, everything here works fully offline and saves to this browser.");
@@ -4416,33 +4863,40 @@ function icon(name, size){
 
   let browseBook = null, browseChapter = null, browseVerses = [], selectedVerseNums = new Set();
 
+  function resetVersePane(msg){
+    browseChapter = null; browseVerses = []; selectedVerseNums = new Set(); lastVersePicked = null;
+    document.getElementById('verseList').innerHTML = `<div class="vp-empty">${msg || 'Choose a chapter to see its verses.'}</div>`;
+    document.getElementById('browseBreadcrumb').textContent = 'Verses';
+    updateInsertButtonLabel();
+  }
+  let lastVersePicked = null;
   function renderBookGrid(){
     const grid = document.getElementById('bookGrid');
-    grid.innerHTML = BOOKS.map(([name,,test])=>`<button class="${test}" data-book="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join('');
-    document.getElementById('browseBreadcrumb').textContent = 'Choose a book';
-    grid.style.display = 'grid';
-    document.getElementById('chapterGrid').style.display = 'none';
-    document.getElementById('verseChecklist').style.display = 'none';
+    const section = (label, test)=>`<div class="book-section"><div class="book-section-label">${label}</div>`
+      + BOOKS.filter(b=>b[2]===test).map(([name])=>`<button class="bk ${name===browseBook?'sel':''}" data-book="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join('') + `</div>`;
+    grid.innerHTML = section('Old Testament','ot') + section('New Testament','nt');
+    const f = document.getElementById('bookFilter'); if(f && f.value){ f.value = ''; }
     document.getElementById('browseStatus').textContent = '';
   }
-  function renderChapterGrid(bookName){
+  function renderChapterGrid(bookName, keepVerses){
     browseBook = bookName;
     const book = BOOKS.find(b=>b[0]===bookName);
     const grid = document.getElementById('chapterGrid');
-    let html = `<button data-back-to-books="1" style="grid-column:1/-1; text-align:left; font-weight:600;">← All books</button>`;
-    for(let c=1;c<=book[1];c++) html += `<button data-chapter="${c}">${c}</button>`;
+    let html = '';
+    for(let c=1;c<=book[1];c++) html += `<button class="chap ${c===browseChapter?'sel':''}" data-chapter="${c}">${c}</button>`;
     grid.innerHTML = html;
-    document.getElementById('browseBreadcrumb').innerHTML = `<a href="#" data-nav="books" style="text-decoration:underline;cursor:pointer;">All books</a> → ${escapeHtml(bookName)} — choose a chapter`;
-    document.getElementById('bookGrid').style.display = 'none';
-    grid.style.display = 'grid';
-    document.getElementById('verseChecklist').style.display = 'none';
+    document.getElementById('vpChapTitle').textContent = `${bookName} · ${book[1]} chapter${book[1]===1?'':'s'}`;
+    document.querySelectorAll('#bookGrid .bk').forEach(b=>b.classList.toggle('sel', b.dataset.book === bookName));
+    if(!keepVerses) resetVersePane();
     document.getElementById('browseStatus').textContent = '';
   }
   async function chooseChapter(chapterNum){
     browseChapter = chapterNum;
+    document.querySelectorAll('#chapterGrid .chap').forEach(b=>b.classList.toggle('sel', parseInt(b.dataset.chapter,10) === chapterNum));
     const statusEl = document.getElementById('browseStatus');
-    statusEl.textContent = 'Loading verses…';
-    document.getElementById('chapterGrid').style.display = 'none';
+    statusEl.textContent = '';
+    browseVerses = []; selectedVerseNums = new Set();
+    document.getElementById('verseList').innerHTML = '<div class="vp-empty">Loading verses…</div>';
     try{
       const query = `${browseBook} ${chapterNum}`;
       const url = 'https://api.esv.org/v3/passage/text/?q=' + encodeURIComponent(query)
@@ -4464,33 +4918,69 @@ function icon(name, size){
         if(text) verses.push({num, text});
       }
       if(!verses.length) throw new Error('Could not parse verses');
+      if(browseChapter !== chapterNum) return;
       browseVerses = verses; selectedVerseNums = new Set();
       renderVerseChecklist();
-      statusEl.textContent = '';
     }catch(e){
       console.error(e);
-      statusEl.textContent = "Couldn't load that chapter — this may be a network/CORS restriction. Try \"Paste manually\" instead.";
-      document.getElementById('chapterGrid').style.display = 'grid';
+      resetVersePane("Couldn't load that chapter — this may be a network restriction. Use “Paste manually” instead.");
+      statusEl.textContent = '';
     }
   }
+  // "1 Pet 3:1-7" / "john 3:16" / "Ps 23" → open that passage with its verses ticked.
+  function parsePassageQuery(q){
+    const m = /^\s*((?:[1-3]|I{1,3})?\s*[A-Za-z][A-Za-z .]*?)\s*(\d+)?\s*(?::\s*([\d,\s\-–]+))?\s*$/.exec(q || '');
+    if(!m) return null;
+    const norm = x=>x.toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^iii/,'3').replace(/^ii/,'2').replace(/^i(?=[a-z])/,'1');
+    const key = norm(m[1]); if(!key) return null;
+    const book = BOOKS.find(b=>norm(b[0]) === key) || BOOKS.find(b=>norm(b[0]).startsWith(key)) || BOOKS.find(b=>norm(b[0]).includes(key));
+    if(!book) return null;
+    const chapter = m[2] ? Math.min(parseInt(m[2],10), book[1]) : null;
+    const nums = new Set();
+    (m[3] || '').split(',').forEach(part=>{
+      const r = part.split(/[-–]/).map(x=>parseInt(x,10));
+      if(r.some(isNaN)) return;
+      for(let n=r[0]; n<=(r[1]||r[0]); n++) nums.add(n);
+    });
+    return {book:book[0], chapter, nums};
+  }
+  async function goToPassage(q){
+    const p = parsePassageQuery(q);
+    const statusEl = document.getElementById('browseStatus');
+    if(!p){ statusEl.textContent = "Couldn't find that book — try something like “1 Pet 3:1-7”."; return false; }
+    statusEl.textContent = '';
+    renderChapterGrid(p.book);
+    const sc = document.querySelector('#bookGrid .bk.sel'); if(sc) sc.scrollIntoView({block:'nearest'});
+    if(!p.chapter) return true;
+    await chooseChapter(p.chapter);
+    if(p.nums.size){
+      selectedVerseNums = new Set([...p.nums].filter(n=>browseVerses.some(v=>v.num===n)));
+      renderVerseChecklist();
+    }
+    return true;
+  }
   function renderVerseChecklist(){
-    document.getElementById('browseBreadcrumb').innerHTML =
-      `<a href="#" data-nav="books" style="text-decoration:underline;cursor:pointer;">All books</a> → ` +
-      `<a href="#" data-nav="chapters" style="text-decoration:underline;cursor:pointer;">${escapeHtml(browseBook)}</a> → Chapter ${browseChapter} — select verse(s)`;
+    document.getElementById('browseBreadcrumb').textContent = `${browseBook} ${browseChapter}`;
     const list = document.getElementById('verseList');
     list.innerHTML = browseVerses.map(v=>`
-      <label class="verse-check-row">
+      <label class="verse-check-row ${selectedVerseNums.has(v.num)?'on':''}">
         <input type="checkbox" data-vnum="${v.num}" ${selectedVerseNums.has(v.num)?'checked':''}>
         <span class="vnum">${v.num}</span><span>${escapeHtml(v.text)}</span>
       </label>`).join('');
-    document.getElementById('verseChecklist').style.display = 'block';
     updateInsertButtonLabel();
   }
   function updateInsertButtonLabel(){
     const n = selectedVerseNums.size;
     const btn = document.getElementById('btnInsertSelectedVerses');
-    btn.textContent = n ? `Insert Selected (${n})` : 'Insert Selected';
+    btn.textContent = editingVerseId ? (n ? `Update verse (${n})` : 'Update verse') : (n ? `Insert ${n} verse${n===1?'':'s'}` : 'Insert');
     btn.disabled = n === 0;
+    const sum = document.getElementById('vpSummary');
+    const r = n ? selectedVerseRefAndText() : null;
+    sum.textContent = r ? r.ref : 'Pick a book, chapter and verse(s). Shift-click selects a range.';
+    sum.classList.toggle('has', !!r);
+    document.querySelectorAll('#verseList .verse-check-row').forEach(row=>{
+      const cb = row.querySelector('input'); row.classList.toggle('on', !!(cb && cb.checked));
+    });
   }
   function selectedVerseRefAndText(){
     const nums = Array.from(selectedVerseNums).sort((a,b)=>a-b);
@@ -4513,13 +5003,13 @@ function icon(name, size){
       reader.onload = ()=>{
         const img = new Image();
         img.onload = ()=>{
-          const maxW = 1000;
+          const maxW = 1400;
           let w = img.width, h = img.height;
           if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
           const canvas = document.createElement('canvas');
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', 0.82));
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
         };
         img.onerror = reject;
         img.src = reader.result;
@@ -4998,8 +5488,10 @@ function icon(name, size){
 
   function renderNodesEditable(nodes, depth, bl){
     bl = bl || 0; // nesting level among non-section items (drives the bullet style)
+    let headingCount = 0;
     return nodes.map((node, idx)=>{
-      const label = numberLabel(depth, idx);
+      // Sections are numbered by their position among the sections (I., II. / A., B. / 1., 2. by level).
+      const label = node.kind === 'heading' ? numberLabel(depth, headingCount++) : numberLabel(depth, idx);
       const isHeading = node.kind === 'heading';
       const isVerse = node.kind === 'verse';
       const isPhoto = node.kind === 'photo';
@@ -5007,24 +5499,28 @@ function icon(name, size){
       let mainContent = '';
       if(isVerse){
         mainContent = `<span class="verse-ref-chip">${escapeHtml(node.ref||'Reference')}</span>
-          <textarea class="node-text full-only" readonly>${escapeHtml(node.text)}</textarea>`;
+          <textarea class="node-text full-only" data-id="${node.id}" style="${escapeHtml(styleObjToCssText(node.style))}" readonly>${escapeHtml(node.text)}</textarea>`;
       } else if(isPhoto){
         if(node.photoRef){
           const dataUrl = photoCache[node.photoRef];
           mainContent = dataUrl
-            ? `<img class="node-photo" src="${dataUrl}" alt="">
-               <input type="text" class="photo-caption" data-field="caption" data-id="${node.id}" placeholder="Caption (optional)" value="${escapeHtml(node.caption||'')}">`
+            ? `<div class="photo-wrap">${photoFrameHtml(node, dataUrl, cropEditingId === node.id ? 'crop' : 'edit')}
+               <input type="text" class="photo-caption" data-field="caption" data-id="${node.id}" placeholder="Caption (optional)" value="${escapeHtml(node.caption||'')}"></div>`
             : `<div class="photo-placeholder"><span class="condensed-flag">loading photo…</span></div>`;
         } else {
           mainContent = `<div class="photo-placeholder"><button class="btn small brass" data-action="upload-photo" data-id="${node.id}">Upload Photo</button></div>`;
         }
       } else {
-        mainContent = `<textarea class="node-text full-only" data-field="text" data-id="${node.id}" placeholder="${placeholderFor(node.kind)}" style="${escapeHtml(styleObjToCssText(node.style))}">${escapeHtml(node.text)}</textarea>`;
+        mainContent = `<div class="node-text full-only rt-edit" contenteditable="true" spellcheck="true" role="textbox" data-field="text" data-id="${node.id}" data-ph="${escapeHtml(placeholderFor(node.kind))}"${node.text ? '' : ' data-empty="1"'} style="${escapeHtml(styleObjToCssText(node.style))}">${runsToHtml(node.text, node.runs)}</div>`;
       }
 
-      const photoExtra = isPhoto ? `
+      const photoExtra = isPhoto ? (cropEditingId === node.id ? `
+            <button class="btn small brass" data-action="apply-crop" data-id="${node.id}">Apply crop</button>
+            <button class="btn small" data-action="cancel-crop" data-id="${node.id}">Cancel</button>` : `
+            ${(node.photoRef && node.natW) ? `<button class="btn small" data-action="crop-photo" data-id="${node.id}">Crop</button>` : ''}
+            ${(node.imgW || node.crop) ? `<button class="btn small" data-action="reset-photo" data-id="${node.id}" title="Back to the original size and framing">Reset</button>` : ''}
             <button class="btn small" data-action="upload-photo" data-id="${node.id}">${node.photoRef?'Replace':'Upload'}</button>
-            ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}` : '';
+            ${node.photoRef ? `<button class="btn small danger" data-action="remove-photo" data-id="${node.id}">Remove image</button>` : ''}`) : '';
 
       const hasKids = !!(node.children && node.children.length > 0);
       const collapseToggle = hasKids
@@ -5045,7 +5541,7 @@ function icon(name, size){
             </div>
           </div>` : '';
       const childrenHtml = showChildrenArea
-        ? `<div class="node-children">${hasKids ? renderNodesEditable(node.children, depth+1, isHeading ? 0 : bl + 1) : ''}${bottomAddMenu}</div>` : '';
+        ? `<div class="node-children">${hasKids ? renderNodesEditable(node.children, depth+1, isHeading ? 0 : bl + (node.indent||0) + 1) : ''}${bottomAddMenu}</div>` : '';
 
       const nodeMainInner = `${mainContent}${collapsedCount}`;
 
@@ -5057,7 +5553,7 @@ function icon(name, size){
       // Photos keep their own small Upload/Replace controls inline since those need
       // to be reachable without knowing this pattern exists.
       return `
-      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>
+      <div class="node" data-kind="${node.kind}" data-id="${node.id}" data-depth="${depth}" data-bl="${bl + (isHeading ? 0 : (node.indent||0))}"${(node.indent && !isHeading) ? ` style="margin-left:${node.indent*22}px"` : ''}>
         <div class="node-row">
           <span class="drag-handle" draggable="true" title="Drag to move or nest">${icon('grip-vertical',14)}</span>
           ${collapseToggle}
@@ -5073,10 +5569,7 @@ function icon(name, size){
   }
   function placeholderFor(kind){
     if(kind==='heading') return 'Section title... (press Enter to add your first line below)';
-    if(kind==='question') return 'Discussion question...';
-    if(kind==='statement') return 'Statement or teaching point... (press Enter for a new line)';
-    if(kind==='application') return 'How should this change how we live this week?';
-    if(kind==='teachernote') return "Private note to yourself — won't show on the audience handout...";
+    // Lines are left blank (just a bullet), like a word processor.
     return '';
   }
 
@@ -5230,10 +5723,10 @@ function icon(name, size){
     } else if(node.kind==='photo'){
       const dataUrl = node.photoRef ? photoCache[node.photoRef] : null;
       body = dataUrl
-        ? `<img class="node-photo" src="${dataUrl}" alt=""><div>${escapeHtml(node.caption||'')}</div>`
+        ? `${photoFrameHtml(node, dataUrl, 'static')}<div>${escapeHtml(node.caption||'')}</div>`
         : '<em>(no photo yet)</em>';
     } else {
-      body = `<span style="${styleCss}">${escapeHtml(node.text || '(empty)')}</span>`;
+      body = `<span style="${styleCss}">${node.text ? runsToHtml(node.text, node.runs) : '(empty)'}</span>`;
     }
     let timeBadge = '';
     if(node.kind==='heading' && pubStyle.showTimeBadges !== false){
@@ -5253,8 +5746,8 @@ function icon(name, size){
       const idx = (startIdx != null) ? startIdx : i;
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1, undefined, node.kind === 'heading' ? 0 : bl + 1)}</div>` : '';
-      return `<div class="p-node" data-kind="${node.kind}" data-bl="${bl}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
+      const childrenHtml = (node.children && node.children.length) ? `<div class="p-children">${renderNodesPreview(node.children, depth+1, undefined, node.kind === 'heading' ? 0 : bl + (node.indent||0) + 1)}</div>` : '';
+      return `<div class="p-node" data-kind="${node.kind}" data-bl="${bl + (node.indent||0)}"${node.indent ? ` style="margin-left:${node.indent*22}px"` : ''}>${rowHtml}${childrenHtml}</div>`;
     }).join('');
   }
   // Pre-order flatten of the outline into one paginatable block per node. Indentation
@@ -5267,10 +5760,10 @@ function icon(name, size){
     nodes.forEach((node, idx)=>{
       const label = numberLabel(depth, idx);
       const rowHtml = renderNodeRowHtml(node, label);
-      const html = `<div class="p-node p-flat" data-kind="${node.kind}" data-bl="${bl}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
+      const html = `<div class="p-node p-flat" data-kind="${node.kind}" data-bl="${bl + (node.indent||0)}" style="margin-left:${(depth+(node.indent||0))*28}px;">${rowHtml}</div>`;
       out.push({ html, isSectionStart: depth === 0 && node.kind === 'heading' });
       if(node.children && node.children.length){
-        out = out.concat(flattenNodesFlat(node.children, depth+1, node.kind === 'heading' ? 0 : bl + 1));
+        out = out.concat(flattenNodesFlat(node.children, depth+1, node.kind === 'heading' ? 0 : bl + (node.indent||0) + 1));
       }
     });
     return out;
@@ -5301,29 +5794,45 @@ function icon(name, size){
     }
     return Math.max(320, Math.min(window.innerHeight * 0.7, 900));
   }
-  function measureBlockHeights(pageWidth, blockHtmls){
+  // Measuring probes must live inside the same container as the real page, otherwise CSS scoped to
+  // the presenter overlay (fonts, bullets, spacing) doesn't apply and every block measures too tall,
+  // which left each page only partly filled.
+  // The probe copies the live page's classes and inline style variables (font scale etc.) so it
+  // measures exactly what will be shown.
+  function makeProbe(pageWidth){
+    const surf = document.getElementById('previewSurface');
     const probe = document.createElement('div');
-    probe.className = 'preview-surface';
-    probe.style.cssText = `position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    probe.className = (surf ? surf.className : 'preview-surface').replace(/\bpaginated\b/, '').trim();
+    probe.style.cssText = (surf ? surf.style.cssText : '') + `;position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    return probe;
+  }
+  function probeHost(){
+    const surf = document.getElementById('previewSurface');
+    return (surf && surf.parentElement) || document.body;
+  }
+  const PAGE_SLACK = 40; // blocks are measured one by one; leave room for spacing between them
+  function measureBlockHeights(pageWidth, blockHtmls){
+    const probe = makeProbe(pageWidth);
     const bodyDiv = document.createElement('div');
     bodyDiv.className = 'ms-body';
     probe.appendChild(bodyDiv);
-    document.body.appendChild(probe);
+    probeHost().appendChild(probe);
     const heights = blockHtmls.map(html=>{
       bodyDiv.innerHTML = html;
-      return bodyDiv.getBoundingClientRect().height;
+      // Measure the content only: the body's own top/bottom padding is budgeted once per page,
+      // so counting it again for every block made pages look full when they were half empty.
+      const cs = window.getComputedStyle(bodyDiv);
+      return bodyDiv.getBoundingClientRect().height - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
     });
-    document.body.removeChild(probe);
+    probe.remove();
     return heights;
   }
   function measureBandHeight(pageWidth, bandHtml){
-    const probe = document.createElement('div');
-    probe.className = 'preview-surface';
-    probe.style.cssText = `position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    const probe = makeProbe(pageWidth);
     probe.innerHTML = bandHtml;
-    document.body.appendChild(probe);
+    probeHost().appendChild(probe);
     const h = probe.getBoundingClientRect().height;
-    document.body.removeChild(probe);
+    probe.remove();
     return h;
   }
   // Measures the real rendered top+bottom padding of an empty .ms-body, instead of
@@ -5331,17 +5840,15 @@ function icon(name, size){
   // a stale guess here was quietly shrinking how much content each page thought it
   // had room for, leaving pages looking under-filled even though space was available.
   function measureBodyVPadding(pageWidth, bodyClass){
-    const probe = document.createElement('div');
-    probe.className = 'preview-surface';
-    probe.style.cssText = `position:absolute; visibility:hidden; pointer-events:none; left:-9999px; top:0; width:${pageWidth}px; max-height:none; overflow:visible;`;
+    const probe = makeProbe(pageWidth);
     const cls = 'ms-body' + (bodyClass ? ' ' + bodyClass : '');
     const bodyDiv = document.createElement('div');
     bodyDiv.className = cls;
     probe.appendChild(bodyDiv);
-    document.body.appendChild(probe);
+    probeHost().appendChild(probe);
     const cs = window.getComputedStyle(bodyDiv);
     const padding = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-    document.body.removeChild(probe);
+    probe.remove();
     return padding;
   }
   function paginateAndSetBook(bandHtml, blockHtmls, bodyClass){
@@ -5357,7 +5864,7 @@ function icon(name, size){
     let current = [];
     let currentHeight = 0;
     blockHtmls.forEach((html, i)=>{
-      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding;
+      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding - PAGE_SLACK;
       const h = heights[i];
       if(current.length && currentHeight + h > budget){
         pages.push(current);
@@ -5396,7 +5903,7 @@ function icon(name, size){
     let current = [];
     let currentHeight = 0;
     flatBlocks.forEach((block, i)=>{
-      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding;
+      const budget = (pages.length === 0 ? maxPageHeight - bandHeight : maxPageHeight) - bodyVPadding - PAGE_SLACK;
       const h = heights[i];
       const forceBreak = forceSectionBreaks && block.isSectionStart && current.length > 0;
       if(forceBreak || (current.length && currentHeight + h > budget)){
@@ -5576,21 +6083,58 @@ function icon(name, size){
     browseBook = null; browseChapter = null; browseVerses = []; selectedVerseNums = new Set();
     switchPickerTab('browse');
     renderBookGrid();
+    document.getElementById('chapterGrid').innerHTML = '<div class="vp-empty">Choose a book.</div>';
+    document.getElementById('vpChapTitle').textContent = 'Chapter';
+    document.getElementById('vpGoto').value = ''; document.getElementById('bookFilter').value = '';
+    resetVersePane();
     document.getElementById('verseModalOverlay').classList.add('open');
   }
-  function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; pendingVerseReplaceId = null; }
+  function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; editingVerseId = null; }
+  // Right-click > Edit verses…: reopen the picker on this verse's passage with its verses ticked, so verses
+  // can be added or removed; confirming rewrites the verse in place instead of adding a new one.
+  let editingVerseId = null;
+  async function openVerseEditor(id){
+    const ctx = findContext(id) || findContext(id, lesson.brainstorm || [], null);
+    if(!ctx || ctx.node.kind !== 'verse') return;
+    await openVerseModal(null);
+    editingVerseId = id;
+    document.getElementById('newVerseRef').value = ctx.node.ref || '';
+    document.getElementById('newVerseText').value = ctx.node.text || '';
+    const m = /^(.+?)\s+(\d+):([\d,\s\-–]+)$/.exec((ctx.node.ref || '').trim());
+    const book = m && BOOKS.find(b=>b[0].toLowerCase() === m[1].trim().toLowerCase());
+    if(!book){ switchPickerTab('manual'); return; }
+    renderChapterGrid(book[0]);
+    await chooseChapter(parseInt(m[2],10));
+    if(editingVerseId !== id) return;
+    const nums = new Set();
+    m[3].split(',').forEach(part=>{
+      const r = part.split(/[-–]/).map(x=>parseInt(x,10));
+      if(r.some(isNaN)) return;
+      for(let n=r[0]; n<=(r[1]||r[0]); n++) nums.add(n);
+    });
+    selectedVerseNums = new Set([...nums].filter(n=>browseVerses.some(v=>v.num===n)));
+    renderVerseChecklist();
+  }
+  function applyVerseEdit(ref, text){
+    const ctx = findContext(editingVerseId) || findContext(editingVerseId, lesson.brainstorm || [], null);
+    if(ctx){ ctx.node.ref = ref; ctx.node.text = text; }
+  }
   // When the ribbon's Insert > Verse opened the modal, move the new verse to sit right after the line the cursor was on.
   function placeVerseAfterCursor(newId){
     const afterId = pendingVerseAfterId;
     if(!afterId || afterId === newId || !findContext(afterId)) return;
+    // Cursor in an empty statement-type line: the verse takes that line's place (same spot in the hierarchy).
+    const blank = findContext(afterId);
+    if(FLOW_KINDS.includes(blank.node.kind) && !(blank.node.text || '').trim()){
+      const fresh = removeNodeById(newId);
+      if(fresh){
+        Object.assign(blank.node, {kind:'verse', ref:fresh.ref, text:fresh.text});
+        delete blank.node.style; delete blank.node.kindManual;
+        return;
+      }
+    }
     const node = removeNodeById(newId);
     if(node) insertRelative(afterId, node, 'after');
-    // A quick Verse key on an empty line: the verse takes that line's place.
-    const replaceCtx = pendingVerseReplaceId === afterId ? findContext(afterId) : null;
-    if(replaceCtx && isEmptyTextLine(replaceCtx.node)){
-      removeNodeById(afterId);
-      lastFocusedNodeId = newId;
-    }
   }
   function switchPickerTab(tab){
     document.getElementById('browsePane').style.display = tab==='browse' ? 'block' : 'none';
@@ -5612,6 +6156,7 @@ function icon(name, size){
     const text = document.getElementById('newVerseText').value.trim();
     if(!ref || !text){ await appAlert('Add both a reference and the verse text.'); return; }
     pushUndo();
+    if(editingVerseId){ applyVerseEdit(ref, text); await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList(); return; }
     const newId = addVerseNode(pendingVerseParentId, {ref: ref, text: text});
     placeVerseAfterCursor(newId);
     await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList();
@@ -5620,6 +6165,7 @@ function icon(name, size){
     const result = selectedVerseRefAndText();
     if(!result){ await appAlert('Select at least one verse first.'); return; }
     pushUndo();
+    if(editingVerseId){ applyVerseEdit(result.ref, result.text); await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList(); return; }
     const newId = addVerseNode(pendingVerseParentId, {ref: result.ref, text: result.text});
     placeVerseAfterCursor(newId);
     await saveLesson(); closeVerseModal(); renderTree(); renderBrainstormList();
@@ -5996,7 +6542,7 @@ function icon(name, size){
         if(child.kind === 'verse'){
           bullets.push({ text: child.ref || 'Verse', options:{ bullet:true, bold:true, color:'2C4F52' } });
         } else {
-          const prefix = child.kind==='question' ? 'Q: ' : child.kind==='application' ? 'Apply: ' : '';
+          const prefix = child.kind==='question' ? 'Q: ' : child.kind==='application' ? 'A: ' : '';
           bullets.push({ text: prefix + (child.text || ''), options:{ bullet:true } });
         }
       });
@@ -6258,14 +6804,14 @@ function icon(name, size){
   function armFieldUndoTracking(container){
     container.addEventListener('focusin', (e)=>{
       const t = e.target;
-      if(!editSessionActive && (t.tagName==='TEXTAREA' || t.tagName==='INPUT' || t.tagName==='SELECT')){
+      if(!editSessionActive && (isTA(t) || t.tagName==='INPUT' || t.tagName==='SELECT')){
         pushUndo();
         editSessionActive = true;
       }
     });
     container.addEventListener('focusout', (e)=>{
       const t = e.target;
-      if(t.tagName==='TEXTAREA' || t.tagName==='INPUT' || t.tagName==='SELECT') editSessionActive = false;
+      if(isTA(t) || t.tagName==='INPUT' || t.tagName==='SELECT') editSessionActive = false;
     });
   }
 
@@ -6444,11 +6990,11 @@ function icon(name, size){
       runPaletteItem({ type:'command', id: QUICK_COMMAND_KEYS[e.code] });
       return;
     }
-    if(e.key === '?' && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName)){
+    if(e.key === '?' && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName) && !isTA(document.activeElement)){
       e.preventDefault(); openShortcutsModal();
     }
     if(!e.metaKey && !e.ctrlKey && !e.altKey
-       && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName)
+       && !['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName) && !isTA(document.activeElement)
        && !document.activeElement.isContentEditable
        && !document.querySelector('.modal-overlay.open') && lesson){
       const QUICK_ADD_KIND = { s:'statement', q:'question', v:'verse', a:'application', t:'teachernote', p:'photo', h:'heading' };
@@ -6462,7 +7008,7 @@ function icon(name, size){
         const newId = addNodeAfter(QUICK_ADD_KIND[key], lastFocusedNodeId);
         saveLesson().then(()=>{
           renderTree();
-          requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+          requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`.node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
         });
         lastFocusedNodeId = newId;
       }
@@ -6881,7 +7427,7 @@ function icon(name, size){
     const newId = addNode('heading', 'root');
     await saveLesson();
     renderTree();
-    requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+    requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree .node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
   });
   document.getElementById('outlineViewSegmented').addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-level]');
@@ -6917,7 +7463,7 @@ function icon(name, size){
       await saveLesson();
       renderBrainstormList();
       if(kind === 'photo'){ pendingPhotoNodeId = node.id; photoFileInput.value=''; photoFileInput.click(); }
-      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#brainstormList textarea[data-id="${node.id}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
+      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#brainstormList .node-text[data-id="${node.id}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
     });
   });
 
@@ -7010,6 +7556,7 @@ function icon(name, size){
     const t = e.target;
     if(t.dataset && t.dataset.field){
       updateNodeField(t.dataset.id, t.dataset.field, t.value);
+      if(t.dataset.field === 'text'){ const bc = findContext(t.dataset.id, lesson.brainstorm || [], null); if(bc) delete bc.node.runs; }
       if(t.tagName==='TEXTAREA'){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
       scheduleAutosave();
     }
@@ -7019,54 +7566,48 @@ function icon(name, size){
     if(t.dataset && t.dataset.field){ updateNodeField(t.dataset.id, t.dataset.field, t.value); await saveLesson(); }
   });
   brainstormList.addEventListener('blur', async (e)=>{
-    if(e.target.tagName==='TEXTAREA' || e.target.tagName==='INPUT') await saveLesson();
+    if(isTA(e.target) || e.target.tagName==='INPUT') await saveLesson();
   }, true);
   brainstormList.addEventListener('keydown', async (e)=>{
     const t = e.target;
-    if(e.key === 'Tab' && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if(e.key === 'Tab' && (isTA(t) || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
       const rowEl = t.closest('.node');
       const tabId = rowEl && rowEl.dataset.id;
       const tabCtx = tabId && findContext(tabId, lesson.brainstorm || [], null);
       if(tabCtx){
         e.preventDefault();
         if(!ensureManualBrainstormOrder()) return;
-        const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
+        const isText = isTA(t) && t.dataset.field === 'text';
         if(isText) tabCtx.node.text = t.value;
         const selStart = t.selectionStart, selEnd = t.selectionEnd;
         if(e.shiftKey) await outdentNode(tabId); else await indentNode(tabId);
         requestAnimationFrame(()=>{
-          const el = brainstormList.querySelector(`.node[data-id="${tabId}"] > .node-row textarea, .node[data-id="${tabId}"] > .node-row input`);
+          const el = brainstormList.querySelector(`.node[data-id="${tabId}"] > .node-row .node-text, .node[data-id="${tabId}"] > .node-row input`);
           if(el){ editSessionActive = true; el.focus(); try{ if(isText) el.setSelectionRange(selStart, selEnd); }catch(err){} }
         });
         return;
       }
     }
-    if((t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+    if((isTA(t) || t.tagName === 'INPUT') && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
       const rowEl = t.closest('.node'); const mvId = rowEl && rowEl.dataset.id;
       if(mvId && findContext(mvId, lesson.brainstorm || [], null)){
         e.preventDefault();
         if(!ensureManualBrainstormOrder()) return;
         if(await moveNodeSibling(mvId, e.key === 'ArrowUp' ? -1 : 1)){
           requestAnimationFrame(()=>{
-            const el = brainstormList.querySelector(`.node[data-id="${mvId}"] > .node-row textarea, .node[data-id="${mvId}"] > .node-row input`);
+            const el = brainstormList.querySelector(`.node[data-id="${mvId}"] > .node-row .node-text, .node[data-id="${mvId}"] > .node-row input`);
             if(el){ editSessionActive = true; el.focus(); }
           });
         }
         return;
       }
     }
-    if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
+    if(!isTA(t) || !t.dataset || t.dataset.field !== 'text') return;
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
       const ctx = findContext(t.dataset.id, lesson.brainstorm || [], null);
       if(!ctx){ await saveLesson(); t.blur(); return; }
       ctx.node.text = t.value;
-      // Enter on an empty nested line steps out a level; on an empty top-level line it just finishes.
-      if(!t.value.trim()){
-        if(ctx.parentNode || ctx.node.indent > 0){ if(ensureManualBrainstormOrder()) await outdentNode(ctx.node.id); }
-        else { await saveLesson(); t.blur(); }
-        return;
-      }
       // Otherwise start the next line right below (first child if this line already has some).
       if(!ensureManualBrainstormOrder()) return;
       pushUndo();
@@ -7074,7 +7615,7 @@ function icon(name, size){
       if(ctx.node.children && ctx.node.children.length && !ctx.node.collapsed) ctx.node.children.unshift(nn);
       else ctx.arr.splice(ctx.idx + 1, 0, nn);
       await saveLesson(); renderBrainstormList();
-      requestAnimationFrame(()=>{ const el = brainstormList.querySelector(`textarea[data-id="${nn.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+      requestAnimationFrame(()=>{ const el = brainstormList.querySelector(`.node-text[data-id="${nn.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
     }
   });
 
@@ -7085,22 +7626,43 @@ function icon(name, size){
   document.getElementById('btnSaveInsertVerse').addEventListener('click', saveNewVerseAndInsert);
   document.getElementById('pickerTabBrowse').addEventListener('click', ()=> switchPickerTab('browse'));
   document.getElementById('pickerTabManual').addEventListener('click', ()=> switchPickerTab('manual'));
+  document.getElementById('bookFilter').addEventListener('input', (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#bookGrid .bk').forEach(b=>{ b.style.display = (!q || b.dataset.book.toLowerCase().includes(q)) ? '' : 'none'; });
+    document.querySelectorAll('#bookGrid .book-section').forEach(sec=>{
+      sec.style.display = [...sec.querySelectorAll('.bk')].some(b=>b.style.display !== 'none') ? '' : 'none';
+    });
+  });
+  document.getElementById('bookFilter').addEventListener('keydown', (e)=>{
+    if(e.key !== 'Enter') return;
+    const first = [...document.querySelectorAll('#bookGrid .bk')].find(b=>b.style.display !== 'none');
+    if(first){ document.getElementById('bookFilter').value = ''; document.getElementById('bookFilter').dispatchEvent(new Event('input')); renderChapterGrid(first.dataset.book); }
+  });
   document.getElementById('bookGrid').addEventListener('click', (e)=>{ const b=e.target.closest('button[data-book]'); if(b) renderChapterGrid(b.dataset.book); });
   document.getElementById('chapterGrid').addEventListener('click', (e)=>{
-    const back = e.target.closest('button[data-back-to-books]'); if(back){ renderBookGrid(); return; }
     const b=e.target.closest('button[data-chapter]'); if(b) chooseChapter(parseInt(b.dataset.chapter,10));
   });
-  document.getElementById('browseBreadcrumb').addEventListener('click', (e)=>{
-    const link = e.target.closest('a[data-nav]'); if(!link) return; e.preventDefault();
-    if(link.dataset.nav==='books') renderBookGrid(); if(link.dataset.nav==='chapters') renderChapterGrid(browseBook);
+  document.getElementById('vpGotoBtn').addEventListener('click', ()=> goToPassage(document.getElementById('vpGoto').value));
+  document.getElementById('vpGoto').addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); goToPassage(e.target.value); } });
+  // Click selects; Shift+click selects everything between this verse and the last one clicked.
+  document.getElementById('verseList').addEventListener('click', (e)=>{
+    const row = e.target.closest('.verse-check-row'); if(!row) return;
+    const cb = row.querySelector('input[data-vnum]'); if(!cb) return;
+    const num = parseInt(cb.dataset.vnum,10);
+    if(e.shiftKey && lastVersePicked != null){
+      e.preventDefault();
+      const [a,b] = [Math.min(lastVersePicked, num), Math.max(lastVersePicked, num)];
+      browseVerses.forEach(v=>{ if(v.num>=a && v.num<=b) selectedVerseNums.add(v.num); });
+      renderVerseChecklist();
+    } else lastVersePicked = num;
   });
-  document.getElementById('btnBackToChapters').addEventListener('click', ()=> renderChapterGrid(browseBook));
   document.getElementById('verseList').addEventListener('change', (e)=>{
     const cb = e.target.closest('input[data-vnum]'); if(!cb) return;
     const num = parseInt(cb.dataset.vnum,10);
     if(cb.checked) selectedVerseNums.add(num); else selectedVerseNums.delete(num);
     updateInsertButtonLabel();
   });
+  document.getElementById('btnClearVerses').addEventListener('click', ()=>{ selectedVerseNums = new Set(); if(browseVerses.length) renderVerseChecklist(); });
   document.getElementById('btnInsertSelectedVerses').addEventListener('click', insertSelectedVerses);
   document.getElementById('btnSelectAllVerses').addEventListener('click', ()=>{ selectedVerseNums = new Set(browseVerses.map(v=>v.num)); renderVerseChecklist(); });
 
@@ -7113,12 +7675,36 @@ function icon(name, size){
   // Tracks whichever outline node was last focused, so keyboard add-shortcuts
   // (+, S, Q, V, A, T, P, H — see the global keydown handler) know where to insert.
   let lastFocusedNodeId = null;
+  // Clicking a verse's reference label puts the cursor in the verse so Tab / Shift+Tab / formatting work on it.
+  mainTree.addEventListener('click', e=>{
+    const chip = e.target.closest && e.target.closest('.verse-ref-chip');
+    if(!chip) return;
+    const ta = chip.parentElement && chip.parentElement.querySelector('textarea.node-text');
+    if(ta){ editSessionActive = true; ta.focus(); }
+  });
   mainTree.addEventListener('focusin', (e)=>{
-    const ta = e.target.closest && e.target.closest('textarea.node-text[data-id]');
+    const ta = e.target.closest && e.target.closest('.node-text[data-id]');
     if(ta) lastFocusedNodeId = ta.dataset.id;
     else { const row = e.target.closest && e.target.closest('.node[data-id]'); if(row) lastFocusedNodeId = row.dataset.id; }
     updateRibbonState();
+    updateWsPath();
   });
+  // "You are here": the chain of sections (with their outline numbers) above the line you're in.
+  function updateWsPath(){
+    const el = document.getElementById('wsPath'); if(!el) return;
+    const id = lastFocusedNodeId;
+    let found = null;
+    (function walk(nodes, depth, trail){
+      let hc = 0;
+      for(const n of nodes){
+        const label = n.kind === 'heading' ? numberLabel(depth, hc++) : null;
+        const next = label ? trail.concat([label + ' ' + ((n.text || '').trim() || 'Untitled')]) : trail;
+        if(n.id === id){ found = next; return; }
+        if(n.children && n.children.length){ walk(n.children, label ? depth + 1 : depth, next); if(found) return; }
+      }
+    })(lesson.outline || [], 0, []);
+    el.textContent = found && found.length ? found.join('  ›  ') : '';
+  }
   function openQuickAddMenuAt(afterId){
     const menu = document.getElementById('nodeContextMenu');
     ctxMenuTargetId = null;
@@ -7152,7 +7738,7 @@ function icon(name, size){
         style[key] = !style[key];
         await saveLesson();
         fmtBtn.classList.toggle('active', style[key]);
-        const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
+        const ta = mainTree.querySelector(`.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
       }
       return;
@@ -7167,7 +7753,7 @@ function icon(name, size){
         await saveLesson();
         const menu = fmtColorBtn.closest('.format-menu');
         menu.querySelectorAll('[data-fmt-color]').forEach(b=> b.classList.toggle('active', b.dataset.fmtColor === style.color));
-        const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
+        const ta = mainTree.querySelector(`.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
       }
       return;
@@ -7216,7 +7802,7 @@ function icon(name, size){
       await saveLesson();
       renderTree();
       if(kind === 'photo'){ pendingPhotoNodeId = newId; photoFileInput.value=''; photoFileInput.click(); }
-      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
+      else{ requestAnimationFrame(()=>{ const ta = document.querySelector(`#mainTree .node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } }); }
       return;
     }
     const uploadBtn = e.target.closest('[data-action="upload-photo"]');
@@ -7225,8 +7811,36 @@ function icon(name, size){
     if(removeBtn){
       pushUndo();
       const ctx = findContext(removeBtn.dataset.id);
-      if(ctx && ctx.node.photoRef){ await deletePhotoData(ctx.node.photoRef); ctx.node.photoRef = ''; }
+      if(ctx && ctx.node.photoRef){ await deletePhotoData(ctx.node.photoRef); ctx.node.photoRef = ''; delete ctx.node.crop; delete ctx.node.imgW; delete ctx.node.natW; delete ctx.node.natH; }
       await saveLesson(); renderTree(); return;
+    }
+    const cropBtn = e.target.closest('[data-action="crop-photo"]');
+    if(cropBtn){
+      const ctx = findContext(cropBtn.dataset.id); if(!ctx) return;
+      cropEditingId = ctx.node.id; cropDraft = Object.assign({}, ctx.node.crop || FULL_CROP);
+      renderTree(); return;
+    }
+    const cancelCropBtn = e.target.closest('[data-action="cancel-crop"]');
+    if(cancelCropBtn){ cropEditingId = null; cropDraft = null; renderTree(); return; }
+    const applyCropBtn = e.target.closest('[data-action="apply-crop"]');
+    if(applyCropBtn){
+      const ctx = findContext(applyCropBtn.dataset.id);
+      const frame = mainTree.querySelector(`.photo-frame.cropping[data-photo-frame="${applyCropBtn.dataset.id}"]`);
+      if(ctx && frame && cropDraft){
+        pushUndo();
+        const frameW = frame.offsetWidth, d = cropDraft;
+        const isFull = d.x < 0.002 && d.y < 0.002 && d.w > 0.996 && d.h > 0.996;
+        if(isFull){ delete ctx.node.crop; } else ctx.node.crop = { x:+d.x.toFixed(4), y:+d.y.toFixed(4), w:+d.w.toFixed(4), h:+d.h.toFixed(4) };
+        ctx.node.imgW = Math.max(48, Math.round(frameW * d.w));   // keep the same scale: cropping trims, it doesn't zoom
+        await saveLesson();
+      }
+      cropEditingId = null; cropDraft = null; renderTree(); return;
+    }
+    const resetPhotoBtn = e.target.closest('[data-action="reset-photo"]');
+    if(resetPhotoBtn){
+      const ctx = findContext(resetPhotoBtn.dataset.id);
+      if(ctx){ pushUndo(); delete ctx.node.crop; delete ctx.node.imgW; await saveLesson(); renderTree(); }
+      return;
     }
 
     const actionBtn = e.target.closest('[data-action]');
@@ -7249,6 +7863,8 @@ function icon(name, size){
         if(ok){
           if(oldRef && oldRef !== key) await deletePhotoData(oldRef);
           ctx.node.photoRef = key;
+          delete ctx.node.crop; delete ctx.node.imgW; delete ctx.node.natW; delete ctx.node.natH;
+          await ensurePhotoDims(ctx.node);
           await saveLesson();
           renderTree();
           renderBrainstormList();
@@ -7290,7 +7906,7 @@ function icon(name, size){
     blockSel = { container, anchorId, headId };
     paintBlockSel();
     const ae = document.activeElement;
-    if(ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && container.contains(ae)){ try{ ae.setSelectionRange(ae.selectionEnd, ae.selectionEnd); }catch(err){} }
+    if(ae && (isTA(ae) || ae.tagName === 'INPUT') && container.contains(ae)){ try{ ae.setSelectionRange(ae.selectionEnd, ae.selectionEnd); }catch(err){} }
   }
   function clearBlockSel(){ if(!blockSel) return; blockSel = null; paintBlockSel(); }
   function blockNodeDepth(el){ let d = 0, n = el.parentElement; while(n){ if(n.classList && n.classList.contains('node')) d++; n = n.parentElement; } return d; }
@@ -7328,6 +7944,8 @@ function icon(name, size){
   }
   document.addEventListener('mousedown', (e)=>{
     const row = e.target.closest ? e.target.closest('#mainTree .node, #brainstormList .node') : null;
+    // Clicking the ribbon (bold, size, colour…) keeps the highlighted lines so the change applies to all of them.
+    if(blockSel && e.target.closest && e.target.closest('#wordRibbon')){ blockDrag = null; return; }
     if(blockSel && !(e.shiftKey && row)) clearBlockSel();
     blockDrag = null;
     if(!row || e.button !== 0 || e.target.closest('button, .drag-handle, .drawer-drag-handle, .add-menu, .node-controls')) return;
@@ -7354,7 +7972,7 @@ function icon(name, size){
     const t = e.target;
     const row = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
     const mod = e.metaKey || e.ctrlKey;
-    if(blockSel){
+    if(blockSel && !(t && t.closest && t.closest('#wordRibbon'))){
       if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); clearBlockSel(); return; }
       if(e.key === 'Delete' || e.key === 'Backspace'){ e.preventDefault(); e.stopPropagation(); deleteBlockSelection(); return; }
       if(e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
@@ -7373,7 +7991,7 @@ function icon(name, size){
         return;
       }
     }
-    if(!row || (t.tagName !== 'TEXTAREA' && t.tagName !== 'INPUT')) return;
+    if(!row || (!isTA(t) && t.tagName !== 'INPUT')) return;
     const container = row.closest('#mainTree, #brainstormList');
     if(mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'a'){
       const ids = blockVisibleNodes(container).map(n=>n.dataset.id);
@@ -7383,7 +8001,7 @@ function icon(name, size){
       }
       return;
     }
-    if(e.shiftKey && !mod && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && t.tagName === 'TEXTAREA'){
+    if(e.shiftKey && !mod && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && isTA(t)){
       const atEdge = e.key === 'ArrowUp' ? t.selectionStart === 0 : t.selectionEnd === t.value.length;
       if(!atEdge) return;
       const ids = blockVisibleNodes(container).map(n=>n.dataset.id);
@@ -7410,10 +8028,14 @@ function icon(name, size){
   document.addEventListener('paste', async (e)=>{
     const cd = e.clipboardData; if(!cd) return;
     const t = e.target;
-    if(!t || t.tagName !== 'TEXTAREA' || t.dataset.field !== 'text' || t.readOnly) return;
+    if(!t || !isTA(t) || t.dataset.field !== 'text' || t.readOnly) return;
     const row = t.closest('#mainTree .node, #brainstormList .node'); if(!row) return;
     const raw = cd.getData('text/plain').replace(/\r\n?/g, '\n').replace(/\n+$/, '');
-    if(!raw.includes('\n')) return;
+    if(!raw.includes('\n')){
+      // Single-line paste into a rich box: plain text only (never bring another page's fonts along).
+      if(raw && isRT(t)){ e.preventDefault(); document.execCommand('insertText', false, raw); }
+      return;
+    }
     e.preventDefault();
     const ctx = findContext(row.dataset.id); if(!ctx) return;
     const parsed = raw.split('\n').filter(l=>l.trim()).map(l=>{
@@ -7427,6 +8049,7 @@ function icon(name, size){
     const before = t.value.slice(0, t.selectionStart), after = t.value.slice(t.selectionEnd);
     const base = parsed[0].level;
     ctx.node.text = before + parsed[0].text;
+    setNodeRuns(ctx.node, clipRuns(ctx.node.runs, 0, before.length, 0));
     let pos = ctx.idx + 1, stack = [], last = ctx.node;
     parsed.slice(1).forEach(({level, text})=>{
       const nn = makeNode('statement'); nn.text = text;
@@ -7446,7 +8069,7 @@ function icon(name, size){
     updateActionCardsAndChips();
     const inBrainstorm = !!row.closest('#brainstormList');
     requestAnimationFrame(()=>{
-      const el = (inBrainstorm ? document.getElementById('brainstormList') : mainTree).querySelector(`textarea[data-id="${last.id}"]`);
+      const el = (inBrainstorm ? document.getElementById('brainstormList') : mainTree).querySelector(`.node-text[data-id="${last.id}"]`);
       if(el){ editSessionActive = true; el.focus(); const pos2 = (last.text || '').length - after.length; try{ el.setSelectionRange(pos2, pos2); }catch(err){} }
     });
   });
@@ -7468,28 +8091,68 @@ function icon(name, size){
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
   })();
 
+  // ---------------- Page zoom (like Word's zoom slider) ----------------
+  (function pageZoom(){
+    let zoom = 100;
+    try{ const z = parseInt(localStorage.getItem(lsKey('page-zoom')), 10); if(z >= 50 && z <= 200) zoom = z; }catch(e){}
+    const range = document.getElementById('wsZoomRange'), pct = document.getElementById('wsZoomPct');
+    function apply(v, save){
+      zoom = Math.max(50, Math.min(200, Math.round(v / 5) * 5));
+      document.documentElement.style.setProperty('--page-zoom', String(zoom / 100));
+      range.value = zoom; pct.textContent = zoom + '%';
+      if(save){ try{ localStorage.setItem(lsKey('page-zoom'), String(zoom)); }catch(e){} }
+      requestAnimationFrame(()=> autosizeVisibleTextareas(mainTree));
+    }
+    // The page's width at 100% (fits the window, capped at 1200px); zoom then scales the whole sheet from there.
+    const scroller = document.getElementById('pageScroller');
+    function setBaseWidth(){ document.documentElement.style.setProperty('--page-w', Math.min(1200, scroller.clientWidth) + 'px'); }
+    setBaseWidth();
+    if(window.ResizeObserver) new ResizeObserver(setBaseWidth).observe(scroller); else window.addEventListener('resize', setBaseWidth);
+    apply(zoom, false);
+    range.addEventListener('input', ()=> apply(parseInt(range.value, 10), true));
+    document.getElementById('wsZoomOut').addEventListener('click', ()=> apply(zoom - 10, true));
+    document.getElementById('wsZoomIn').addEventListener('click', ()=> apply(zoom + 10, true));
+    pct.addEventListener('click', ()=> apply(100, true));
+    document.addEventListener('wheel', (e)=>{
+      if(!(e.ctrlKey || e.metaKey) || !e.target.closest || !e.target.closest('#panel-outline, .word-ribbon')) return;
+      e.preventDefault();
+      apply(zoom + (e.deltaY < 0 ? 10 : -10), true);
+    }, { passive:false });
+  })();
+
   // Paste a screenshot / copied picture into the outline or Brainstorm: it becomes a photo line
   // right after the line you're typing in (or at the end of Brainstorm if nothing is focused).
   document.addEventListener('paste', async (e)=>{
     const cd = e.clipboardData; if(!cd) return;
     const imgItem = Array.from(cd.items || []).find(it=>it.kind === 'file' && it.type.startsWith('image/'));
-    if(!imgItem || cd.getData('text/plain')) return;
+    // A screenshot / copied picture. (Some sources also attach text or HTML; a plain-text-only copy is left alone.)
+    const plain = (cd.getData('text/plain') || '').trim();
+    const html = cd.getData('text/html') || '';
+    if(!imgItem || (plain && !/<img\b/i.test(html))) return;
     const t = e.target;
     const rowEl = t && t.closest ? t.closest('#mainTree .node, #brainstormList .node') : null;
     const drawerOpen = document.getElementById('brainstormDrawer').classList.contains('open');
-    const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT');
+    const typing = t && (isTA(t) || t.tagName === 'INPUT');
     if(!rowEl && (typing || !drawerOpen)) return; // some other field (title, search, modal): leave it alone
     const file = imgItem.getAsFile(); if(!file) return;
     e.preventDefault();
     try{
       const dataUrl = await readAndCompressImage(file);
-      const node = makeNode('photo');
+      const ctx = rowEl ? findContext(rowEl.dataset.id) : null;
+      // Cursor in an empty line: the picture takes that line's place (same spot in the outline).
+      const inPlace = !!(ctx && FLOW_KINDS.includes(ctx.node.kind) && !(ctx.node.text || '').trim());
+      const node = inPlace ? ctx.node : makeNode('photo');
       const key = photoKeyFor(node.id);
       if(!(await savePhotoData(key, dataUrl))){ showToast("Couldn't save that image.", true); return; }
-      node.photoRef = key;
       pushUndo();
-      const ctx = rowEl ? findContext(rowEl.dataset.id) : null;
-      if(ctx) ctx.arr.splice(ctx.idx + 1, 0, node); else lesson.brainstorm.push(node);
+      if(inPlace){
+        node.kind = 'photo'; node.caption = ''; delete node.text; delete node.runs; delete node.style; delete node.kindManual;
+      }
+      node.photoRef = key;
+      const sz = await imageNaturalSize(dataUrl); if(sz){ node.natW = sz.w; node.natH = sz.h; }
+      if(!inPlace){
+        if(ctx) ctx.arr.splice(ctx.idx + 1, 0, node); else lesson.brainstorm.push(node);
+      }
       await saveLesson();
       rerenderStructure();
       updateActionCardsAndChips();
@@ -7500,6 +8163,53 @@ function icon(name, size){
     }
   });
 
+
+  // ---- Photo resize grip + crop box (mouse / touch / pen) ----
+  mainTree.addEventListener('pointerdown', (e)=>{
+    const grip = e.target.closest && e.target.closest('[data-photo-grip]');
+    const cropH = e.target.closest && e.target.closest('.crop-h, [data-crop-box]');
+    if(!grip && !cropH) return;
+    e.preventDefault(); e.stopPropagation();
+    if(grip){
+      const frame = grip.closest('.photo-frame');
+      const nodeId = frame.dataset.photoFrame;
+      const startX = e.clientX, startW = frame.offsetWidth;
+      const scale = (frame.getBoundingClientRect().width / (frame.offsetWidth || 1)) || 1;
+      const maxW = Math.max(48, frame.parentElement.clientWidth);
+      frame.classList.add('resizing');
+      const move = (ev)=>{ frame.style.width = Math.round(Math.min(maxW, Math.max(48, startW + (ev.clientX - startX) / scale))) + 'px'; };
+      const up = async ()=>{
+        window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+        frame.classList.remove('resizing');
+        const ctx = findContext(nodeId);
+        if(ctx && Math.abs(frame.offsetWidth - startW) > 1){ pushUndo(); ctx.node.imgW = frame.offsetWidth; await saveLesson(); renderTree(); }
+      };
+      window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+      return;
+    }
+    const frame = cropH.closest('.photo-frame.cropping'); if(!frame || !cropDraft) return;
+    const box = frame.querySelector('[data-crop-box]');
+    const handle = cropH.dataset.h || 'move';
+    const r = frame.getBoundingClientRect();
+    const d0 = Object.assign({}, cropDraft), startX = e.clientX, startY = e.clientY, MIN = 0.05;
+    const clamp = (v, lo, hi)=> Math.min(hi, Math.max(lo, v));
+    const move = (ev)=>{
+      const dx = (ev.clientX - startX) / r.width, dy = (ev.clientY - startY) / r.height;
+      let { x, y, w, h } = d0;
+      if(handle === 'move'){ x = clamp(d0.x + dx, 0, 1 - d0.w); y = clamp(d0.y + dy, 0, 1 - d0.h); }
+      else {
+        if(handle.includes('w')){ x = clamp(d0.x + dx, 0, d0.x + d0.w - MIN); w = d0.x + d0.w - x; }
+        if(handle.includes('e')){ w = clamp(d0.w + dx, MIN, 1 - d0.x); }
+        if(handle.includes('n')){ y = clamp(d0.y + dy, 0, d0.y + d0.h - MIN); h = d0.y + d0.h - y; }
+        if(handle.includes('s')){ h = clamp(d0.h + dy, MIN, 1 - d0.y); }
+      }
+      cropDraft = { x, y, w, h };
+      box.style.left = x * 100 + '%'; box.style.top = y * 100 + '%'; box.style.width = w * 100 + '%'; box.style.height = h * 100 + '%';
+    };
+    const up = ()=>{ window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  });
+
   let autosaveTimer = null;
   function scheduleAutosave(){
     if(autosaveTimer) clearTimeout(autosaveTimer);
@@ -7507,7 +8217,14 @@ function icon(name, size){
   }
   mainTree.addEventListener('input', (e)=>{
     const t = e.target;
-    if(t.dataset && t.dataset.field){
+    if(isRT(t) && t.dataset.field === 'text'){
+      const rd = readRT(t);
+      const nctx = findContext(t.dataset.id);
+      if(nctx){ nctx.node.text = rd.text; setNodeRuns(nctx.node, rd.runs); }
+      if(rd.text) t.removeAttribute('data-empty'); else t.setAttribute('data-empty', '1');
+      scheduleAutosave();
+      scheduleWordStatus();
+    } else if(t.dataset && t.dataset.field){
       updateNodeField(t.dataset.id, t.dataset.field, t.value);
       if(t.tagName==='TEXTAREA'){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
       scheduleAutosave();
@@ -7522,9 +8239,9 @@ function icon(name, size){
       if(ctx){
         pushUndo();
         const style = ensureStyle(ctx.node);
-        style.size = t.value;
+        style.size = t.value; delete style.pt;
         await saveLesson();
-        const ta = mainTree.querySelector(`textarea.node-text.full-only[data-id="${ctx.node.id}"]`);
+        const ta = mainTree.querySelector(`.node-text.full-only[data-id="${ctx.node.id}"]`);
         applyStyleObjToEl(ta, style);
       }
       return;
@@ -7550,7 +8267,7 @@ function icon(name, size){
     }
   });
   mainTree.addEventListener('blur', async (e)=>{
-    if(e.target.tagName==='TEXTAREA' || e.target.tagName==='INPUT'){
+    if(isTA(e.target) || e.target.tagName==='INPUT'){
       if(autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
       await saveLesson();
     }
@@ -7560,24 +8277,43 @@ function icon(name, size){
     const t = e.target;
     // Tab / Shift+Tab indent or outdent from any row's field: text, read-only verse
     // text, or a photo caption — not just editable text areas.
-    if(e.key === 'Tab' && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if(e.key === 'Tab' && (isTA(t) || t.tagName === 'INPUT') && !e.ctrlKey && !e.metaKey && !e.altKey){
       const rowEl = t.closest('.node');
       const tabId = rowEl && rowEl.dataset.id;
       const tabCtx = tabId && findContext(tabId);
       if(tabCtx){
         e.preventDefault();
-        const isText = t.tagName === 'TEXTAREA' && t.dataset.field === 'text';
+        const isText = isTA(t) && t.dataset.field === 'text';
         if(isText) tabCtx.node.text = t.value;
         const selStart = t.selectionStart, selEnd = t.selectionEnd;
         if(e.shiftKey) await outdentNode(tabId); else await indentNode(tabId);
         requestAnimationFrame(()=>{
-          const el = mainTree.querySelector(`.node[data-id="${tabId}"] > .node-row textarea, .node[data-id="${tabId}"] > .node-row input`);
+          const el = mainTree.querySelector(`.node[data-id="${tabId}"] > .node-row .node-text, .node[data-id="${tabId}"] > .node-row input`);
           if(el){ editSessionActive = true; el.focus(); try{ if(isText) el.setSelectionRange(selStart, selEnd); }catch(err){} }
         });
         return;
       }
     }
-    if(t.tagName !== 'TEXTAREA' || !t.dataset || t.dataset.field !== 'text') return;
+    if(isTA(t) && t.readOnly && t.dataset.id && (e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
+      e.preventDefault();
+      await toggleNodeFormat(t.dataset.id, {b:'bold', i:'italic', u:'underline'}[e.key.toLowerCase()]);
+      return;
+    }
+    // Enter on a verse starts a new statement right below it (inside it if it already has lines nested under it).
+    if(isTA(t) && t.readOnly && t.dataset.id && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey){
+      const vctx = findContext(t.dataset.id);
+      if(vctx && vctx.node.kind === 'verse'){
+        e.preventDefault();
+        pushUndo();
+        const fresh = makeNode('statement'); fresh.style = {bold:false, italic:false, underline:false, size:'normal', color:''};
+        if(vctx.node.children && vctx.node.children.length && !vctx.node.collapsed) vctx.node.children.unshift(fresh);
+        else vctx.arr.splice(vctx.idx + 1, 0, fresh);
+        await saveLesson(); rerenderStructure();
+        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`.node-text[data-id="${fresh.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+        return;
+      }
+    }
+    if(!isTA(t) || !t.dataset || t.dataset.field !== 'text') return;
     const id = t.dataset.id;
     const ctx = findContext(id);
     if(!ctx) return;
@@ -7586,7 +8322,7 @@ function icon(name, size){
       e.preventDefault();
       ctx.node.text = t.value;
       if(await moveNodeSibling(id, e.key === 'ArrowUp' ? -1 : 1)){
-        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`textarea[data-id="${id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`.node-text[data-id="${id}"]`); if(el){ editSessionActive = true; el.focus(); } });
       }
       return;
     }
@@ -7597,6 +8333,8 @@ function icon(name, size){
       return;
     }
 
+    if(e.key === 'Enter' && e.shiftKey && isRT(t)){ e.preventDefault(); document.execCommand('insertLineBreak'); return; }
+
     const caretAtStart = t.selectionStart === 0 && t.selectionEnd === 0;
     const caretAtEnd = t.selectionStart === t.value.length && t.selectionEnd === t.value.length;
 
@@ -7604,6 +8342,7 @@ function icon(name, size){
       e.preventDefault();
       pushUndo();
       ctx.node.text = t.value;
+      if(isRT(t)) setNodeRuns(ctx.node, readRT(t).runs);
 
       // Section heading: Enter starts the section's first line, like typing under a heading in Word.
       if(ctx.node.kind === 'heading'){
@@ -7618,25 +8357,30 @@ function icon(name, size){
       }
 
       if(FLOW_KINDS.includes(ctx.node.kind)){
-        // Enter on an empty indented line steps back out a level (Word list behaviour).
-        if(!t.value.trim() && ctx.parentNode){
-          await outdentNode(id);
-          focusNodeText(id, 0);
-          return;
-        }
-        // Otherwise split at the cursor: text after it moves to a new line below.
-        const before = t.value.slice(0, t.selectionStart);
-        const after = t.value.slice(t.selectionEnd);
+        // Enter always starts another line right below (even from an empty one); use Shift+Tab to step out.
+        // Split at the cursor: text after it moves to the new line.
+        const selA = t.selectionStart, selB = t.selectionEnd;
+        const before = t.value.slice(0, selA);
+        const after = t.value.slice(selB);
+        const allRuns = isRT(t) ? readRT(t).runs : [];
         ctx.node.text = before;
+        setNodeRuns(ctx.node, clipRuns(allRuns, 0, selA, 0));
         // Sync the old box too: the browser fires a late 'change' from it while the tree re-renders.
         t.value = before;
         const auto = autoClassifyKind(before);
         if(auto && !ctx.node.kindManual) ctx.node.kind = auto;
         const newNode = makeNode('statement');
         newNode.text = after;
+        setNodeRuns(newNode, clipRuns(allRuns, selB, Infinity, -selB));
         const autoNew = autoClassifyKind(after);
         if(autoNew) newNode.kind = autoNew;
         newNode.style = Object.assign({}, ensureStyle(ctx.node), { italic:false });
+        // A line that has lines nested under it keeps them with the lower half, so the new line
+        // appears directly below this one instead of after all of its nested lines.
+        if(ctx.node.children && ctx.node.children.length){
+          newNode.children = ctx.node.children; newNode.collapsed = ctx.node.collapsed;
+          delete ctx.node.children; delete ctx.node.collapsed;
+        }
         ctx.arr.splice(ctx.idx + 1, 0, newNode);
         await saveLesson();
         renderTree();
@@ -7652,16 +8396,16 @@ function icon(name, size){
     // Backspace at the very start of a line: delete an empty line, or merge into the line above.
     if(e.key === 'Backspace' && caretAtStart){
       const isEmpty = !t.value.length;
-      const leafOrEmptySection = !(ctx.node.children && ctx.node.children.length) && (FLOW_KINDS.includes(ctx.node.kind) || ctx.node.kind === 'heading');
-      if(isEmpty && leafOrEmptySection){
-        const prev = adjacentNodeText(t, -1);
-        if(!prev) return;
+      if(isEmpty && (FLOW_KINDS.includes(ctx.node.kind) || ctx.node.kind === 'heading')){
+        // Backspace on a blank line deletes the whole line (any lines nested under it move up in its place).
+        const prev = adjacentNodeText(t, -1) || adjacentNodeText(t, 1);
         e.preventDefault();
         pushUndo();
-        removeNodeById(id);
+        const keep = ctx.node.children || [];
+        ctx.arr.splice(ctx.idx, 1, ...keep);
         await saveLesson();
         renderTree();
-        focusNodeText(prev.dataset.id, 'end');
+        if(prev) focusNodeText(prev.dataset.id, adjacentNodeText(t, -1) ? 'end' : 0);
         return;
       }
       const prevSib = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
@@ -7669,7 +8413,9 @@ function icon(name, size){
         e.preventDefault();
         pushUndo();
         const joinAt = (prevSib.text || '').length;
+        const curRuns = isRT(t) ? readRT(t).runs : [];
         prevSib.text = (prevSib.text || '') + t.value;
+        setNodeRuns(prevSib, (prevSib.runs || []).concat(clipRuns(curRuns, 0, Infinity, joinAt)));
         removeNodeById(id);
         await saveLesson();
         renderTree();
@@ -7698,7 +8444,7 @@ function icon(name, size){
 
   // ---------------- Word-style ribbon + status bar ----------------
   function visibleNodeTexts(){
-    return Array.from(mainTree.querySelectorAll('textarea.node-text[data-field="text"]')).filter(x=>x.offsetParent !== null);
+    return Array.from(mainTree.querySelectorAll('.node-text[data-field="text"]')).filter(x=>x.offsetParent !== null);
   }
   function adjacentNodeText(fromEl, dir){
     const all = visibleNodeTexts();
@@ -7707,7 +8453,7 @@ function icon(name, size){
   }
   function focusNodeText(nodeId, caret){
     requestAnimationFrame(()=>{
-      const ta = mainTree.querySelector(`textarea.node-text[data-field="text"][data-id="${nodeId}"]`);
+      const ta = mainTree.querySelector(`.node-text[data-field="text"][data-id="${nodeId}"]`);
       if(!ta) return;
       editSessionActive = true;
       ta.focus();
@@ -7720,24 +8466,95 @@ function icon(name, size){
   function currentRibbonNode(){
     return lastFocusedNodeId ? (findContext(lastFocusedNodeId) || null) : null;
   }
-  function isFormattableNode(node){ return !!node && (node.kind === 'heading' || FLOW_KINDS.includes(node.kind)); }
-  async function toggleNodeFormat(id, key){
-    const ctx = findContext(id);
-    if(!ctx || !isFormattableNode(ctx.node)) return;
+  function isFormattableNode(node){ return !!node && (node.kind === 'heading' || node.kind === 'verse' || FLOW_KINDS.includes(node.kind)); }
+  // Formatting goes to every highlighted line when several are selected, otherwise to the line you're in.
+  function formatTargetIds(fallbackId){
+    if(blockSel && blockSel.container === mainTree){
+      const ids = blockSelectedIds().filter(i=>{ const c = findContext(i); return c && isFormattableNode(c.node); });
+      if(ids.length) return ids;
+    }
+    return fallbackId ? [fallbackId] : [];
+  }
+  function applyStyleToIds(ids, fn){
+    ids.forEach(i=>{
+      const c = findContext(i); if(!c || !isFormattableNode(c.node)) return;
+      const st = ensureStyle(c.node);
+      fn(st, c.node);
+      applyStyleObjToEl(mainTree.querySelector(`.node-text.full-only[data-id="${i}"]`), st);
+    });
+  }
+  // A highlighted piece of text inside one line (remembered while focus is in the ribbon's size / font boxes).
+  let lastRTSel = null;
+  function rtSelection(){
+    if(blockSel) return null;
+    const ae = document.activeElement;
+    if(isRT(ae) && mainTree.contains(ae)){
+      const r = rtSelRange(ae);
+      return (r && r[1] > r[0]) ? { id: ae.dataset.id, a: r[0], b: r[1] } : null;
+    }
+    return (lastRTSel && lastRTSel.id === lastFocusedNodeId) ? lastRTSel : null;
+  }
+  async function formatSelection(sel, key, value){
+    const ctx = findContext(sel.id); if(!ctx) return;
+    const el = mainTree.querySelector(`.rt-edit[data-id="${sel.id}"]`); if(!el) return;
+    const rd = readRT(el); ctx.node.text = rd.text; setNodeRuns(ctx.node, rd.runs);
     pushUndo();
-    const style = ensureStyle(ctx.node);
-    style[key] = !style[key];
-    applyStyleObjToEl(mainTree.querySelector(`textarea.node-text.full-only[data-id="${id}"]`), style);
+    const nodeStyle = ensureStyle(ctx.node);
+    let all = true;
+    const k = {bold:'b', italic:'i', underline:'u'}[key] || key;
+    const base = !!nodeStyle[key];
+    patchRuns(ctx.node, sel.a, sel.b,
+      sg=>{
+        if(value === undefined) sg[k] = !all;
+        else if(value === '' || value === null) delete sg[k];
+        else sg[k] = value;
+      },
+      segs=>{ if(value === undefined) all = segs.every(sg=> sg[k] !== undefined ? sg[k] : base); });
+    el.innerHTML = runsToHtml(ctx.node.text, ctx.node.runs);
+    el.focus();
+    el.setSelectionRange(sel.a, sel.b);
+    lastRTSel = { id: sel.id, a: sel.a, b: sel.b };
+    await saveLesson();
+    updateRibbonState();
+  }
+  // Formatting goes to every highlighted line when several are selected, otherwise to the line you're in.
+  function formatTargetIds(fallbackId){
+    if(blockSel && blockSel.container === mainTree){
+      const ids = blockSelectedIds().filter(i=>{ const c = findContext(i); return c && isFormattableNode(c.node); });
+      if(ids.length) return ids;
+    }
+    return fallbackId ? [fallbackId] : [];
+  }
+  function applyStyleToIds(ids, fn){
+    ids.forEach(i=>{
+      const c = findContext(i); if(!c || !isFormattableNode(c.node)) return;
+      const st = ensureStyle(c.node);
+      fn(st, c.node);
+      applyStyleObjToEl(mainTree.querySelector(`.node-text.full-only[data-id="${i}"]`), st);
+    });
+  }
+  async function toggleNodeFormat(id, key){
+    const rs = rtSelection();
+    if(rs){ await formatSelection(rs, key); return; }
+    const ids = formatTargetIds(id);
+    if(!ids.length) return;
+    pushUndo();
+    const all = ids.every(i=>{ const c = findContext(i); return c && ensureStyle(c.node)[key]; });
+    applyStyleToIds(ids, st=>{ st[key] = !all; });
     await saveLesson();
     updateRibbonState();
   }
   async function setNodeStyleField(id, key, value){
-    const ctx = findContext(id);
-    if(!ctx || !isFormattableNode(ctx.node)) return;
+    const rs = rtSelection();
+    if(rs && ['pt','font','color'].includes(key)){ await formatSelection(rs, key, value || ''); return; }
+    const ids = formatTargetIds(id);
+    if(!ids.length) return;
     pushUndo();
-    const style = ensureStyle(ctx.node);
-    style[key] = value;
-    applyStyleObjToEl(mainTree.querySelector(`textarea.node-text.full-only[data-id="${id}"]`), style);
+    applyStyleToIds(ids, st=>{
+      st[key] = value;
+      if(key === 'pt'){ if(!value) delete st.pt; else st.size = 'normal'; }
+      if(key === 'font' && !value) delete st.font;
+    });
     await saveLesson();
     updateRibbonState();
   }
@@ -7796,7 +8613,6 @@ function icon(name, size){
       const parentId = !ctx ? 'root' : (ctx.node.kind === 'heading' ? ctx.node.id : (ctx.parentNode ? ctx.parentNode.id : 'root'));
       await openVerseModal(parentId);
       pendingVerseAfterId = (ctx && ctx.node.kind !== 'heading') ? ctx.node.id : null;
-      pendingVerseReplaceId = (ctx && ctx.node.kind !== 'heading' && isEmptyTextLine(ctx.node)) ? ctx.node.id : null;
       return;
     }
     const textLine = ctx && (ctx.node.kind === 'heading' || FLOW_KINDS.includes(ctx.node.kind));
@@ -7832,8 +8648,26 @@ function icon(name, size){
     styleSel.value = node ? node.kind : 'statement';
     const sizeSel = document.getElementById('rbSize');
     sizeSel.disabled = !formattable;
-    sizeSel.value = style.size || 'normal';
+    document.getElementById('rbSizeDown').disabled = document.getElementById('rbSizeUp').disabled = !formattable;
+    if(document.activeElement !== sizeSel){
+      const el = node && mainTree.querySelector(`.node-text[data-id="${node.id}"]`);
+      sizeSel.value = el ? String(Math.round(parseFloat(getComputedStyle(el).fontSize) * 0.75 * 2) / 2) : '';
+    }
+    const fontSel = document.getElementById('rbFont');
+    fontSel.disabled = !formattable;
+    fontSel.value = (style.font && FONT_FAMILIES[style.font]) ? style.font : '';
     ribbon.querySelectorAll('[data-rb-fmt]').forEach(b=>{ b.disabled = !formattable; b.classList.toggle('active', !!style[b.dataset.rbFmt]); });
+    const aeRT = document.activeElement;
+    if(isRT(aeRT) && mainTree.contains(aeRT)){
+      const sel = window.getSelection();
+      let n = sel && sel.anchorNode; if(n && n.nodeType === 3) n = n.parentElement;
+      if(n && aeRT.contains(n)){
+        const cs = getComputedStyle(n);
+        sizeSel.value = String(Math.round(parseFloat(cs.fontSize) * 0.75 * 2) / 2);
+        const on = { bold: (parseInt(cs.fontWeight, 10) || 400) >= 600, italic: cs.fontStyle === 'italic', underline: (cs.textDecorationLine || '').includes('underline') };
+        ribbon.querySelectorAll('[data-rb-fmt]').forEach(b=>b.classList.toggle('active', !!on[b.dataset.rbFmt]));
+      }
+    }
     document.getElementById('rbColorBtn').disabled = !formattable;
     document.getElementById('rbColorBar').style.background = style.color || 'var(--text)';
     document.getElementById('rbIndent').disabled = !node;
@@ -7865,6 +8699,15 @@ function icon(name, size){
   let wordStatusScrollRaf = null;
   window.addEventListener('scroll', ()=>{ cancelAnimationFrame(wordStatusScrollRaf); wordStatusScrollRaf = requestAnimationFrame(updateWordStatus); }, {passive:true});
 
+  let ribbonRaf = null;
+  document.addEventListener('selectionchange', ()=>{
+    const ae = document.activeElement;
+    if(isRT(ae) && mainTree.contains(ae)){
+      const r = rtSelRange(ae);
+      lastRTSel = (r && r[1] > r[0]) ? { id: ae.dataset.id, a: r[0], b: r[1] } : null;
+      cancelAnimationFrame(ribbonRaf); ribbonRaf = requestAnimationFrame(updateRibbonState);
+    } else if(!(ae && ae.closest && ae.closest('#wordRibbon'))) lastRTSel = null;
+  });
   (function wireRibbon(){
     const ribbon = document.getElementById('wordRibbon');
     document.getElementById('rbIndent').innerHTML = icon('indent', 16);
@@ -7907,8 +8750,27 @@ function icon(name, size){
     ribbon.addEventListener('change', async (e)=>{
       if(!lastFocusedNodeId) return;
       if(e.target.id === 'rbStyle') await changeNodeKind(lastFocusedNodeId, e.target.value);
-      else if(e.target.id === 'rbSize'){ await setNodeStyleField(lastFocusedNodeId, 'size', e.target.value); focusNodeText(lastFocusedNodeId, 'end'); }
+      else if(e.target.id === 'rbSize'){
+        const pt = clampPt(e.target.value);
+        const had = !!rtSelection();
+        if(pt) await setNodeStyleField(lastFocusedNodeId, 'pt', pt);
+        if(!had) focusNodeText(lastFocusedNodeId, 'end');
+      }
+      else if(e.target.id === 'rbFont'){ const had = !!rtSelection(); await setNodeStyleField(lastFocusedNodeId, 'font', e.target.value); if(!had) focusNodeText(lastFocusedNodeId, 'end'); }
     });
+    // A − / + step through the usual word-processor sizes.
+    const PT_STEPS = [8,9,10,11,12,14,16,18,20,24,28,32,36,48,60,72];
+    async function stepSize(dir){
+      if(!lastFocusedNodeId) return;
+      const cur = parseFloat(document.getElementById('rbSize').value) || 11;
+      const next = dir > 0 ? (PT_STEPS.find(x=>x > cur) || PT_STEPS[PT_STEPS.length-1]) : ([...PT_STEPS].reverse().find(x=>x < cur) || PT_STEPS[0]);
+      const had = !!rtSelection();
+      await setNodeStyleField(lastFocusedNodeId, 'pt', next);
+      if(!had) focusNodeText(lastFocusedNodeId, 'end');
+    }
+    document.getElementById('rbSizeUp').addEventListener('click', ()=>stepSize(1));
+    document.getElementById('rbSizeDown').addEventListener('click', ()=>stepSize(-1));
+    document.getElementById('rbSize').addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); e.target.dispatchEvent(new Event('change', {bubbles:true})); } });
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.rb-color-wrap')) document.getElementById('rbColorMenu').classList.remove('open'); });
   })();
 
@@ -8088,7 +8950,7 @@ function icon(name, size){
       await saveLesson();
       closeNodeContextMenu();
       renderTree();
-      requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`textarea[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
+      requestAnimationFrame(()=>{ const ta = mainTree.querySelector(`.node-text[data-id="${newId}"]`); if(ta){ editSessionActive = true; ta.focus(); } });
       lastFocusedNodeId = newId;
       return;
     }
@@ -8136,6 +8998,8 @@ function icon(name, size){
     if(indentBtn){ if(!indentBtn.disabled) await indentNode(id); closeNodeContextMenu(); return; }
     const outdentBtn = e.target.closest('[data-action="outdent-node"]');
     if(outdentBtn){ if(!outdentBtn.disabled) await outdentNode(id); closeNodeContextMenu(); return; }
+    const editVerseBtn = e.target.closest('[data-action="edit-verse"]');
+    if(editVerseBtn){ closeNodeContextMenu(); openVerseEditor(id); return; }
     const addBrainstormBtn = e.target.closest('[data-action="ctx-add-from-brainstorm"]');
     if(addBrainstormBtn){
       const ctx = findContext(id);
@@ -8209,7 +9073,7 @@ function icon(name, size){
     if(!lesson){ lesson = newLessonObj('Untitled Lesson'); await saveLesson(); await safeSet('last-lesson-id', lesson.id, false); }
     await migrateEmbeddedPhotos(lesson.outline);
     await migrateEmbeddedPhotos(lesson.brainstorm);
-    await saveLesson();
+    await saveLesson({ keepTime: true });
     await prefetchPhotos(lesson.outline);
     await prefetchPhotos(lesson.brainstorm);
     renderShell();
