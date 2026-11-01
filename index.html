@@ -1378,7 +1378,7 @@
   }
   /* As the window narrows, labels give way (icons stay) so the ribbon keeps to one row:
      "Brainstorm" first, then "Presenter Mode", then "Set time". */
-  @media (max-width: 1399px){
+  @media (max-width: 1499px){
     .rb-insert .action-card.brainstorm .t{display:none;}
     .rb-insert .action-card.brainstorm{padding-right:8px;}
   }
@@ -1387,12 +1387,16 @@
     .word-ribbon .rb-grp{padding:0 5px;}
     .rb-actions{padding-left:6px; gap:4px;}
   }
-  @media (max-width: 1299px) and (min-width: 901px){
+  @media (max-width: 1399px) and (min-width: 901px){
     .rb-actions .action-card.publish .t{display:none;}
     .rb-actions .action-card.publish{padding-right:8px;}
   }
-  @media (max-width: 1209px) and (min-width: 901px){
+  @media (max-width: 1309px) and (min-width: 901px){
     .rb-actions .chip-time b{display:none;}
+  }
+  @media (max-width: 1209px) and (min-width: 901px){
+    .word-ribbon .rb-style{width:112px;}
+    .word-ribbon .rb-font{width:100px;}
   }
   /* ================= Desktop: give the page (the typing area) as much room as possible =================
      No separate app bar (the sidebar is the app chrome), a slim title row that scrolls away, a pinned
@@ -1448,6 +1452,20 @@
     font-family:'Inter',sans-serif; font-size:.78rem !important; font-weight:700;
   }
   body.outline-style-classic #mainTree .node-children > .node[data-kind="heading"]{margin-top:10px;}
+  /* Page views (document / classic): the hover-only "+ Add" at the end of each section no longer takes up
+     room (it left a blank band under every section, and under every empty heading). Spacing comes from the
+     headings instead, always more above a heading than below it. Lines are added with Enter, the Insert
+     buttons, "Start a subsection here" and the right-click menu. */
+  #mainTree.doc-view .node-add-bottom,
+  body.outline-style-classic #mainTree .node-add-bottom{display:none;}
+  html body #mainTree.doc-view .node-children > .node[data-kind="heading"],
+  html body.outline-style-classic #mainTree .node-children > .node[data-kind="heading"]{margin-top:22px;}
+  html body #mainTree.doc-view .node-children > .node[data-kind="heading"]:first-child,
+  html body.outline-style-classic #mainTree .node-children > .node[data-kind="heading"]:first-child{margin-top:8px;}
+  html body #mainTree.doc-view > .node[data-depth="0"][data-kind="heading"],
+  html body.outline-style-classic #mainTree > .node[data-depth="0"][data-kind="heading"]{margin-top:40px;}
+  html body #mainTree.doc-view > .node[data-depth="0"][data-kind="heading"]:first-child,
+  html body.outline-style-classic #mainTree > .node[data-depth="0"][data-kind="heading"]:first-child{margin-top:0;}
   body.outline-style-classic #mainTree .node[data-kind="heading"] > .node-children{border-left:1px solid var(--border); margin-left:14px; padding-left:8px;}
   .ws-path{max-width:46vw; overflow:hidden; text-overflow:ellipsis; color:var(--text); font-weight:600;}
   .ws-path:empty{display:none;}
@@ -1710,6 +1728,7 @@
       <div class="rb-grp rb-insert">
         <span class="rb-label">Insert</span>
         <button class="rb-btn rb-text" id="btnNewSection" title="Add a new section">Section</button>
+        <button class="rb-btn rb-text" id="btnNewSubsection" title="Start a subsection at the line you're on: that line and the ones after it (up to the next subsection) move into it">Subsection</button>
         <button class="rb-btn rb-text" id="rbInsertVerse" title="Look up a verse and insert it below the current line">Verse</button>
         <button class="rb-btn rb-text" id="rbInsertPhoto" title="Insert a photo below the current line">Photo</button>
         <button class="action-card brainstorm" id="btnActionBrainstorm" title="Brainstorm: open your ideas, then drag one into the outline">
@@ -3760,6 +3779,54 @@ function icon(name, size){
     return n;
   }
 
+  // ---------------- Sections own the lines under them ----------------
+  // How many lines right after position idx are "loose" (not a section), i.e. belong to the section above them.
+  function looseLinesAfter(arr, idx){ let end = idx + 1; while(end < arr.length && arr[end].kind !== 'heading') end++; return end - idx - 1; }
+  // Moves the loose lines that follow a section heading into it (they were showing under it anyway).
+  function adoptLooseLines(ctx){
+    const n = looseLinesAfter(ctx.arr, ctx.idx);
+    if(!n) return 0;
+    const moved = ctx.arr.splice(ctx.idx + 1, n);
+    moved.forEach(m=> delete m.indent);
+    ctx.node.children = (ctx.node.children || []).concat(moved);
+    ctx.node.collapsed = false;
+    return n;
+  }
+  // "Start a subsection here": a new subsection heading goes right above the line you're on, and takes in
+  // that line and the ones after it, up to the next subsection. On a section heading, the new subsection
+  // becomes its first one and takes in the lines before any existing subsection. A line nested under
+  // another line counts as the line it's nested under. At the very top level this makes a section.
+  async function startSubsectionAt(id){
+    if(outlineViewLevel === 'sections'){
+      showToast('The Sections view only shows top-level sections. Switch to Subsections or All to add one.');
+      return;
+    }
+    let ctx = id ? findContext(id, lesson.outline, null) : null;
+    if(!ctx){ document.getElementById('btnNewSection').click(); return; }
+    pushUndo();
+    const h = makeNode('heading');
+    if(ctx.node.kind === 'heading'){
+      const kids = ctx.node.children = ctx.node.children || [];
+      let n = 0; while(n < kids.length && kids[n].kind !== 'heading') n++;
+      h.children = kids.splice(0, n);
+      kids.unshift(h);
+      ctx.node.collapsed = false;
+    } else {
+      while(ctx.parentNode && ctx.parentNode.kind !== 'heading'){
+        const up = findContext(ctx.parentNode.id, lesson.outline, null);
+        if(!up) break;
+        ctx = up;
+      }
+      const n = 1 + looseLinesAfter(ctx.arr, ctx.idx);
+      h.children = ctx.arr.splice(ctx.idx, n, h);
+      h.children.forEach(m=> delete m.indent);
+    }
+    await saveLesson();
+    renderTree();
+    focusNodeText(h.id, 0);
+    showToast(h.children.length ? `New subsection: type its title. ${h.children.length} line${h.children.length===1?'':'s'} moved into it.` : 'New subsection: type its title.');
+  }
+
   // ---------------- Outline views (bottom bar: All / Sections / Subsections) ----------------
   //   All          — everything.
   //   Sections     — only the top-level sections; anything added is another section.
@@ -4062,6 +4129,13 @@ function icon(name, size){
 
     if(node.kind === 'verse'){
       html += `<button data-action="edit-verse">${icon('book-open',14)} Edit verses…</button><div class="ctx-divider"></div>`;
+    }
+
+    if(findContext(nodeId, lesson.outline, null) && outlineViewLevel !== 'sections'){
+      html += `<button data-action="start-subsection">${icon('heading',14)} Start a subsection here</button>`;
+      const loose = isHeading ? looseLinesAfter(ctx.arr, ctx.idx) : 0;
+      if(loose) html += `<button data-action="adopt-lines">${icon('corner-down-right',14)} Move the ${loose} line${loose===1?'':'s'} below into this ${ctx.parentNode ? 'subsection' : 'section'}</button>`;
+      html += `<div class="ctx-divider"></div>`;
     }
 
     {
@@ -7396,6 +7470,10 @@ function icon(name, size){
   document.getElementById('mainTree').addEventListener('click', ()=>{
     if(lesson && lesson.outline && !lesson.outline.length) document.getElementById('btnNewSection').click();
   });
+  document.getElementById('btnNewSubsection').addEventListener('click', ()=>{
+    const ctx = currentRibbonNode();
+    startSubsectionAt(ctx ? ctx.node.id : null);
+  });
   document.getElementById('btnNewSection').addEventListener('click', async ()=>{
     pushUndo();
     const newId = addNode('heading', 'root');
@@ -8559,6 +8637,9 @@ function icon(name, size){
     pushUndo();
     if(kind === 'heading'){
       node.children = node.children || []; node.collapsed = false; node.minutes = null;
+      delete node.indent;
+      // A heading owns the lines under it: the loose lines that follow move into it.
+      if(findContext(id, lesson.outline, null)) adoptLooseLines(ctx);
     } else if(node.kind === 'heading'){
       delete node.minutes;
       if(!(node.children && node.children.length)){ delete node.children; delete node.collapsed; }
@@ -8638,10 +8719,10 @@ function icon(name, size){
     styleSel.value = node ? node.kind : 'statement';
     // Line styles and Insert buttons the current view (Sections / Subsections) can't hold are greyed out.
     Array.from(styleSel.options).forEach(o=>{ if(o.value !== 'verse' && o.value !== 'photo') o.disabled = !viewAllowsKind(o.value); });
-    [['rbInsertVerse','verse'], ['rbInsertPhoto','photo']].forEach(([bid, kind])=>{
+    [['rbInsertVerse','verse'], ['rbInsertPhoto','photo'], ['btnNewSubsection','subsection']].forEach(([bid, kind])=>{
       const b = document.getElementById(bid); if(!b) return;
       if(!b.dataset.title) b.dataset.title = b.title;
-      b.disabled = !viewAllowsKind(kind);
+      b.disabled = kind === 'subsection' ? outlineViewLevel === 'sections' : !viewAllowsKind(kind);
       b.title = b.disabled ? 'Switch to All at the bottom to use this' : b.dataset.title;
     });
     const sizeSel = document.getElementById('rbSize');
@@ -8996,6 +9077,13 @@ function icon(name, size){
         renderTree();
       }
       closeNodeContextMenu();
+      return;
+    }
+    if(e.target.closest('[data-action="start-subsection"]')){ closeNodeContextMenu(); await startSubsectionAt(id); return; }
+    if(e.target.closest('[data-action="adopt-lines"]')){
+      closeNodeContextMenu();
+      const actx = findContext(id, lesson.outline, null);
+      if(actx){ pushUndo(); const n = adoptLooseLines(actx); await saveLesson(); renderTree(); if(n) showToast(`Moved ${n} line${n===1?'':'s'} into "${actx.node.text || 'this section'}".`); }
       return;
     }
     const indentBtn = e.target.closest('[data-action="indent-node"]');
