@@ -1101,6 +1101,8 @@
     max-width:816px; min-height:1056px; padding:84px 92px 110px; border:none; border-radius:2px;
     box-shadow:0 1px 3px rgba(0,0,0,.12), 0 6px 20px rgba(0,0,0,.07);
   }
+  /* Verses: words can be selected and formatted, but there's no typing cursor (the text can't be changed). */
+  #mainTree .rt-verse{caret-color:transparent; cursor:text;}
   /* Spelling mistakes found by the app's own checker (Spell, in the script). */
   /* Look like the system's own spell-check marks: Chrome / Edge draw their real one (spell-native), Safari gets
      macOS-style red dots (spell-dots), anything else a thin red wave. Classes are set by Spell at start. */
@@ -3591,6 +3593,9 @@ function icon(name, size){
   const RUN_KEYS = ['b','i','u','pt','font','color'];
   const isRT = el => !!(el && el.classList && el.classList.contains('rt-edit'));
   const isTA = el => !!el && (el.tagName === 'TEXTAREA' || isRT(el));
+  // Text that can be formatted but not changed: Scripture in the outline (rich box marked data-verse) and
+  // read-only text areas (verses in Brainstorm).
+  const isLockedText = el => !!el && ((el.tagName === 'TEXTAREA' && el.readOnly) || !!(el.dataset && el.dataset.verse === '1'));
   function runCss(r){
     let c = '';
     if(r.b !== undefined) c += 'font-weight:' + (r.b ? '700' : '400') + ';';
@@ -5594,7 +5599,7 @@ function icon(name, size){
       let mainContent = '';
       if(isVerse){
         mainContent = `<span class="verse-ref-chip">${escapeHtml(node.ref||'Reference')}</span>
-          <textarea class="node-text full-only" data-id="${node.id}" style="${escapeHtml(styleObjToCssText(node.style))}" readonly>${escapeHtml(node.text)}</textarea>`;
+          <div class="node-text full-only rt-edit rt-verse" contenteditable="true" spellcheck="false" role="textbox" aria-readonly="true" data-verse="1" data-id="${node.id}" title="Scripture can't be changed here. Select words and press Bold, Italic or Underline (Ctrl/⌘ B, I, U) to stress them." style="${escapeHtml(styleObjToCssText(node.style))}">${runsToHtml(node.text, node.runs)}</div>`;
       } else if(isPhoto){
         if(node.photoRef){
           const dataUrl = photoCache[node.photoRef];
@@ -5809,7 +5814,7 @@ function icon(name, size){
     const styleCss = escapeHtml(styleObjToCssText(node.style));
     let body = '';
     if(node.kind==='verse'){
-      body = `<span class="p-verse-ref">${escapeHtml(node.ref||'')}</span><span style="${styleCss}">${escapeHtml(node.text)}</span>`;
+      body = `<span class="p-verse-ref">${escapeHtml(node.ref||'')}</span><span style="${styleCss}">${runsToHtml(node.text, node.runs)}</span>`;
     } else if(node.kind==='photo'){
       const dataUrl = node.photoRef ? photoCache[node.photoRef] : null;
       body = dataUrl
@@ -6212,7 +6217,10 @@ function icon(name, size){
   }
   function applyVerseEdit(ref, text){
     const ctx = findContext(editingVerseId) || findContext(editingVerseId, lesson.brainstorm || [], null);
-    if(ctx){ ctx.node.ref = ref; ctx.node.text = text; }
+    if(ctx){
+      if(ctx.node.text !== text) delete ctx.node.runs; // the stressed words were in the old text
+      ctx.node.ref = ref; ctx.node.text = text;
+    }
   }
   // When the ribbon's Insert > Verse opened the modal, move the new verse to sit right after the line the cursor was on.
   function placeVerseAfterCursor(newId){
@@ -8196,7 +8204,7 @@ function icon(name, size){
   document.addEventListener('paste', async (e)=>{
     const cd = e.clipboardData; if(!cd) return;
     const t = e.target;
-    if(!t || !isTA(t) || t.dataset.field !== 'text' || t.readOnly) return;
+    if(!t || !isTA(t) || t.dataset.field !== 'text' || isLockedText(t)) return;
     const row = t.closest('#mainTree .node, #brainstormList .node'); if(!row) return;
     const raw = cd.getData('text/plain').replace(/\r\n?/g, '\n').replace(/\n+$/, '');
     if(!raw.includes('\n')){
@@ -8387,8 +8395,29 @@ function icon(name, size){
     if(autosaveTimer) clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(()=>{ autosaveTimer = null; saveLesson(); }, 900);
   }
+  // Scripture is locked: typing, deleting, pasting, dropping and cutting in a verse are refused. Only the
+  // app's own formatting (Bold / Italic / Underline on the selected words, see formatSelection) changes it.
+  mainTree.addEventListener('beforeinput', (e)=>{
+    const v = e.target && e.target.closest && e.target.closest('.rt-verse');
+    if(!v) return;
+    e.preventDefault();
+    if(!/^format|^history/.test(e.inputType || '')) showVerseLockedHint();
+  });
+  let verseHintAt = 0;
+  function showVerseLockedHint(){
+    if(Date.now() - verseHintAt < 4000) return;
+    verseHintAt = Date.now();
+    showToast("Scripture can't be changed. Select words and use Bold, Italic or Underline to stress them.");
+  }
   mainTree.addEventListener('input', (e)=>{
     const t = e.target;
+    // Anything that still got through (e.g. typing with an input method) is undone straight away.
+    const lockedVerse = t && t.closest && t.closest('.rt-verse');
+    if(lockedVerse){
+      const vctx = findContext(lockedVerse.dataset.id);
+      if(vctx) lockedVerse.innerHTML = runsToHtml(vctx.node.text, vctx.node.runs);
+      return;
+    }
     if(isRT(t) && t.dataset.field === 'text'){
       const rd = readRT(t);
       const nctx = findContext(t.dataset.id);
@@ -8467,13 +8496,13 @@ function icon(name, size){
         return;
       }
     }
-    if(isTA(t) && t.readOnly && t.dataset.id && (e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
+    if(isTA(t) && isLockedText(t) && t.dataset.id && (e.metaKey || e.ctrlKey) && !e.altKey && ['b','i','u'].includes(e.key.toLowerCase())){
       e.preventDefault();
       await toggleNodeFormat(t.dataset.id, {b:'bold', i:'italic', u:'underline'}[e.key.toLowerCase()]);
       return;
     }
     // Enter on a verse starts a new statement right below it (inside it if it already has lines nested under it).
-    if(isTA(t) && t.readOnly && t.dataset.id && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if(isTA(t) && isLockedText(t) && t.dataset.id && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey){
       const vctx = findContext(t.dataset.id);
       if(vctx && vctx.node.kind === 'verse'){
         e.preventDefault();
@@ -8481,8 +8510,10 @@ function icon(name, size){
         const fresh = makeNode('statement'); fresh.style = {bold:false, italic:false, underline:false, size:'normal', color:''};
         if(vctx.node.children && vctx.node.children.length && !vctx.node.collapsed) vctx.node.children.unshift(fresh);
         else vctx.arr.splice(vctx.idx + 1, 0, fresh);
-        await saveLesson(); rerenderStructure();
-        requestAnimationFrame(()=>{ const el = mainTree.querySelector(`.node-text[data-id="${fresh.id}"]`); if(el){ editSessionActive = true; el.focus(); } });
+        rerenderStructure();
+        // Cursor into the new line straight away, so the first letter typed lands there (not on the verse).
+        const freshEl = mainTree.querySelector(`.node-text[data-id="${fresh.id}"]`); if(freshEl){ editSessionActive = true; freshEl.focus(); }
+        await saveLesson();
         return;
       }
     }
@@ -8684,7 +8715,13 @@ function icon(name, size){
     const nodeStyle = ensureStyle(ctx.node);
     let all = true;
     const k = {bold:'b', italic:'i', underline:'u'}[key] || key;
-    const base = !!nodeStyle[key];
+    // What the line looks like without any per-word formatting: page styles can already make it bold
+    // (headings) or italic (verses), and toggling should flip what you see, as in Word.
+    const cs = getComputedStyle(el);
+    const base = key === 'bold' ? (parseInt(cs.fontWeight, 10) || 400) >= 600
+      : key === 'italic' ? cs.fontStyle === 'italic'
+      : key === 'underline' ? (cs.textDecorationLine || '').includes('underline')
+      : !!nodeStyle[key];
     patchRuns(ctx.node, sel.a, sel.b,
       sg=>{
         if(value === undefined) sg[k] = !all;
@@ -9479,7 +9516,7 @@ function icon(name, size){
       if(!active()) return;
       syncIgnored();
       const ranges = [];
-      document.querySelectorAll('#mainTree .rt-edit').forEach(el=>{
+      document.querySelectorAll('#mainTree .rt-edit:not(.rt-verse)').forEach(el=>{ // Scripture isn't spell-checked
         const map = textMap(el);
         if(!map.text) return;
         const caret = caretIn(el, map);
@@ -9514,7 +9551,7 @@ function icon(name, size){
       const pt = caretPointFromXY(x, y);
       if(!pt || !pt.node || pt.node.nodeType !== 3) return null;
       const el = pt.node.parentElement && pt.node.parentElement.closest('#mainTree .rt-edit');
-      if(!el) return null;
+      if(!el || el.classList.contains('rt-verse')) return null;
       const map = textMap(el);
       const part = map.parts.find(p=> p.node === pt.node);
       if(!part) return null;
