@@ -728,28 +728,52 @@
      Folders and lessons are both flat ".x-row" items indented purely by depth
      (padding-left), so a file sitting alongside a sibling folder sits on the
      exact same visual plane — only genuine nesting moves a row inward. */
-  .folder-tree{background: var(--surface); color: var(--text); border-radius: var(--radius); padding:6px; max-height:440px; overflow-y:auto;}
-  .x-row{display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:var(--radius-xs); transition:background .1s ease; cursor:pointer;}
-  .x-row:hover{background: var(--accent-soft);}
+  #folderTreeRoot{max-width:1100px; margin:0 auto;}
+  .folder-tree{background: var(--surface); color: var(--text); border:1px solid var(--border); border-radius: var(--radius); padding:6px;}
+  .x-row{position:relative; display:flex; align-items:center; gap:8px; min-height:38px; padding:0 8px; border-radius:var(--radius-sm); transition:background .1s ease; cursor:pointer; user-select:none;}
+  .x-row + .x-row{margin-top:1px;}
+  .x-row:hover{background: var(--bg);}
+  .x-row:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+  .x-row.is-current{background: var(--accent-soft);}
+  .x-row.is-current::before{content:""; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:2px; background:var(--accent);}
   .x-row.drop-target{outline:2px dashed var(--accent); outline-offset:-2px; background: var(--accent-soft);}
-  .x-disclosure{width:18px; height:18px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:transparent; border:none; padding:0; color:var(--text-faint); cursor:pointer;}
+  .x-disclosure{width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:transparent; border:none; padding:0; border-radius:var(--radius-xs); color:var(--text-faint); cursor:pointer;}
+  .x-disclosure:hover{color:var(--text); background:var(--accent-soft);}
   .x-disclosure svg{transition:transform .12s ease;}
   .x-row.is-open .x-disclosure svg{transform:rotate(90deg);}
   .x-disclosure-empty{visibility:hidden; cursor:default;}
   .x-icon{flex-shrink:0; display:flex; color:var(--accent);}
-  .x-lesson .x-icon{color:var(--text-dim);}
-  .x-title{flex:1; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .x-title em{color:var(--text-faint); font-weight:400; font-style:normal;}
-  input.folder-title{flex:1; min-width:60px; border:none; background:transparent; font-size:0.85rem; font-weight:600; font-family:'Inter', sans-serif; color: var(--text); padding:2px 4px; border-radius:var(--radius-xs); margin-bottom:0; cursor:text;}
-  input.folder-title:focus{background:#fff; outline:1px solid var(--border);}
-  .x-count{flex-shrink:0; font-size:0.72rem; white-space:nowrap; margin-right:2px;}
-  .x-row-actions{display:flex; align-items:center; gap:1px; flex-shrink:0;}
+  .x-lesson .x-icon{color:var(--text-faint);}
+  .x-title{flex:1; min-width:0; font-size:0.87rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text);}
+  .x-folder .x-title{font-weight:600;}
+  .x-badge{flex-shrink:0; font-size:0.68rem; font-weight:600; letter-spacing:.02em; color:var(--accent); background:var(--surface); border:1px solid var(--accent); border-radius:var(--radius-xl); padding:1px 8px;}
+  /* Inline rename box: only exists while renaming. The id keeps it ahead of the
+     general ".modal input[type=text]" rule, which would otherwise box it in. */
+  #folderTreeRoot input.folder-title{flex:1; min-width:60px; width:auto; height:28px; margin:0 0 0 -5px; padding:0 4px; border:1px solid var(--accent); border-radius:var(--radius-xs); background:var(--surface); color:var(--text); font-size:0.87rem; font-weight:600; font-family:inherit; outline:none; box-shadow:0 0 0 3px var(--accent-soft); cursor:text; user-select:text;}
+  /* Fixed-width details and actions columns, so counts and dates line up on
+     every row whether or not that row has the folder-only buttons. */
+  .x-count{flex:0 0 72px; text-align:right; font-size:0.75rem; color:var(--text-faint); white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .x-row-actions{flex:0 0 88px; display:flex; align-items:center; justify-content:flex-end; gap:2px;}
   .x-action-btn{opacity:0; pointer-events:none; transition:opacity .12s ease; color:var(--text-faint); background:transparent; border:none; padding:5px; border-radius:var(--radius-xs); display:flex; cursor:pointer;}
   .x-action-btn:hover{color:var(--text); background:var(--accent-soft);}
   .x-row:hover .x-action-btn,
   .x-row:focus-within .x-action-btn,
   .row-menu-wrap.menu-open .x-action-btn{opacity:1; pointer-events:auto;}
   @media (hover:none){ .x-action-btn{opacity:1; pointer-events:auto;} }
+  /* Menus on the right-hand end of a row open leftward, inside the list,
+     so a closed (invisible) menu never pokes past the edge and adds a scrollbar. */
+  .x-row-actions .add-menu{left:auto; right:0;}
+  /* Closed menus take no space at all, so they can't stretch the page and
+     leave a scrollbar behind on a short list. */
+  #folderTreeRoot .add-menu:not(.open){display:none;}
+  #lessonsBrowserBody{scrollbar-width:thin; scrollbar-color:var(--border) transparent;}
+  #lessonsBrowserBody::-webkit-scrollbar{width:10px;}
+  #lessonsBrowserBody::-webkit-scrollbar-thumb{background:var(--border); border-radius:10px; border:3px solid var(--bg);}
+  #lessonsBrowserBody::-webkit-scrollbar-track{background:transparent;}
+  @media (max-width:640px){
+    .x-count{flex-basis:56px;}
+    .x-row{gap:6px;}
+  }
 
   /* Row kebab menu (hover-reveal secondary/destructive actions on lesson & folder rows) */
   .row-menu-wrap{margin-left:auto; position:relative; flex-shrink:0;}
@@ -1155,7 +1179,8 @@
   .lb-switch{position:relative; width:42px; height:23px; background:var(--surface-2); border:1px solid var(--border); border-radius:20px; cursor:pointer; flex-shrink:0;}
   .lb-switch .knob{position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:var(--accent); transition:left .16s ease;}
   .lb-switch.on .knob{left:21px;}
-  .lb-crumb{padding:10px 24px 0; font-size:.8rem; color:var(--text-dim);}
+  .lb-crumb{padding:10px 20px 0; font-size:.8rem; color:var(--text-dim); width:100%; max-width:1140px; margin:0 auto; box-sizing:border-box;}
+  #galleryModeRoot{max-width:1100px; margin:0 auto;}
   .lb-crumb b{color:var(--text); cursor:pointer;}
   .lb-crumb a{color:var(--text-dim); text-decoration:none; cursor:pointer;}
   .lb-crumb a:hover{color:var(--accent); text-decoration:underline;}
@@ -1990,7 +2015,7 @@
     </div>
     <div class="lb-crumb no-print" id="lessonsBreadcrumb"></div>
     <div class="publish-body" id="lessonsBrowserBody" style="display:block; overflow-y:auto;">
-      <div class="folder-tree" id="folderTreeRoot" style="max-height:none;"></div>
+      <div class="folder-tree" id="folderTreeRoot"></div>
       <div class="gallery-mode" id="galleryModeRoot" style="display:none;"></div>
     </div>
   </div>
@@ -6242,8 +6267,8 @@ function icon(name, size){
           <div class="x-row x-folder ${isOpen?'is-open':''}" draggable="true" data-drag-type="folder" data-id="${f.id}" tabindex="0" style="padding-left:${pad}px;">
             <button class="x-disclosure ${count?'':'x-disclosure-empty'}" data-action="toggle-folder" data-id="${f.id}" aria-label="${isOpen?'Collapse':'Expand'}">${count?icon('chevron-right',14):''}</button>
             <span class="x-icon">${icon('folder',16)}</span>
-            <input type="text" class="folder-title" data-folder-id="${f.id}" value="${escapeHtml(f.title)}">
-            <span class="x-count hint">${count} item${count===1?'':'s'}</span>
+            <span class="x-title" data-folder-name="${f.id}" title="${escapeHtml(f.title)} (double-click to rename)">${escapeHtml(f.title)}</span>
+            <span class="x-count">${count ? `${count} item${count===1?'':'s'}` : 'Empty'}</span>
             <div class="x-row-actions">
               <button class="x-action-btn" data-action="new-subfolder" data-id="${f.id}" title="New subfolder" aria-label="New subfolder">${icon('plus',14)}</button>
               <div class="add-menu-wrap">
@@ -6253,6 +6278,7 @@ function icon(name, size){
               <div class="add-menu-wrap row-menu-wrap">
                 <button class="row-kebab" data-action="row-menu-toggle" data-id="folder-${f.id}" title="More actions" aria-label="More actions">${icon('more-vertical',16)}</button>
                 <div class="add-menu row-menu" data-row-menu="folder-${f.id}">
+                  <button data-action="rename-folder" data-id="${f.id}">Rename</button>
                   <button data-action="export-series" data-id="${f.id}">${icon('download',14)} Export Series</button>
                   <div class="add-menu-divider"></div>
                   <button class="row-menu-danger" data-action="delete-folder" data-id="${f.id}">Delete Folder</button>
@@ -6266,11 +6292,12 @@ function icon(name, size){
         if(q && !(e.title||'').toLowerCase().includes(q)) return;
         const isCurrent = lesson && lesson.id===e.id;
         html += `
-          <div class="x-row x-lesson" draggable="true" data-drag-type="lesson" data-id="${e.id}" tabindex="0" style="padding-left:${pad}px;">
+          <div class="x-row x-lesson ${isCurrent?'is-current':''}" draggable="true" data-drag-type="lesson" data-id="${e.id}" tabindex="0" style="padding-left:${pad}px;">
             <span class="x-disclosure x-disclosure-empty"></span>
             <span class="x-icon">${icon('book-open',15)}</span>
-            <span class="x-title">${escapeHtml(e.title||'Untitled Lesson')}${isCurrent?' <em>(current)</em>':''}</span>
-            <span class="x-count hint">${fmtRelTime(e.updatedAt)}</span>
+            <span class="x-title" title="${escapeHtml(e.title||'Untitled Lesson')}">${escapeHtml(e.title||'Untitled Lesson')}</span>
+            ${isCurrent?'<span class="x-badge">Open now</span>':''}
+            <span class="x-count" title="Last edited">${fmtRelTime(e.updatedAt)}</span>
             <div class="x-row-actions">
               <div class="add-menu-wrap row-menu-wrap">
                 <button class="row-kebab" data-action="row-menu-toggle" data-id="lesson-${e.id}" title="More actions" aria-label="More actions">${icon('more-vertical',16)}</button>
@@ -7232,6 +7259,13 @@ function icon(name, size){
   let folderDragInfo = null;
   folderTreeRoot.addEventListener('click', async (e)=>{
     if(e.target.closest('input.folder-title')) return; // renaming — let the input handle it
+    if(e.detail > 1 && e.target.closest('[data-folder-name]')) return; // second click of a double-click: rename, don't toggle again
+    const renameBtn = e.target.closest('[data-action="rename-folder"]');
+    if(renameBtn){
+      folderTreeRoot.querySelectorAll('.row-menu.open').forEach(m=>{ m.classList.remove('open'); m.closest('.row-menu-wrap')?.classList.remove('menu-open'); });
+      startFolderRename(renameBtn.dataset.id);
+      return;
+    }
     const rowMenuToggle = e.target.closest('[data-action="row-menu-toggle"]');
     if(rowMenuToggle){
       const wrap = rowMenuToggle.closest('.row-menu-wrap');
@@ -7293,6 +7327,7 @@ function icon(name, size){
     if(lessonRow){ await openLesson(lessonRow.dataset.id); closeFolderModal(); return; }
   });
   folderTreeRoot.addEventListener('keydown', (e)=>{
+    if(e.key === 'F2' && e.target.classList?.contains('x-folder')){ e.preventDefault(); startFolderRename(e.target.dataset.id); return; }
     if(e.key !== 'Enter' && e.key !== ' ') return;
     const row = e.target.closest('.x-row');
     if(row && (e.target === row)){ e.preventDefault(); row.click(); }
@@ -7307,13 +7342,50 @@ function icon(name, size){
     await importSeriesBundleFromText(text);
     e.target.value = '';
   });
-  folderTreeRoot.addEventListener('change', async (e)=>{
-    const t = e.target;
-    if(t.classList.contains('folder-title')){
-      const folders = await loadFolders();
-      const f = folders.find(x=>x.id===t.dataset.folderId);
-      if(f){ f.title = t.value.trim() || f.title; f.updatedAt = Date.now(); await saveFolders(folders); await renderSeriesStrip(); }
-    }
+  // Folder names are plain text; renaming swaps in a text box (double-click the
+  // name, "Rename" in the row menu, or F2). Enter or clicking away saves, Esc cancels.
+  function startFolderRename(id){
+    const nameEl = folderTreeRoot.querySelector(`[data-folder-name="${id}"]`);
+    if(!nameEl) return;
+    const row = nameEl.closest('.x-row');
+    const original = nameEl.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'folder-title';
+    input.value = original;
+    input.setAttribute('aria-label', 'Folder name');
+    if(row) row.draggable = false;
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+    let done = false;
+    const finish = async (save)=>{
+      if(done) return;
+      done = true;
+      const title = input.value.trim();
+      if(save && title && title !== original){
+        const folders = await loadFolders();
+        const f = folders.find(x=>x.id===id);
+        if(f){ f.title = title; f.updatedAt = Date.now(); await saveFolders(folders); await renderSeriesStrip(); }
+      }
+      await renderFolderModal();
+      folderTreeRoot.querySelector(`.x-folder[data-id="${id}"]`)?.focus();
+    };
+    input.addEventListener('keydown', (e)=>{
+      e.stopPropagation();
+      if(e.key === 'Enter'){ e.preventDefault(); finish(true); }
+      else if(e.key === 'Escape'){ e.preventDefault(); finish(false); }
+    });
+    input.addEventListener('blur', ()=> finish(true));
+  }
+  folderTreeRoot.addEventListener('dblclick', async (e)=>{
+    const nameEl = e.target.closest('[data-folder-name]');
+    if(!nameEl) return;
+    const id = nameEl.dataset.folderName;
+    // The first click of the double-click opened/closed the folder; undo that.
+    if(expandedFolders.has(id)) expandedFolders.delete(id); else expandedFolders.add(id);
+    await renderFolderModal();
+    startFolderRename(id);
   });
   folderTreeRoot.addEventListener('dragstart', (e)=>{
     const row = e.target.closest('[data-drag-type]');
