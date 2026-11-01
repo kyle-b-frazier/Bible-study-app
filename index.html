@@ -1512,6 +1512,11 @@
   #verseList{max-height:none !important; border:none;}
   .verse-check-row{border-radius:8px; border-bottom:none; margin-bottom:2px; padding:7px 9px;}
   .verse-check-row.on{background:var(--accent-soft);}
+  /* The lesson's main passage: its verses are marked (not ticked) when the picker opens on it. */
+  .verse-check-row.in-main{box-shadow:inset 3px 0 0 var(--accent);}
+  .vp-main{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:-4px 0 12px; font-size:.82rem; color:var(--text-dim);}
+  .vp-main .vp-main-ref{background:var(--accent-soft); color:var(--accent); border:none; border-radius:var(--radius-xl); padding:3px 10px; font:inherit; font-weight:700; cursor:pointer;}
+  .vp-main .vp-main-change{background:transparent; border:none; color:var(--text-dim); font:inherit; text-decoration:underline; cursor:pointer; padding:0;}
   .vp-empty{color:var(--text-faint); font-size:.85rem; padding:14px 8px; text-align:center;}
   .vp-foot{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px;}
   .vp-summary{font-size:.85rem; color:var(--text-faint);}
@@ -1910,6 +1915,7 @@
   <div class="modal vp-modal">
     <button class="modal-x" id="xCloseVerse" title="Close">✕</button>
     <h3>Insert a Verse</h3>
+    <div class="vp-main" id="vpMainPassage"></div>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
       <button class="btn small brass" id="pickerTabBrowse">Browse the Bible</button>
       <button class="btn small ghost" id="pickerTabManual">Paste manually</button>
@@ -3497,7 +3503,12 @@ function icon(name, size){
   async function createNewLesson(){
     const title = await appPrompt('Title for this lesson:', 'Untitled Lesson');
     if(title === null) return;
+    // Optional: the passage the lesson focuses on, so the verse picker opens there. A title that is a passage is offered.
+    const fromTitle = parsePassageQuery(title);
+    const passage = await askMainPassage('Is there a main passage this lesson focuses on? (e.g. 1 Peter 3:13-22). The verse picker will open there. Leave blank to skip.',
+      fromTitle && fromTitle.chapter ? formatPassage(fromTitle) : '');
     lesson = newLessonObj(title.trim() || 'Untitled Lesson');
+    if(passage) lesson.mainPassage = passage;
     await saveLesson();
     updateLiveShareSubscription();
     await safeSet('last-lesson-id', lesson.id, false);
@@ -4907,6 +4918,7 @@ function icon(name, size){
   }
   async function chooseChapter(chapterNum){
     browseChapter = chapterNum;
+    const bookAsked = browseBook;
     document.querySelectorAll('#chapterGrid .chap').forEach(b=>b.classList.toggle('sel', parseInt(b.dataset.chapter,10) === chapterNum));
     const statusEl = document.getElementById('browseStatus');
     statusEl.textContent = '';
@@ -4933,7 +4945,7 @@ function icon(name, size){
         if(text) verses.push({num, text});
       }
       if(!verses.length) throw new Error('Could not parse verses');
-      if(browseChapter !== chapterNum) return;
+      if(browseChapter !== chapterNum || browseBook !== bookAsked) return; // the user has moved on
       browseVerses = verses; selectedVerseNums = new Set();
       renderVerseChecklist();
     }catch(e){
@@ -4947,7 +4959,14 @@ function icon(name, size){
     const m = /^\s*((?:[1-3]|I{1,3})?\s*[A-Za-z][A-Za-z .]*?)\s*(\d+)?\s*(?::\s*([\d,\s\-–]+))?\s*$/.exec(q || '');
     if(!m) return null;
     const norm = x=>x.toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^iii/,'3').replace(/^ii/,'2').replace(/^i(?=[a-z])/,'1');
-    const key = norm(m[1]); if(!key) return null;
+    let key = norm(m[1]); if(!key) return null;
+    // Common short forms that aren't the start of the book's name ("Jn", "1 Jn", "Mt", "Lk"...).
+    const SHORT = { jn:'john', jhn:'john', mt:'matthew', mk:'mark', mrk:'mark', lk:'luke', lu:'luke', rm:'romans',
+      jas:'james', jm:'james', pt:'peter', pet:'peter', php:'philippians', phm:'philemon', gn:'genesis', dt:'deuteronomy',
+      jdg:'judges', jgs:'judges', sos:'songofsolomon', sng:'songofsolomon', ezk:'ezekiel', dn:'daniel', jl:'joel', ob:'obadiah',
+      jon:'jonah', hab:'habakkuk', zep:'zephaniah', hg:'haggai', tm:'timothy', rv:'revelation' };
+    const km = /^([123]?)(.+)$/.exec(key);
+    if(km && SHORT[km[2]] && BOOKS.some(b=> norm(b[0]) === km[1] + SHORT[km[2]])) key = km[1] + SHORT[km[2]];
     const book = BOOKS.find(b=>norm(b[0]) === key) || BOOKS.find(b=>norm(b[0]).startsWith(key)) || BOOKS.find(b=>norm(b[0]).includes(key));
     if(!book) return null;
     const chapter = m[2] ? Math.min(parseInt(m[2],10), book[1]) : null;
@@ -4974,11 +4993,78 @@ function icon(name, size){
     }
     return true;
   }
+  // ---------------- The lesson's main passage ----------------
+  // Asked for when a lesson is created (optional); the verse picker opens there instead of at an empty book list.
+  // Stored on the lesson as text, e.g. "1 Peter 3:13-22".
+  function formatPassage(p){
+    if(!p) return '';
+    let out = p.book + (p.chapter ? ' ' + p.chapter : '');
+    const nums = [...(p.nums || [])].sort((a, b)=> a - b);
+    if(p.chapter && nums.length){
+      const parts = []; let a = nums[0], prev = nums[0];
+      for(const n of nums.slice(1).concat([null])){
+        if(n === prev + 1){ prev = n; continue; }
+        parts.push(a === prev ? String(a) : a + '-' + prev);
+        a = prev = n;
+      }
+      out += ':' + parts.join(',');
+    }
+    return out;
+  }
+  function mainPassage(){ return lesson && lesson.mainPassage ? parsePassageQuery(lesson.mainPassage) : null; }
+  // Asks for (or changes) the main passage; returns the saved text, '' when cleared, null when cancelled.
+  async function askMainPassage(message, suggestion){
+    while(true){
+      const ans = await appPrompt(message, suggestion || '');
+      if(ans === null) return null;
+      if(!ans.trim()) return '';
+      const p = parsePassageQuery(ans);
+      if(p && p.chapter) return formatPassage(p);
+      message = `Couldn't read "${ans.trim()}" as a passage. Try something like 1 Peter 3:13-22 (or leave it blank to skip).`;
+      suggestion = ans;
+    }
+  }
+  async function changeMainPassage(){
+    const ans = await askMainPassage('Main passage for this lesson, e.g. 1 Peter 3:13-22 (leave blank for none):', lesson.mainPassage || '');
+    if(ans === null) return;
+    if(ans) lesson.mainPassage = ans; else delete lesson.mainPassage;
+    await saveLesson();
+    renderMainPassageLine();
+    if(ans) openPickerAtMainPassage();
+  }
+  function renderMainPassageLine(){
+    const el = document.getElementById('vpMainPassage');
+    if(!el) return;
+    el.innerHTML = lesson && lesson.mainPassage
+      ? `Main passage: <button class="vp-main-ref" data-action="vp-main-go" title="Go to the main passage">${escapeHtml(lesson.mainPassage)}</button><button class="vp-main-change" data-action="vp-main-change">Change</button>`
+      : `<button class="vp-main-change" data-action="vp-main-change">Set a main passage for this lesson</button><span>so the picker opens there</span>`;
+  }
+  let mainPassageMark = null; // {book, chapter, nums}: verses marked in the list (never ticked)
+  // Opens the picker on the main passage's chapter and scrolls to its first verse.
+  async function openPickerAtMainPassage(){
+    const p = mainPassage();
+    mainPassageMark = p;
+    if(!p) return;
+    renderChapterGrid(p.book);
+    const sc = document.querySelector('#bookGrid .bk.sel'); if(sc) sc.scrollIntoView({block:'nearest'});
+    if(!p.chapter) return;
+    await chooseChapter(p.chapter);
+    if(browseBook !== p.book || browseChapter !== p.chapter || !p.nums.size) return;
+    const first = Math.min(...p.nums);
+    const row = document.querySelector(`#verseList input[data-vnum="${first}"]`);
+    if(row){ const r = row.closest('.verse-check-row'); r.scrollIntoView({block:'start'}); }
+  }
+  document.getElementById('vpMainPassage').addEventListener('click', (e)=>{
+    if(e.target.closest('[data-action="vp-main-change"]')) changeMainPassage();
+    else if(e.target.closest('[data-action="vp-main-go"]')) openPickerAtMainPassage();
+  });
+
   function renderVerseChecklist(){
     document.getElementById('browseBreadcrumb').textContent = `${browseBook} ${browseChapter}`;
+    const mark = (mainPassageMark && mainPassageMark.book === browseBook && mainPassageMark.chapter === browseChapter) ? mainPassageMark.nums : null;
     const list = document.getElementById('verseList');
     list.innerHTML = browseVerses.map(v=>`
-      <label class="verse-check-row ${selectedVerseNums.has(v.num)?'on':''}">
+      <label class="verse-check-row ${selectedVerseNums.has(v.num)?'on':''} ${mark && mark.has(v.num)?'in-main':''}">
         <input type="checkbox" data-vnum="${v.num}" ${selectedVerseNums.has(v.num)?'checked':''}>
         <span class="vnum">${v.num}</span><span>${escapeHtml(v.text)}</span>
       </label>`).join('');
@@ -6076,7 +6162,7 @@ function icon(name, size){
   }
 
   // ---------------- Verse modal ----------------
-  async function openVerseModal(parentId){
+  async function openVerseModal(parentId, opts){
     if(parentId !== 'brainstorm' && viewBlocked('verse')) return;
     pendingVerseParentId = parentId;
     document.getElementById('newVerseRef').value = '';
@@ -6088,7 +6174,11 @@ function icon(name, size){
     document.getElementById('vpChapTitle').textContent = 'Chapter';
     document.getElementById('vpGoto').value = ''; document.getElementById('bookFilter').value = '';
     resetVersePane();
+    mainPassageMark = null;
+    renderMainPassageLine();
     document.getElementById('verseModalOverlay').classList.add('open');
+    // Start at the lesson's main passage (not awaited: the chapter loads while the picker is already open).
+    if(!(opts && opts.noDefault)) openPickerAtMainPassage();
   }
   function closeVerseModal(){ document.getElementById('verseModalOverlay').classList.remove('open'); pendingVerseParentId = null; pendingVerseAfterId = null; editingVerseId = null; }
   // Right-click > Edit verses…: reopen the picker on this verse's passage with its verses ticked, so verses
@@ -6097,7 +6187,7 @@ function icon(name, size){
   async function openVerseEditor(id){
     const ctx = findContext(id) || findContext(id, lesson.brainstorm || [], null);
     if(!ctx || ctx.node.kind !== 'verse') return;
-    await openVerseModal(null);
+    await openVerseModal(null, { noDefault: true });
     editingVerseId = id;
     document.getElementById('newVerseRef').value = ctx.node.ref || '';
     document.getElementById('newVerseText').value = ctx.node.text || '';
