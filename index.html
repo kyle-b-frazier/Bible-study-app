@@ -1102,7 +1102,11 @@
     box-shadow:0 1px 3px rgba(0,0,0,.12), 0 6px 20px rgba(0,0,0,.07);
   }
   /* Spelling mistakes found by the app's own checker (Spell, in the script). */
-  ::highlight(spell-error){ text-decoration: underline wavy #E5484D; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }
+  /* Look like the system's own spell-check marks: Chrome / Edge draw their real one (spell-native), Safari gets
+     macOS-style red dots (spell-dots), anything else a thin red wave. Classes are set by Spell at start. */
+  ::highlight(spell-error){ text-decoration: underline wavy #E0383E 1px; text-underline-offset: 2px; text-decoration-skip-ink: none; }
+  html.spell-native ::highlight(spell-error){ text-decoration: none; text-decoration-line: spelling-error; }
+  html.spell-dots ::highlight(spell-error){ text-decoration: underline dotted #E0383E 2px; text-underline-offset: 2px; text-decoration-skip-ink: none; }
   #nodeContextMenu .spell-word{font-weight:700;}
   #nodeContextMenu .spell-none{padding:6px 10px; font-size:.8rem; color:var(--text-faint);}
   #nodeContextMenu button.spell-fix{font-weight:600;}
@@ -9261,6 +9265,14 @@ function icon(name, size){
   // loaded (an old browser, or the page opened as a local file), lines keep the browser's own checker.
   const Spell = (()=>{
     const SUPPORTED = !!(window.CSS && CSS.highlights && typeof Highlight === 'function');
+    // Which underline matches this browser's own spell check (see ::highlight(spell-error) in the styles).
+    (function pickUnderline(){
+      const ua = navigator.userAgent || '';
+      const brands = (navigator.userAgentData && navigator.userAgentData.brands) || [];
+      const chromium = brands.some(b=> /Chromium|Google Chrome|Microsoft Edge|Opera/.test(b.brand)) || /Chrome\/|Chromium\/|Edg\//.test(ua);
+      if(chromium && CSS.supports('text-decoration-line', 'spelling-error')) document.documentElement.classList.add('spell-native');
+      else if(/Safari\//.test(ua) && !/Chrome|Chromium|Edg|Firefox|FxiOS/.test(ua)) document.documentElement.classList.add('spell-dots');
+    })();
     const LETTER = 'A-Za-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u00FF';
     const WORD_RE = new RegExp(`[${LETTER}]+(?:['\\u2019][${LETTER}]+)*`, 'g');
     const SKIP_RE = /(?:https?:\/\/|www\.)\S+|\S+@\S+\.\S+/gi; // links and e-mail addresses aren't words
