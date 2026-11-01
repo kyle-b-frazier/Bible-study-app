@@ -1157,15 +1157,6 @@
   html[data-theme="dark"] #previewModalOverlay .preview-surface{background:#FFFFFF; color:#1F2320;}
   #previewModalOverlay .publish-body{background:#FFFFFF;}
 
-  /* First-visit welcome + sample lesson label */
-  .sample-badge{font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8C6A2E; background:#FCEFD1; border-radius:20px; padding:3px 10px; white-space:nowrap;}
-  .welcome-card{display:flex; gap:20px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin:4px auto 6px; width:calc(100% - 48px); max-width:1392px; padding:18px 22px; background:var(--accent-soft); border:1px solid var(--border); border-radius:var(--radius);}
-  .welcome-card h2{font-size:1.05rem; font-weight:800; margin:0 0 6px; color:var(--text);}
-  .welcome-card p{margin:0 0 6px; font-size:.88rem; color:var(--text); line-height:1.5;}
-  .welcome-steps{margin:4px 0 8px; padding-left:20px; font-size:.88rem; line-height:1.6; color:var(--text);}
-  .welcome-card .welcome-note{font-size:.8rem; color:var(--text-dim); margin:0;}
-  .welcome-actions{display:flex; gap:8px; flex-wrap:wrap;}
-  @media (max-width: 900px){ .welcome-card{width:calc(100% - 32px); padding:14px 16px;} }
   /* Phones/small tablets: keep the three main steps on screen as a compact row
      (they used to be hidden in the drawer), and let the lesson title wrap fully. */
   @media (max-width: 900px){
@@ -1625,7 +1616,6 @@
   <div class="main-wrap">
     <div class="lesson-bar no-print">
       <textarea class="lesson-title" id="lessonTitleInput" placeholder="Untitled Lesson" rows="1"></textarea>
-      <span class="sample-badge" id="sampleBadge" style="display:none;" title="This is a built-in example. Edit it freely, or start your own lesson.">Sample lesson</span>
       <span id="storageWarning" class="storage-warning" style="display:none;" title="Changes aren't persisting automatically in this session.">⚠ not auto-saving</span>
       <span id="savedIndicator" class="saved-indicator"></span>
       <div class="lesson-toolbar">
@@ -1644,23 +1634,6 @@
         <button class="btn icon" id="btnTeam" title="Team lessons" style="position:relative;">
           <span class="tb-dot" id="teamDot" style="display:none;"></span>
         </button>
-      </div>
-    </div>
-
-    <div class="welcome-card no-print" id="welcomeCard" style="display:none;" role="region" aria-labelledby="welcomeTitle">
-      <div class="welcome-text">
-        <h2 id="welcomeTitle">Welcome to Bible Lesson Builder</h2>
-        <p>You're looking at a <b>sample lesson</b> on 2 Peter 2. Every lesson comes together in three steps:</p>
-        <ol class="welcome-steps">
-          <li><b>Brainstorm</b> — jot down ideas, questions and illustrations as they come.</li>
-          <li><b>Scripture</b> — look up verses and pull them into your outline.</li>
-          <li><b>Presenter Mode</b> — teach from your phone in full screen; the screen stays on while you teach.</li>
-        </ol>
-        <p class="welcome-note">Your work saves automatically in this browser. Sign in to keep it in sync across devices.</p>
-      </div>
-      <div class="welcome-actions">
-        <button class="btn brass" id="welcomeStartBtn">Start my own lesson</button>
-        <button class="btn ghost" id="welcomeDismissBtn">Explore the sample</button>
       </div>
     </div>
 
@@ -1986,7 +1959,6 @@
       <label style="font-size:0.82rem; color:var(--ink-dim); display:flex; align-items:center; gap:6px;">Filter by tag:
         <select id="libraryTagFilter"><option value="">All</option></select>
       </label>
-      <button class="btn small ghost" id="btnLoadExample" title="Load a fully-built sample lesson demonstrating every feature">📖 Load Example Lesson (2 Peter 2)</button>
     </div>
     <div id="lessonList"></div>
     <hr class="modal-rule">
@@ -2012,7 +1984,6 @@
       <button class="btn small" id="btnNewRootFolder">+ Folder</button>
       <button class="btn small brass" id="btnNewLessonFromBrowser">+ Lesson</button>
       <button class="btn small" id="btnImportSeries">Import Series</button>
-      <button class="btn small ghost" id="btnLoadExampleFromBrowser" title="Load a fully-built sample lesson demonstrating every feature">Load Example</button>
       <input type="file" id="seriesFileInput" accept="application/json,.json" style="display:none;">
       <div class="lb-switch-wrap">
         <span id="lessonsModeLabelTree">Tree</span>
@@ -3373,134 +3344,40 @@ function icon(name, size){
     return l;
   }
 
-  // ---------------- Example lesson: 2 Peter 2 (demonstrates every feature) ----------------
-  const EXAMPLE_LESSON_ID = 'example-2peter2-lesson';
-  const EXAMPLE_PHOTO_NODE_ID = 'ex-photo1';
-  const EXAMPLE_PHOTO_DATA_URL = "data:image/jpeg;base64,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h+55Y2sFGThS4Yj656k1ylRTVojluNop1FWIbRTqKAG0U6igBtFOooAbRTqKAG0U6igBtFOooAbRTqKAG0U6igBtFOooAbRTqKAFop2KMUhjaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADaKdijFADa9J+EH/Ejt/EHiyfiCwszCiP8AIk7khtoc8Bsogxgn94PbPnGK9F1iNvDPwg0zTzK8Vzrl0byWJgGDxAAjBA+UYEDYznJPuBFTVW7lLuecUU7FGKskbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAbRTsUYoAdRTsUYpXGNop2KMUXAbRTsUYouA2inYoxRcBtFOxRii4DaKdijFFwG0U7FGKLgNop2KMUXAbRTsUYouA2inYoxRcBtFOxRii4DaKdijFFwG0U7FGKLgNop2KMUXAbRTsUYouA2inYoxRcBtFOxRii4DaKdijFFwG0U7FGKLgNop2KMUXAbRTsUYouA2inYoxRcBtFOxRii4DaKdijFFwG0U7FGKLgNop2KMUXAbRTsUYouBJZ232y8gtvOhg86RY/NmbbHHk43MewHUn0rs/i7rdjqviK3tdKnSSw0+1SCMQspgDHJPl7SRjaUU9PuY7CuIxRipa1uMbRTsUYqriG0U7FGKLgNop2KMUXAbRTsUYouA2inYoxRcBtFOxRii4DaKdijFFwG0U7FGKLgNop2KMUXAbRTsUYouA2inYoxRcBtFOxRii4C4oxTsUYpDG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUYoAbijFOxRigBuKMU7FGKAG4oxTsUY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VUdTijFYUfitC4Elqyr3Kvk/lgVah8R2EmdzSRY/vp1/LNS4SXQpTj3NPFGKgj1Czl27LqEl8YG8ZOfbrmrGKjVFCYoxS4qlcazYW65NyjkgkCM7ify6fjQk3sJtLcuYoxXP3Pils4toABn70h6j6D/GsqfVL25z5lzIQRtIB2gj3A4rVUpPch1EtjrLnUbS0OJp0VgcFRyR+A5rJufFC4xbW5Jx96Q9D9B/jXP0VoqSW5m6jexYudRu7sYmndlIwVHAP4Diq9FFapWM7hRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFPimlgYtFI8bEYyjEHFMooAllu7idQss8sig5w7kjNRUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/9k=";
-  const EXAMPLE_FOLDER_ROOT_ID = 'ex-folder-nt-studies';
-  const EXAMPLE_FOLDER_SUB_ID = 'ex-folder-general-epistles';
-
-  function exNode(id, kind, text, extra){
-    const node = { id: id, kind: kind, text: text || '', kindManual: false, createdAt: Date.now(),
-      style: { bold:false, italic:false, underline:false, size:'normal', color:'' } };
-    if(kind === 'heading'){ node.children = []; node.collapsed = false; node.minutes = null; }
-    if(kind === 'verse'){ node.ref = ''; }
-    if(kind === 'photo'){ node.photoRef = ''; node.caption = ''; }
-    return Object.assign(node, extra || {});
-  }
-
-  function buildExampleOutline(){
-    return [
-      exNode('ex-h1', 'heading', 'Introduction: A Warning from Peter', { minutes: 5, children: [
-        exNode('ex-h1-s1', 'statement', "Peter has just finished grounding the church in the reliability of Scripture (chapter 1) — now he pivots to a hard warning: false teachers are coming, just as false prophets once troubled Israel."),
-        exNode('ex-h1-v1', 'verse', "But there were false prophets also among the people, even as there shall be false teachers among you, who privily shall bring in damnable heresies, even denying the Lord that bought them, and bring upon themselves swift destruction.", { ref:'2 Peter 2:1 (KJV)' }),
-        exNode('ex-h1-q1', 'question', "Why do you think Peter roots his warning about the future in Israel's past experience with false prophets?"),
-        exNode('ex-h1-tn1', 'teachernote', "Context: 2 Peter closely parallels the book of Jude. If time allows, compare Jude 4-19 side by side with this chapter.")
-      ]}),
-      exNode('ex-h2', 'heading', 'The Character of False Teachers', { minutes: 10, children: [
-        exNode('ex-h2-s1', 'statement', "Peter names three specific marks of these teachers: they operate secretly, they deny the Lord, and they exploit people through greed for financial gain."),
-        exNode('ex-h2-v1', 'verse', "And many shall follow their pernicious ways; by reason of whom the way of truth shall be evil spoken of. And through covetousness shall they with feigned words make merchandise of you: whose judgment now of a long time lingereth not, and their damnation slumbereth not.", { ref:'2 Peter 2:2-3 (KJV)' }),
-        exNode('ex-h2-q1', 'question', "What is the danger of a teacher who is motivated by covetousness rather than truth?"),
-        exNode('ex-h2-a1', 'application', "As a group, name modern warning signs to watch for in teaching that claims to be Christian.")
-      ]}),
-      exNode('ex-h3', 'heading', 'Three Old Testament Examples of Judgment', { minutes: 12, children: [
-        exNode('ex-h3a', 'heading', 'The Angels Who Sinned', { children: [
-          exNode('ex-h3a-v1', 'verse', "For if God spared not the angels that sinned, but cast them down to hell, and delivered them into chains of darkness, to be reserved unto judgment;", { ref:'2 Peter 2:4 (KJV)' }),
-          exNode('ex-h3a-s1', 'statement', "Even angels were not spared judgment when they sinned — a sober reminder that position and privilege do not exempt anyone from accountability.")
-        ]}),
-        exNode('ex-h3b', 'heading', 'The Flood and Noah', { children: [
-          exNode('ex-h3b-v1', 'verse', "And spared not the old world, but saved Noah the eighth person, a preacher of righteousness, bringing in the flood upon the world of the ungodly;", { ref:'2 Peter 2:5 (KJV)' }),
-          exNode('ex-h3b-s1', 'statement', "God preserved Noah, \"a preacher of righteousness,\" while judging the world of the ungodly."),
-          exNode('ex-h3b-q1', 'question', "What does it mean that Noah was a preacher of righteousness even before the flood came?")
-        ]}),
-        exNode('ex-h3c', 'heading', 'Sodom and Gomorrah', { children: [
-          exNode('ex-h3c-v1', 'verse', "And turning the cities of Sodom and Gomorrha into ashes condemned them with an overthrow, making them an ensample unto those that after should live ungodly; and delivered just Lot, vexed with the filthy conversation of the wicked: (for that righteous man dwelling among them, in seeing and hearing, vexed his righteous soul from day to day with their unlawful deeds;)", { ref:'2 Peter 2:6-8 (KJV)' }),
-          exNode('ex-h3c-s1', 'statement', "Peter singles out Lot as an example of a righteous man distressed by the sin around him — God sees and remembers the godly even in a corrupt culture."),
-          exNode(EXAMPLE_PHOTO_NODE_ID, 'photo', '', { caption: "Storm clouds gathering — a visual for 2 Peter 2:17's picture of judgment (swap in your own image any time)", photoRef: 'photo:' + EXAMPLE_PHOTO_NODE_ID })
-        ]})
-      ]}),
-      exNode('ex-h4', 'heading', 'God Rescues the Godly, Judges the Unjust', { minutes: 5, children: [
-        exNode('ex-h4-v1', 'verse', "The Lord knoweth how to deliver the godly out of temptations, and to reserve the unjust unto the day of judgment to be punished:", { ref:'2 Peter 2:9 (KJV)' }),
-        exNode('ex-h4-s1', 'statement', "Verse 9 is the hinge of the whole argument: God knows how to do both — rescue His people through trial, and hold the unrighteous for judgment.", { style: { bold:true, italic:false, underline:false, size:'normal', color:'#8C6A2E' } }),
-        exNode('ex-h4-a1', 'application', "Where in your life right now do you need to trust that God \"knoweth how to deliver\" you, even while you're still in the trial?")
-      ]}),
-      exNode('ex-h5', 'heading', 'The Behavior and Danger of False Teachers', { minutes: 12, children: [
-        exNode('ex-h5-s1', 'statement', "Verses 10-19 describe these teachers as bold, sensual, greedy, and arrogant — spots and blemishes who exploit the fellowship meal itself for personal gain."),
-        exNode('ex-h5-v1', 'verse', "Having eyes full of adultery, and that cannot cease from sin; beguiling unstable souls: an heart they have exercised with covetous practices; cursed children:", { ref:'2 Peter 2:14 (KJV)' }),
-        exNode('ex-h5-tn1', 'teachernote', "The reference to Balaam (vv. 15-16) assumes familiarity with Numbers 22-24. Consider a 60-second recap of that story before this point in the lesson."),
-        exNode('ex-h5-v2', 'verse', "Which have forsaken the right way, and are gone astray, following the way of Balaam the son of Bosor, who loved the wages of unrighteousness; but was rebuked for his iniquity: the dumb ass speaking with man's voice forbad the madness of the prophet.", { ref:'2 Peter 2:15-16 (KJV)' }),
-        exNode('ex-h5-q1', 'question', "Balaam knew God's will but pursued profit anyway. What makes greed such a persuasive counter-argument to obedience?"),
-        exNode('ex-h5-v3', 'verse', "While they promise them liberty, they themselves are the servants of corruption: for of whom a man is overcome, of the same is he brought in bondage.", { ref:'2 Peter 2:19 (KJV)' }),
-        exNode('ex-h5-a1', 'application', "\"Whoever overcomes you, you are enslaved to.\" What things — not necessarily sinful in themselves — currently have too much control over your choices?")
-      ]}),
-      exNode('ex-h6', 'heading', 'The Danger of Turning Back', { minutes: 8, children: [
-        exNode('ex-h6-v1', 'verse', "For if after they have escaped the pollutions of the world through the knowledge of the Lord and Saviour Jesus Christ, they are again entangled therein, and overcome, the latter end is worse with them than the beginning. For it had been better for them not to have known the way of righteousness, than, after they have known it, to turn from the holy commandment delivered unto them. But it is happened unto them according to the true proverb, The dog is turned to his own vomit again; and the sow that was washed to her wallowing in the mire.", { ref:'2 Peter 2:20-22 (KJV)' }),
-        exNode('ex-h6-s1', 'statement', "Peter's warning is severe: to taste truth and then return to the old life is worse than never knowing it at all."),
-        exNode('ex-h6-q1', 'question', "How should a warning this sobering be taught without minimizing it, or causing despair in someone who has struggled with sin?"),
-        exNode('ex-h6-tn1', 'teachernote', "Be pastorally careful here — this passage describes willful, settled rejection of truth, not the normal up-and-down struggle of a believer's sanctification. Don't let strugglers hear this as aimed at them.")
-      ]}),
-      exNode('ex-h7', 'heading', 'Closing: Personal Application', { minutes: 6, children: [
-        exNode('ex-h7-a1', 'application', "This week, identify one teaching, influencer, or message you regularly take in. Test it against what Peter describes here: does it point to Christ, or does it profit from you?"),
-        exNode('ex-h7-a2', 'application', "Pray as a group for discernment — that we would recognize both the plain dangers and the subtle ones."),
-        exNode('ex-h7-s1', 'statement', "Close by returning to 2 Peter 1:19-21 briefly: we don't have to guess. We have a \"more sure word of prophecy\" to test every teacher against.")
-      ]})
-    ];
-  }
-
-  function buildExampleBrainstorm(){
-    return [
-      exNode('ex-b1', 'statement', "Consider opening with a show-of-hands: how many false-teaching movements can the group name, from church history or today?"),
-      exNode('ex-b2', 'question', "Is it possible to be sincere and still be a false teacher? Why doesn't sincerity equal truth?"),
-      exNode('ex-b3', 'verse', "But chiefly them that walk after the flesh in the lust of uncleanness, and despise government. Presumptuous are they, selfwilled, they are not afraid to speak evil of dignities. Whereas angels, which are greater in power and might, bring not railing accusation against them before the Lord.", { ref:'2 Peter 2:10-11 (KJV)' }),
-      exNode('ex-b4', 'application', "Have each person write down one \"test\" they'd apply before trusting a new teacher or ministry."),
-      exNode('ex-b5', 'teachernote', "If short on time, skip the three OT-judgment subsections and just read 2 Peter 2:4-9 aloud, summarizing each example in one sentence."),
-      exNode('ex-b6', 'photo', '', { caption: '' }) // intentionally empty — shows the "Upload Photo" placeholder state in Brainstorming
-    ];
-  }
-
-  function buildExampleFolders(){
-    return [
-      { id: EXAMPLE_FOLDER_ROOT_ID, title: 'New Testament Studies', parentId: null, lessonIds: [], updatedAt: Date.now() },
-      { id: EXAMPLE_FOLDER_SUB_ID, title: 'General Epistles', parentId: EXAMPLE_FOLDER_ROOT_ID, lessonIds: [EXAMPLE_LESSON_ID], updatedAt: Date.now() }
-    ];
-  }
-
-  async function seedExampleLesson(){
-    const exampleLesson = {
-      id: EXAMPLE_LESSON_ID,
-      title: '2 Peter 2: Guarding the Church from False Teachers',
-      outline: buildExampleOutline(),
-      brainstorm: buildExampleBrainstorm(),
-      tags: ['New Testament', '2 Peter', 'False Teachers', 'Judgment', 'Example Lesson'],
-      folderId: EXAMPLE_FOLDER_SUB_ID,
-      timing: { enabled: true, startTime: '09:00' },
-      updatedAt: Date.now()
-    };
-    await savePhotoData('photo:' + EXAMPLE_PHOTO_NODE_ID, EXAMPLE_PHOTO_DATA_URL);
-    await safeSet('lesson:' + exampleLesson.id, JSON.stringify(exampleLesson), false);
-    await upsertIndexEntry({ id: exampleLesson.id, title: exampleLesson.title, updatedAt: exampleLesson.updatedAt, tags: exampleLesson.tags, folderId: exampleLesson.folderId });
-
-    const existingFolders = await loadFolders();
-    const seedFolders = buildExampleFolders();
-    seedFolders.forEach(sf=>{
-      const i = existingFolders.findIndex(f=>f.id===sf.id);
-      if(i>=0){
-        const merged = Array.from(new Set([...(existingFolders[i].lessonIds||[]), ...(sf.lessonIds||[])]));
-        existingFolders[i] = Object.assign({}, existingFolders[i], sf, { lessonIds: merged });
-      } else {
-        existingFolders.push(sf);
+  // ---------------- Retired built-in sample lesson ----------------
+  // Older versions put a sample lesson (2 Peter 2) and two folders for it on every device and
+  // re-created it at every start, so nobody's edits to it ever survived. It's gone now: these ids are
+  // cleared out on this device and in the cloud, and kept out of sync merges so an older copy
+  // elsewhere can't bring them back. Its folders only go if nothing of the user's is in them.
+  const RETIRED_SAMPLE_LESSON_ID = 'example-2peter2-lesson';
+  const RETIRED_SAMPLE_PHOTO_KEY = 'photo:ex-photo1';
+  const RETIRED_SAMPLE_FOLDER_IDS = ['ex-folder-nt-studies', 'ex-folder-general-epistles'];
+  function withoutRetiredSample(index, folders){
+    const idx = (index || []).filter(e=> e && e.id !== RETIRED_SAMPLE_LESSON_ID);
+    const known = new Set(idx.map(e=> e.id));
+    let fl = (folders || []).map(f=> (f.lessonIds || []).includes(RETIRED_SAMPLE_LESSON_ID)
+      ? Object.assign({}, f, { lessonIds: f.lessonIds.filter(id=> id !== RETIRED_SAMPLE_LESSON_ID) }) : f);
+    let changed = true;
+    while(changed){ // an emptied subfolder can let its parent go too
+      changed = false;
+      for(const id of RETIRED_SAMPLE_FOLDER_IDS){
+        const f = fl.find(x=> x.id === id);
+        if(!f) continue;
+        const hasLessons = idx.some(e=> e.folderId === id) || (f.lessonIds || []).some(l=> known.has(l));
+        const hasFolders = fl.some(x=> x.parentId === id);
+        if(!hasLessons && !hasFolders){ fl = fl.filter(x=> x.id !== id); changed = true; }
       }
-    });
-    await saveFolders(existingFolders);
-    return exampleLesson.id;
+    }
+    return { index: idx, folders: fl };
   }
-
-  async function loadExampleLessonManual(){
-    showToast('Loading example lesson…');
-    const id = await seedExampleLesson();
-    await openLesson(id);
-    closeLibraryModal();
-    showToast('Loaded "2 Peter 2: Guarding the Church from False Teachers".');
+  async function removeRetiredSampleLocally(){
+    const index = await loadLessonIndex(), folders = await loadFolders();
+    const clean = withoutRetiredSample(index, folders);
+    if(clean.index.length !== index.length) await saveLessonIndex(clean.index);
+    if(JSON.stringify(clean.folders) !== JSON.stringify(folders)) await saveFolders(clean.folders);
+    if(await safeGet('lesson:' + RETIRED_SAMPLE_LESSON_ID, false)) await safeDelete('lesson:' + RETIRED_SAMPLE_LESSON_ID, false);
+    if(await safeGet(RETIRED_SAMPLE_PHOTO_KEY, false)) await safeDelete(RETIRED_SAMPLE_PHOTO_KEY, false);
+    if((await safeGet('last-lesson-id', false)) === RETIRED_SAMPLE_LESSON_ID) await safeDelete('last-lesson-id', false);
   }
 
   // ---------------- Photo storage (kept OUT of the lesson blob, one key per photo) ----------------
@@ -4720,15 +4597,15 @@ function icon(name, size){
       if(n.children && n.children.length) await pullMissingPhotos(n.children);
     }
   }
-  // If the lesson on screen was updated from the cloud — or it's only the built-in sample / a blank page and
+  // If the lesson on screen was updated from the cloud — or it's only a blank page and
   // real lessons just arrived — show the newer one instead of leaving a stale copy that would later overwrite it.
   async function refreshOpenLessonAfterSync(pulledIds, mergedIndex){
     if(!lesson) return;
-    const untouched = l=> l.id === EXAMPLE_LESSON_ID || ((!l.outline || !l.outline.length) && (!l.brainstorm || !l.brainstorm.length));
+    const untouched = l=> (!l.outline || !l.outline.length) && (!l.brainstorm || !l.brainstorm.length);
     let targetId = null;
     if(pulledIds.includes(lesson.id)) targetId = lesson.id;
     else if(untouched(lesson)){
-      const newest = mergedIndex.filter(e=>e.id !== EXAMPLE_LESSON_ID && e.id !== lesson.id).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+      const newest = mergedIndex.filter(e=>e.id !== lesson.id).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
       if(newest) targetId = newest.id;
     }
     if(!targetId) return;
@@ -4759,7 +4636,11 @@ function icon(name, size){
         const existing = byId.get(e.id);
         if(!existing || (e.updatedAt||0) > (existing.updatedAt||0)) byId.set(e.id, e);
       });
-      const mergedIndex = Array.from(byId.values());
+      const mergedIndex = withoutRetiredSample(Array.from(byId.values()), []).index;
+      if(cloudIndex.some(e=> e && e.id === RETIRED_SAMPLE_LESSON_ID)){
+        await cloudDeleteDoc('lesson:' + RETIRED_SAMPLE_LESSON_ID);
+        await cloudDeleteDoc(RETIRED_SAMPLE_PHOTO_KEY);
+      }
 
       const pulledIds = [];
       for(const entry of mergedIndex){
@@ -4792,7 +4673,7 @@ function icon(name, size){
         const existing = fById.get(f.id);
         if(!existing || (f.updatedAt||0) > (existing.updatedAt||0)) fById.set(f.id, f);
       });
-      const mergedFoldersStr = JSON.stringify(Array.from(fById.values()));
+      const mergedFoldersStr = JSON.stringify(withoutRetiredSample(mergedIndex, Array.from(fById.values())).folders);
       await writeLocalOnly('folders-index', mergedFoldersStr);
       await cloudSet('folders-index', mergedFoldersStr);
 
@@ -5065,19 +4946,6 @@ function icon(name, size){
     renderSeriesStrip();
     updateActionCardsAndChips();
     refreshLessonsBrowserIfOpen();
-    renderWelcome();
-  }
-  function welcomeDismissed(){ try{ return localStorage.getItem(lsKey('welcome-dismissed')) === '1'; }catch(e){ return false; } }
-  function dismissWelcome(){
-    try{ localStorage.setItem(lsKey('welcome-dismissed'), '1'); }catch(e){}
-    renderWelcome();
-  }
-  function renderWelcome(){
-    const isSample = !!lesson && lesson.id === EXAMPLE_LESSON_ID;
-    const badge = document.getElementById('sampleBadge');
-    if(badge) badge.style.display = isSample ? '' : 'none';
-    const card = document.getElementById('welcomeCard');
-    if(card) card.style.display = (isSample && !welcomeDismissed()) ? 'flex' : 'none';
   }
   function updatePreviewModeClass(){
     document.getElementById('previewSurface').className = 'preview-surface detail-' + previewDetailMode;
@@ -6934,8 +6802,6 @@ function icon(name, size){
   document.getElementById('railSearchBtn').addEventListener('click', openPalette);
   document.getElementById('railLessonsBtn').addEventListener('click', openFolderModal);
   document.getElementById('railNewLessonBtn').addEventListener('click', createNewLesson);
-  document.getElementById('welcomeStartBtn').addEventListener('click', async ()=>{ await createNewLesson(); if(lesson && lesson.id !== EXAMPLE_LESSON_ID) dismissWelcome(); });
-  document.getElementById('welcomeDismissBtn').addEventListener('click', dismissWelcome);
   document.getElementById('railLoadBtn').addEventListener('click', ()=> document.getElementById('lessonFileInput').click());
   document.getElementById('railThemeBtn').addEventListener('click', toggleTheme);
   document.getElementById('railShortcutsBtn').addEventListener('click', openShortcutsModal);
@@ -7088,7 +6954,6 @@ function icon(name, size){
   document.getElementById('xCloseLibrary').addEventListener('click', closeLibraryModal);
   document.getElementById('libraryModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='libraryModalOverlay') closeLibraryModal(); });
   document.getElementById('libraryTagFilter').addEventListener('change', renderLibraryModal);
-  document.getElementById('btnLoadExample').addEventListener('click', loadExampleLessonManual);
 
   // Tags
   function openTagsModal(){
@@ -7239,7 +7104,6 @@ function icon(name, size){
   document.getElementById('folderModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='folderModalOverlay') closeFolderModal(); });
   document.getElementById('btnNewRootFolder').addEventListener('click', ()=> createFolder(null));
   document.getElementById('btnNewLessonFromBrowser').addEventListener('click', createNewLesson);
-  document.getElementById('btnLoadExampleFromBrowser').addEventListener('click', loadExampleLessonManual);
   document.getElementById('lessonsSearchInput').addEventListener('input', ()=>{ renderFolderModal(); });
   document.getElementById('lessonsModeSwitch').addEventListener('click', ()=>{
     setLessonsMode(!document.getElementById('lessonsModeSwitch').classList.contains('on'));
@@ -9142,18 +9006,13 @@ function icon(name, size){
     await loadPublishPrefs();
     updateAuthUi();
     if(FIREBASE_ENABLED) ensureFirebaseInit();
+    await removeRetiredSampleLocally();
     const lastId = await safeGet('last-lesson-id', false);
     if(lastId){ const l = await loadLesson(lastId); if(l){ lesson = ensureLessonDefaults(l); } }
-
-    const exId = await seedExampleLesson();
-
-    const isEffectivelyBlank = !lesson
-      || ((!lesson.outline || lesson.outline.length === 0)
-          && (!lesson.brainstorm || lesson.brainstorm.length === 0)
-          && (!lesson.title || lesson.title.trim() === '' || lesson.title === 'Untitled Lesson'));
-    if(isEffectivelyBlank){
-      const l = await loadLesson(exId);
-      if(l){ lesson = ensureLessonDefaults(l); await safeSet('last-lesson-id', exId, false); }
+    if(!lesson){
+      // Nothing to reopen (first visit, or the last lesson open was the old sample): open the most recent one, if any.
+      const newest = (await loadLessonIndex()).slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+      if(newest){ const l = await loadLesson(newest.id); if(l){ lesson = ensureLessonDefaults(l); await safeSet('last-lesson-id', l.id, false); } }
     }
 
     if(!lesson){ lesson = newLessonObj('Untitled Lesson'); await saveLesson(); await safeSet('last-lesson-id', lesson.id, false); }
