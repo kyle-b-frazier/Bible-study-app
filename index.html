@@ -1098,6 +1098,11 @@
     max-width:816px; min-height:1056px; padding:84px 92px 110px; border:none; border-radius:2px;
     box-shadow:0 1px 3px rgba(0,0,0,.12), 0 6px 20px rgba(0,0,0,.07);
   }
+  /* An empty lesson: the whole page is a click target that starts the first section. */
+  #mainTree.is-empty{cursor:text;}
+  #mainTree.is-empty .empty-state{cursor:text; transition:border-color .12s ease, color .12s ease;}
+  #mainTree.is-empty:hover .empty-state{border-color:var(--accent); color:var(--text-dim);}
+  .empty-state .empty-cta{margin-top:6px; font-weight:600; color:var(--accent);}
   .word-status{
     position:sticky; bottom:0; z-index:15; display:flex; align-items:center; gap:18px; padding:5px 20px;
     background:var(--surface-2); border-top:1px solid var(--border); font-size:.74rem; color:var(--text-dim);
@@ -1393,7 +1398,9 @@
     main{padding:0 12px 0;}
     #panel-outline #mainTree.doc-view,
     body.outline-style-classic #panel-outline #mainTree{
-      max-width:1200px; min-height:calc(100vh - 120px); padding:20px 56px 90px;
+      /* Divided by the zoom, because zoom also shrinks min-height: without this the
+         page ends early at 80% and the status bar floats up with a gap under it. */
+      max-width:1200px; min-height:calc((100vh - 120px) / var(--page-zoom, 1)); padding:20px 56px 90px;
     }
     body.outline-style-classic #mainTree .node[data-depth="0"][data-kind="heading"]{margin-top:18px;}
     .word-status{padding:2px 14px;}
@@ -5398,17 +5405,19 @@ function icon(name, size){
     scheduleCache = computeScheduleStarts();
     if(!lesson.outline.length){
       const emptyMessages = [
-        'A blank page. Start with "+ New Section" above and give this lesson its first heading.',
+        'A blank page. Give this lesson its first section heading.',
         'Nothing here yet — every great lesson starts with one section title.',
-        'This outline is waiting on you. Tap "+ New Section" to begin.'
+        'This outline is waiting on you.'
       ];
       const msg = emptyMessages[lesson.id ? (lesson.id.charCodeAt(1)||0) % emptyMessages.length : 0];
-      container.innerHTML = `<div class="empty-state">${icon('heading',20)}<div style="margin-top:8px;">${escapeHtml(msg)}</div></div>`;
+      container.classList.add('is-empty');
+      container.innerHTML = `<div class="empty-state">${icon('heading',20)}<div style="margin-top:8px;">${escapeHtml(msg)}</div><div class="empty-cta">Click anywhere on the page to start typing</div></div>`;
       renderTimingControls();
       updateRibbonState();
       updateWordStatus();
       return;
     }
+    container.classList.remove('is-empty');
     container.innerHTML = renderNodesEditable(lesson.outline, 0);
     autosizeVisibleTextareas(container);
     renderTimingControls();
@@ -7494,6 +7503,11 @@ function icon(name, size){
     setPublishViewMode(btn.dataset.mode);
   });
 
+  // A new lesson has nothing to click into: a click anywhere on its page starts the
+  // first section and puts the cursor in it, the same as Insert › Section.
+  document.getElementById('mainTree').addEventListener('click', ()=>{
+    if(lesson && lesson.outline && !lesson.outline.length) document.getElementById('btnNewSection').click();
+  });
   document.getElementById('btnNewSection').addEventListener('click', async ()=>{
     pushUndo();
     const newId = addNode('heading', 'root');
