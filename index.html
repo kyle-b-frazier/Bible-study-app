@@ -1364,7 +1364,8 @@
   /* Statements are never italic (overrides any leftover per-line italic formatting). */
   html body #mainTree .node[data-kind="statement"] > .node-row :is(textarea,div).node-text,
   html body #brainstormList .node[data-kind="statement"] > .node-row :is(textarea,div).node-text{font-style:normal !important;}
-  /* Brainstorm / Scripture / Presenter Mode / Set time live at the right end of the sticky ribbon. */
+  /* Brainstorm sits in the Insert group; Presenter Mode and Set time at the right end of the sticky ribbon. */
+  .rb-insert .action-card.brainstorm{padding:3px 10px 3px 4px; margin-left:4px;}
   .rb-actions{display:flex; align-items:center; gap:6px; margin-left:auto; padding-left:12px; flex-shrink:0; background:var(--surface);}
   .rb-actions .action-card{padding:3px 11px 3px 4px;}
   .rb-actions .action-card.publish{background:var(--accent); border-color:var(--accent); color:#fff;}
@@ -1375,18 +1376,23 @@
     .rb-actions .action-card .t, .rb-actions .chip-time b{display:none;}
     .rb-actions .action-card.publish .t{display:inline;}
   }
-  @media (max-width: 1750px){
-    .rb-actions .action-card.brainstorm .t, .rb-actions .action-card.scripture .t{display:none;}
-    .rb-actions .action-card.brainstorm, .rb-actions .action-card.scripture{padding-right:8px;}
+  /* As the window narrows, labels give way (icons stay) so the ribbon keeps to one row:
+     "Brainstorm" first, then "Presenter Mode", then "Set time". */
+  @media (max-width: 1399px){
+    .rb-insert .action-card.brainstorm .t{display:none;}
+    .rb-insert .action-card.brainstorm{padding-right:8px;}
   }
   @media (max-width: 1750px){
     .word-ribbon .rb-label{display:none;}
     .word-ribbon .rb-grp{padding:0 5px;}
     .rb-actions{padding-left:6px; gap:4px;}
   }
-  @media (max-width: 1560px) and (min-width: 901px){
+  @media (max-width: 1299px) and (min-width: 901px){
     .rb-actions .action-card.publish .t{display:none;}
     .rb-actions .action-card.publish{padding-right:8px;}
+  }
+  @media (max-width: 1209px) and (min-width: 901px){
+    .rb-actions .chip-time b{display:none;}
   }
   /* ================= Desktop: give the page (the typing area) as much room as possible =================
      No separate app bar (the sidebar is the app chrome), a slim title row that scrolls away, a pinned
@@ -1706,19 +1712,13 @@
         <button class="rb-btn rb-text" id="btnNewSection" title="Add a new section">Section</button>
         <button class="rb-btn rb-text" id="rbInsertVerse" title="Look up a verse and insert it below the current line">Verse</button>
         <button class="rb-btn rb-text" id="rbInsertPhoto" title="Insert a photo below the current line">Photo</button>
-        <button class="rb-btn rb-text" id="rbInsertBrainstorm" title="Pull an idea in from Brainstorm">From Brainstorm</button>
+        <button class="action-card brainstorm" id="btnActionBrainstorm" title="Brainstorm: open your ideas, then drag one into the outline">
+          <div class="ic"></div>
+          <div class="txt"><div class="t">Brainstorm</div></div>
+          <span class="count-pill" id="brainstormCountPill">0</span>
+        </button>
       </div>
       <div class="rb-actions">
-      <button class="action-card brainstorm" id="btnActionBrainstorm" title="Brainstorm">
-        <div class="ic"></div>
-        <div class="txt"><div class="t">Brainstorm</div></div>
-        <span class="count-pill" id="brainstormCountPill">0</span>
-      </button>
-      <button class="action-card scripture" id="btnActionScripture" title="Scripture">
-        <div class="ic"></div>
-        <div class="txt"><div class="t">Scripture</div></div>
-        <span class="count-pill" id="scriptureCountPill">0</span>
-      </button>
       <button class="action-card publish" id="btnActionPublish" title="Presenter Mode — teach from this lesson">
         <div class="ic"></div>
         <div class="txt"><div class="t">Presenter Mode</div></div>
@@ -4244,8 +4244,6 @@ function icon(name, size){
     if(!lesson) return;
     const bPill = document.getElementById('brainstormCountPill');
     if(bPill) bPill.textContent = countDescendants(lesson.brainstorm || []);
-    const sPill = document.getElementById('scriptureCountPill');
-    if(sPill) sPill.textContent = scriptureCount();
     const teamDot = document.getElementById('teamDot');
     if(teamDot) teamDot.style.display = (lesson.teamShared || lesson.sharedDocId) ? 'block' : 'none';
   }
@@ -5278,7 +5276,7 @@ function icon(name, size){
     });
 
     // Action row cards
-    const actionIcons = { btnActionBrainstorm:'lightbulb', btnActionScripture:'cross', btnActionPublish:'presentation' };
+    const actionIcons = { btnActionBrainstorm:'lightbulb', btnActionPublish:'presentation' };
     Object.keys(actionIcons).forEach(id=>{
       const card = document.getElementById(id);
       const ic = card && card.querySelector('.ic');
@@ -7036,7 +7034,6 @@ function icon(name, size){
   });
 
   // Scripture modal
-  document.getElementById('btnActionScripture').addEventListener('click', openScriptureModal);
   document.getElementById('xCloseScripture').addEventListener('click', closeScriptureModal);
   document.getElementById('btnCloseScripture').addEventListener('click', closeScriptureModal);
   document.getElementById('scriptureModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='scriptureModalOverlay') closeScriptureModal(); });
@@ -8641,7 +8638,7 @@ function icon(name, size){
     styleSel.value = node ? node.kind : 'statement';
     // Line styles and Insert buttons the current view (Sections / Subsections) can't hold are greyed out.
     Array.from(styleSel.options).forEach(o=>{ if(o.value !== 'verse' && o.value !== 'photo') o.disabled = !viewAllowsKind(o.value); });
-    [['rbInsertVerse','verse'], ['rbInsertPhoto','photo'], ['rbInsertBrainstorm','statement']].forEach(([bid, kind])=>{
+    [['rbInsertVerse','verse'], ['rbInsertPhoto','photo']].forEach(([bid, kind])=>{
       const b = document.getElementById(bid); if(!b) return;
       if(!b.dataset.title) b.dataset.title = b.title;
       b.disabled = !viewAllowsKind(kind);
@@ -8740,12 +8737,6 @@ function icon(name, size){
         await saveLesson();
         renderTree();
         pendingPhotoNodeId = newId; photoFileInput.value = ''; photoFileInput.click();
-        return;
-      }
-      if(e.target.closest('#rbInsertBrainstorm')){
-        const ctx = currentRibbonNode();
-        if(!lesson.brainstorm || !lesson.brainstorm.length || !ctx){ toggleBrainstormDrawer(true); return; }
-        openBrainstormPicker(ctx.node.id, ctx.node.kind === 'heading' ? 'child' : 'after');
         return;
       }
     });
