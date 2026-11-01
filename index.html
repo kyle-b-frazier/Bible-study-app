@@ -308,15 +308,18 @@
   .node.drop-after > .node-row{box-shadow: inset 0 -3px 0 var(--accent);}
   .node.drop-child > .node-row{outline:2px dashed var(--accent); outline-offset:-3px; border-radius:var(--radius-sm);}
 
-  /* "Subsections only" view: show the full heading hierarchy at every depth but
-     hide non-heading leaf content (statements/questions/verses/applications/
-     teacher's notes/photos) wherever it occurs — this is a pure CSS filter, kept
-     separate from each node's own collapsed/expanded state, so switching view
-     levels never overwrites a section's manually-chosen collapse state. */
-  /* Subsections view: hide the lines themselves, but keep any section nested inside one of them visible. */
-  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]) > .node-row{display:none;}
-  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]):not(:has(.node[data-kind="heading"])){display:none;}
-  #mainTree.hide-leaf-nodes .node:not([data-kind="heading"]) > .node-children{margin-left:0; padding-left:0; border-left:none;}
+  /* Bottom-bar views, as pure display filters (switching views never changes the lesson).
+     Sections: only the top-level sections, nothing inside them.
+     Subsections: every section and subsection plus statements. Verses, questions, applications,
+     teacher's notes and photos are hidden; a section or statement nested inside one of those still shows. */
+  #mainTree.view-sections .node:not([data-depth="0"]),
+  #mainTree.view-sections .node[data-depth="0"]:not([data-kind="heading"]),
+  #mainTree.view-sections .node-children,
+  #mainTree.view-sections button[data-action="toggle-collapse"],
+  #mainTree.view-sections .condensed-flag{display:none;}
+  #mainTree.view-subsections .node:not([data-kind="heading"]):not([data-kind="statement"]) > .node-row{display:none;}
+  #mainTree.view-subsections .node:not([data-kind="heading"]):not([data-kind="statement"]):not(:has(.node[data-kind="heading"], .node[data-kind="statement"])){display:none;}
+  #mainTree.view-subsections .node:not([data-kind="heading"]):not([data-kind="statement"]) > .node-children{margin-left:0; padding-left:0; border-left:none;}
 
   /* Mobile swipe-to-indent: drag a row right to nest it under the section above,
      left to pull it back out a level. Mirrors Tab/Shift+Tab and the right-click
@@ -3726,6 +3729,9 @@ function icon(name, size){
       </div>`;
   }
   function addNode(kind, parentId, extra){
+    if(viewBlocked(kind)) return null;
+    // Sections view: a new section never goes inside another one (it would be hidden); it goes after it.
+    if(outlineViewLevel === 'sections' && parentId && parentId !== 'root') return addNodeAfter(kind, parentId, extra);
     const node = makeNode(kind);
     if(extra) Object.assign(node, extra);
     if(!parentId || parentId === 'root'){ lesson.outline.push(node); }
@@ -3742,29 +3748,39 @@ function icon(name, size){
     return n;
   }
 
-  // ---------------- Outline view level (collapse to sections-only / subsections-only) ----------------
-  // A quick way to get an overview of the lesson's structure without manually toggling
-  // every section's collapse arrow one at a time.
-  //   "Sections only"    — collapse every top-level section, hiding everything below
-  //                         its title (subsections and content alike).
-  //   "Subsections only" — expand the full heading hierarchy (sections AND nested
-  //                         subsections, at any depth) but hide non-heading leaf
-  //                         content — statements, questions, verses, applications,
-  //                         teacher's notes, photos — wherever it sits, even directly
-  //                         under a top-level section. This is a CSS filter
-  //                         (#mainTree.hide-leaf-nodes) rather than per-node collapse,
-  //                         since collapsing a heading hides ALL its children
-  //                         (headings and leaves alike) and can't selectively keep
-  //                         nested subsection titles visible while hiding only leaves.
-  //   "All"               — expand everything, no filter.
+  // ---------------- Outline views (bottom bar: All / Sections / Subsections) ----------------
+  //   All          — everything.
+  //   Sections     — only the top-level sections; anything added is another section.
+  //   Subsections  — sections, subsections and statements; only those can be added.
+  // Showing and hiding is a CSS filter on #mainTree (.view-sections / .view-subsections), and every
+  // way of adding or retyping a line checks viewAllowsKind() so nothing lands where it can't be seen.
   let outlineViewLevel = 'all';
+  const VIEW_ADDABLE_KINDS = { sections: ['heading'], subsections: ['heading', 'statement'] };
+  const KIND_WITH_ARTICLE = { heading:'a section', statement:'a statement', question:'a question', application:'an application', teachernote:"a teacher's note", verse:'a verse', photo:'a photo' };
+  function viewAllowsKind(kind){ const k = VIEW_ADDABLE_KINDS[outlineViewLevel]; return !k || k.includes(kind); }
+  function viewNewLineKind(){ return outlineViewLevel === 'sections' ? 'heading' : 'statement'; }
+  // True (after saying why) when the current view can't take a line of this kind.
+  function viewBlocked(kind){
+    if(viewAllowsKind(kind)) return false;
+    showToast(outlineViewLevel === 'sections'
+      ? 'The Sections view only holds sections. Switch to All to add ' + (KIND_WITH_ARTICLE[kind] || 'that') + '.'
+      : 'The Subsections view only holds sections and statements. Switch to All to add ' + (KIND_WITH_ARTICLE[kind] || 'that') + '.');
+    return true;
+  }
+  // The top-level section a line sits in (in the Sections view, new sections go after it).
+  function topLevelIdOf(id){
+    for(const n of lesson.outline){ if(n.id === id || isDescendant(n.id, id)) return n.id; }
+    return null;
+  }
   async function setOutlineCollapseLevel(level){
     outlineViewLevel = level;
     document.querySelectorAll('#outlineViewSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.level === level));
-    mainTree.classList.toggle('hide-leaf-nodes', level === 'subsections');
+    mainTree.classList.toggle('view-sections', level === 'sections');
+    mainTree.classList.toggle('view-subsections', level === 'subsections');
+    // Every view starts fully expanded, so the filter (not old collapse arrows) decides what shows.
     function walk(nodes){
       nodes.forEach(node=>{
-        if(node.kind === 'heading' || (node.children && node.children.length)) node.collapsed = (level === 'sections');
+        if(node.kind === 'heading' || (node.children && node.children.length)) node.collapsed = false;
         if(node.children && node.children.length) walk(node.children);
       });
     }
@@ -3799,6 +3815,8 @@ function icon(name, size){
   async function insertBrainstormItemToOutline(id, targetId, position){
     const ctx = findContext(id);
     if(!ctx || !findContext(id, lesson.brainstorm || [], null)) return; // only valid for items still in Brainstorm
+    if(viewBlocked(ctx.node.kind)) return;
+    if(outlineViewLevel === 'sections' && targetId){ targetId = topLevelIdOf(targetId) || targetId; if(position === 'child') position = 'after'; }
     pushUndo();
     const node = removeNodeById(id);
     if(!node) return;
@@ -3852,6 +3870,10 @@ function icon(name, size){
   async function indentNode(id){
     const ctx = findContext(id);
     if(!ctx) return;
+    if(outlineViewLevel === 'sections' && findContext(id, lesson.outline, null)){
+      showToast('The Sections view only shows top-level sections. Switch to Subsections or All to nest one.');
+      return;
+    }
     const prevSibling = ctx.idx > 0 ? ctx.arr[ctx.idx - 1] : null;
     if(!prevSibling && ctx.node.kind === 'heading'){
       // A section's level is always real structure (never just shifted sideways), so numbers and indents agree.
@@ -3910,6 +3932,10 @@ function icon(name, size){
   async function moveNodeTo(id, targetId, pos){
     if(!id || !targetId || id === targetId || isDescendant(id, targetId)) return false;
     if(!findContext(id) || !findContext(targetId)) return false;
+    if(pos === 'child' && outlineViewLevel === 'sections' && findContext(targetId, lesson.outline, null)){
+      showToast('The Sections view only shows top-level sections. Switch to Subsections or All to nest one.');
+      return false;
+    }
     pushUndo();
     const node = removeNodeById(id); if(!node) return false;
     const t = findContext(targetId);
@@ -3937,6 +3963,8 @@ function icon(name, size){
     return true;
   }
   function addNodeAfter(kind, afterId, extra){
+    if(viewBlocked(kind)) return null;
+    if(outlineViewLevel === 'sections' && afterId) afterId = topLevelIdOf(afterId);
     const node = makeNode(kind);
     if(extra) Object.assign(node, extra);
     if(!afterId){ lesson.outline.push(node); return node.id; }
@@ -4000,9 +4028,10 @@ function icon(name, size){
         <div class="ctx-divider"></div>`;
     }
 
-    if(isFlow){
+    const changeKinds = FLOW_KINDS.filter(viewAllowsKind);
+    if(isFlow && changeKinds.length > 1){
       html += `<div class="ctx-section-label">Change to</div>`;
-      FLOW_KINDS.forEach(k=>{
+      changeKinds.forEach(k=>{
         html += `<button data-action="set-kind" data-kind="${k}" class="${k===node.kind?'active':''}">${KIND_LABEL[k]}</button>`;
       });
       html += `<div class="ctx-divider"></div>`;
@@ -5455,18 +5484,13 @@ function icon(name, size){
 
   function populateAddMenu(menuEl, parentId){
     let html = '';
-    if(lesson.brainstorm && lesson.brainstorm.length){
+    if(lesson.brainstorm && lesson.brainstorm.length && outlineViewLevel !== 'sections'){
       html += `<button data-action="open-brainstorm-picker" data-parent="${parentId}">${icon('corner-down-right',14)} Add from Brainstorming…</button>`;
       html += `<div class="add-menu-divider"></div>`;
     }
-    html += `
-      <button data-kind="heading" data-parent="${parentId}">Subsection</button>
-      <button data-kind="statement" data-parent="${parentId}">Statement</button>
-      <button data-kind="question" data-parent="${parentId}">Question</button>
-      <button data-kind="application" data-parent="${parentId}">Application</button>
-      <button data-kind="teachernote" data-parent="${parentId}">Teacher's Note</button>
-      <button data-kind="verse" data-parent="${parentId}">Verse</button>
-      <button data-kind="photo" data-parent="${parentId}">Photo</button>`;
+    const ADD_MENU_LABEL = { heading:'Subsection', statement:'Statement', question:'Question', application:'Application', teachernote:"Teacher's Note", verse:'Verse', photo:'Photo' };
+    html += Object.keys(ADD_MENU_LABEL).filter(viewAllowsKind)
+      .map(k=> `<button data-kind="${k}" data-parent="${parentId}">${ADD_MENU_LABEL[k]}</button>`).join('');
     menuEl.innerHTML = html;
   }
 
@@ -5957,6 +5981,7 @@ function icon(name, size){
 
   // ---------------- Verse modal ----------------
   async function openVerseModal(parentId){
+    if(parentId !== 'brainstorm' && viewBlocked('verse')) return;
     pendingVerseParentId = parentId;
     document.getElementById('newVerseRef').value = '';
     document.getElementById('newVerseText').value = '';
@@ -6884,6 +6909,7 @@ function icon(name, size){
         openQuickAddMenuAt(lastFocusedNodeId);
       } else if(QUICK_ADD_KIND[key]){
         e.preventDefault();
+        if(viewBlocked(QUICK_ADD_KIND[key])) return;
         pushUndo();
         const newId = addNodeAfter(QUICK_ADD_KIND[key], lastFocusedNodeId);
         saveLesson().then(()=>{
@@ -7635,7 +7661,7 @@ function icon(name, size){
   function openQuickAddMenuAt(afterId){
     const menu = document.getElementById('nodeContextMenu');
     ctxMenuTargetId = null;
-    const kinds = ['heading','statement','question','application','teachernote','verse','photo'];
+    const kinds = ['heading','statement','question','application','teachernote','verse','photo'].filter(viewAllowsKind);
     menu.innerHTML = `<div class="ctx-section-label">Add after this</div>` +
       kinds.map(k=>`<button data-action="quick-add-kind" data-kind="${k}" data-after="${afterId}">${KIND_LABEL[k]}</button>`).join('');
     menu.classList.add('open');
@@ -7978,9 +8004,12 @@ function icon(name, size){
     ctx.node.text = before + parsed[0].text;
     setNodeRuns(ctx.node, clipRuns(ctx.node.runs, 0, before.length, 0));
     let pos = ctx.idx + 1, stack = [], last = ctx.node;
+    const inOutline = !row.closest('#brainstormList');
+    const flat = inOutline && outlineViewLevel === 'sections'; // Sections view: every pasted line is a section, side by side
     parsed.slice(1).forEach(({level, text})=>{
-      const nn = makeNode('statement'); nn.text = text;
-      const k = autoClassifyKind(text); if(k) nn.kind = k;
+      if(flat) level = base;
+      const nn = makeNode(inOutline ? viewNewLineKind() : 'statement'); nn.text = text;
+      const k = autoClassifyKind(text); if(k && (!inOutline || viewAllowsKind(k))) nn.kind = k;
       if(level <= base){ stack = []; ctx.arr.splice(pos++, 0, nn); }
       else {
         while(stack.length && stack[stack.length - 1].level >= level) stack.pop();
@@ -8063,6 +8092,7 @@ function icon(name, size){
     if(!rowEl && (typing || !drawerOpen)) return; // some other field (title, search, modal): leave it alone
     const file = imgItem.getAsFile(); if(!file) return;
     e.preventDefault();
+    if(rowEl && rowEl.closest('#mainTree') && viewBlocked('photo')) return;
     try{
       const dataUrl = await readAndCompressImage(file);
       const ctx = rowEl ? findContext(rowEl.dataset.id) : null;
@@ -8272,6 +8302,15 @@ function icon(name, size){
       if(isRT(t)) setNodeRuns(ctx.node, readRT(t).runs);
 
       // Section heading: Enter starts the section's first line, like typing under a heading in Word.
+      if(ctx.node.kind === 'heading' && outlineViewLevel === 'sections'){
+        // Sections view: Enter starts the next section, not a line inside this one.
+        const sib = makeNode('heading');
+        ctx.arr.splice(ctx.idx + 1, 0, sib);
+        await saveLesson();
+        renderTree();
+        focusNodeText(sib.id, 0);
+        return;
+      }
       if(ctx.node.kind === 'heading'){
         const newChild = makeNode('statement');
         ctx.node.children = ctx.node.children || [];
@@ -8295,12 +8334,12 @@ function icon(name, size){
         // Sync the old box too: the browser fires a late 'change' from it while the tree re-renders.
         t.value = before;
         const auto = autoClassifyKind(before);
-        if(auto && !ctx.node.kindManual) ctx.node.kind = auto;
+        if(auto && !ctx.node.kindManual && viewAllowsKind(auto)) ctx.node.kind = auto;
         const newNode = makeNode('statement');
         newNode.text = after;
         setNodeRuns(newNode, clipRuns(allRuns, selB, Infinity, -selB));
         const autoNew = autoClassifyKind(after);
-        if(autoNew) newNode.kind = autoNew;
+        if(autoNew && viewAllowsKind(autoNew)) newNode.kind = autoNew;
         newNode.style = Object.assign({}, ensureStyle(ctx.node), { italic:false });
         // A line that has lines nested under it keeps them with the lower half, so the new line
         // appears directly below this one instead of after all of its nested lines.
@@ -8488,6 +8527,7 @@ function icon(name, size){
   async function changeNodeKind(id, kind){
     const ctx = findContext(id);
     if(!ctx || ctx.node.kind === kind) return;
+    if(findContext(id, lesson.outline, null) && viewBlocked(kind)){ updateRibbonState(); return; }
     const node = ctx.node;
     if(node.kind === 'heading' && node.children && node.children.length){
       showToast('Move or delete the lines inside this section before changing its style.', true);
@@ -8535,6 +8575,7 @@ function icon(name, size){
   }
   async function quickLine(kind){
     if(!lesson) return;
+    if(kind !== 'add' && viewBlocked(kind)) return;
     const ctx = currentRibbonNode();
     if(kind === 'verse'){
       const parentId = !ctx ? 'root' : (ctx.node.kind === 'heading' ? ctx.node.id : (ctx.parentNode ? ctx.parentNode.id : 'root'));
@@ -8555,7 +8596,7 @@ function icon(name, size){
       Object.assign(ctx.node, makeNode('photo'), { id: ctx.node.id });
       newId = ctx.node.id;
     } else {
-      newId = addQuickLine(kind === 'add' ? 'statement' : kind, ctx);
+      newId = addQuickLine(kind === 'add' ? viewNewLineKind() : kind, ctx);
     }
     lastFocusedNodeId = newId;
     await saveLesson();
@@ -8573,6 +8614,14 @@ function icon(name, size){
     const styleSel = document.getElementById('rbStyle');
     styleSel.disabled = !node || node.kind === 'verse' || node.kind === 'photo';
     styleSel.value = node ? node.kind : 'statement';
+    // Line styles and Insert buttons the current view (Sections / Subsections) can't hold are greyed out.
+    Array.from(styleSel.options).forEach(o=>{ if(o.value !== 'verse' && o.value !== 'photo') o.disabled = !viewAllowsKind(o.value); });
+    [['rbInsertVerse','verse'], ['rbInsertPhoto','photo'], ['rbInsertBrainstorm','statement']].forEach(([bid, kind])=>{
+      const b = document.getElementById(bid); if(!b) return;
+      if(!b.dataset.title) b.dataset.title = b.title;
+      b.disabled = !viewAllowsKind(kind);
+      b.title = b.disabled ? 'Switch to All at the bottom to use this' : b.dataset.title;
+    });
     const sizeSel = document.getElementById('rbSize');
     sizeSel.disabled = !formattable;
     document.getElementById('rbSizeDown').disabled = document.getElementById('rbSizeUp').disabled = !formattable;
@@ -8659,6 +8708,7 @@ function icon(name, size){
         return;
       }
       if(e.target.closest('#rbInsertPhoto')){
+        if(viewBlocked('photo')) return;
         const ctx = currentRibbonNode();
         pushUndo();
         const newId = (ctx && ctx.node.kind === 'heading') ? addNode('photo', ctx.node.id) : addNodeAfter('photo', ctx ? ctx.node.id : null);
