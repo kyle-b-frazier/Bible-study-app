@@ -2093,7 +2093,6 @@
           <h4>Data</h4>
           <p class="hint" style="margin-top:0;" id="prefsDataStatus"></p>
           <button class="btn small" id="btnExportPrefs">Export Preferences (.json)</button>
-          <button class="btn small" id="btnSeedTestLessons" style="margin-left:8px;">Add 6 Test Lessons</button>
         </div>
 
       </div>
@@ -3500,27 +3499,6 @@ function icon(name, size){
     if(lesson && lesson.id===id){ lesson = newLessonObj('Untitled Lesson'); await saveLesson(); updateLiveShareSubscription(); renderShell(); }
     await renderLibraryModal();
     refreshLessonsBrowserIfOpen();
-  }
-  const TEST_LESSON_TITLES = [
-    'The Good Shepherd — John 10', 'Faith Over Fear — Mark 4:35-41', 'The Prodigal Son — Luke 15',
-    'Armor of God — Ephesians 6', 'Fruit of the Spirit — Galatians 5', 'The Beatitudes — Matthew 5'
-  ];
-  async function seedTestLessons(){
-    const ok = await appConfirm('Add 6 sample test lessons? Handy for trying out delete and sharing — you can remove them anytime.');
-    if(!ok) return;
-    for(const title of TEST_LESSON_TITLES){
-      const l = newLessonObj(title);
-      const heading = makeNode('heading'); heading.text = 'Opening';
-      const statement = makeNode('statement'); statement.text = 'Sample teaching point for testing purposes.';
-      heading.children.push(statement);
-      l.outline.push(heading);
-      l.tags = ['test'];
-      await safeSet('lesson:'+l.id, JSON.stringify(l), false);
-      await upsertIndexEntry({id: l.id, title: l.title, updatedAt: l.updatedAt, tags: l.tags, folderId: null});
-    }
-    showToast('Added 6 test lessons — find them tagged "test" in Lessons.');
-    refreshLessonsBrowserIfOpen();
-    await renderLibraryModal();
   }
 
   // ---------------- Tree operations ----------------
@@ -7031,7 +7009,6 @@ function icon(name, size){
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
-  document.getElementById('btnSeedTestLessons').addEventListener('click', seedTestLessons);
   document.getElementById('btnOpenAdvancedPublish').addEventListener('click', openAdvancedPublishModal);
   document.getElementById('editorViewSegmented').addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-view]'); if(!btn) return;
