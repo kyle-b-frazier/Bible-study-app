@@ -1336,8 +1336,6 @@
     border:1px solid var(--border); border-radius:var(--radius-xs); padding:3px 8px; white-space:nowrap;
   }
   /* Questions: always italic, marked with "Q:" in place of the number/bullet (editor, brainstorm, previews). */
-  html body #mainTree .node[data-kind="question"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--accent) !important;}
-  html body #mainTree .node[data-kind="question"] > .node-row > .node-number::before{content:"Q:" !important; font-size:.8rem !important; font-weight:700 !important; font-style:italic !important; font-family:'Inter',sans-serif !important; color:var(--accent) !important;}
   html body #mainTree .node[data-kind="question"] > .node-row :is(textarea,div).node-text,
   html body #brainstormList .node[data-kind="question"] :is(textarea,div).node-text{font-style:italic !important;}
   html body .p-node[data-kind="question"] > .p-node-row > .p-number{visibility:hidden;}
@@ -1352,11 +1350,11 @@
   html body .node-row.block-selected :is(textarea,div).node-text{background:transparent !important;}
   html body .node-row.block-selected ::selection{background:transparent;}
   /* Bullets change with each nesting level (under a section: ● ○ ■ – ›) so you can tell the levels apart. */
-  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"●" !important; font-size:.5rem !important; color:var(--text-dim) !important;}
-  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .node-row > .node-number::before{content:"○" !important; font-size:.62rem !important; color:var(--text-dim) !important;}
-  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .node-row > .node-number::before{content:"■" !important; font-size:.42rem !important; color:var(--text-dim) !important;}
-  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .node-row > .node-number::before{content:"–" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
-  body.outline-style-classic #mainTree .node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .node-row > .node-number::before{content:"›" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="0"] > .node-row > .node-number::before{content:"●" !important; font-size:.5rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="1"] > .node-row > .node-number::before{content:"○" !important; font-size:.62rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="2"] > .node-row > .node-number::before{content:"■" !important; font-size:.42rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="3"] > .node-row > .node-number::before{content:"–" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
+  body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="4"] > .node-row > .node-number::before{content:"›" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before,
   #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.5rem !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before,
@@ -1533,24 +1531,23 @@
   html body #mainTree.doc-view .node:not([data-kind="heading"]) > .node-row{padding-left:0 !important;}
   html body.outline-style-classic #mainTree .node[data-kind="teachernote"] > .node-row::before,
   html body #mainTree.doc-view .node[data-kind="teachernote"] > .node-row::before{position:absolute; right:100%; top:10px; margin:0 8px 0 0; white-space:nowrap; font-size:.62rem !important;}
-  /* A question's Q: also carries its level's bullet, so questions at different depths don't look identical. */
-  html body #mainTree .node[data-kind="question"][data-bl="0"] > .node-row > .node-number::before{content:"• Q:" !important; white-space:pre;}
-  html body #mainTree .node[data-kind="question"][data-bl="1"] > .node-row > .node-number::before{content:"◦ Q:" !important; white-space:pre;}
-  html body #mainTree .node[data-kind="question"][data-bl="2"] > .node-row > .node-number::before{content:"▪ Q:" !important; white-space:pre;}
-  html body #mainTree .node[data-kind="question"][data-bl="3"] > .node-row > .node-number::before{content:"– Q:" !important; white-space:pre;}
-  html body #mainTree .node[data-kind="question"][data-bl="4"] > .node-row > .node-number::before{content:"› Q:" !important; white-space:pre;}
+  /* Questions and applications use the same bullet as any line at their level (● ○ ■ – ›, in the same
+     column), so the level reads the same whatever the kind; their "Q:" / "A:" sits at the start of the text. */
+  html body.outline-style-classic #mainTree .node:is([data-kind="question"],[data-kind="application"]) > .node-row > .node-main,
+  html body #mainTree.doc-view .node:is([data-kind="question"],[data-kind="application"]) > .node-row > .node-main{display:flex; align-items:baseline; gap:6px;}
+  html body.outline-style-classic #mainTree .node:is([data-kind="question"],[data-kind="application"]) > .node-row > .node-main > .node-text,
+  html body #mainTree.doc-view .node:is([data-kind="question"],[data-kind="application"]) > .node-row > .node-main > .node-text{flex:1; min-width:0;}
+  html body.outline-style-classic #mainTree .node:is([data-kind="question"],[data-kind="application"]) > .node-row > .node-main::before,
+  html body #mainTree.doc-view .node:is([data-kind="question"],[data-kind="application"]) > .node-row > .node-main::before{flex:0 0 auto; font-family:'Inter',sans-serif; font-size:.8rem; font-weight:700;}
+  html body.outline-style-classic #mainTree .node[data-kind="question"] > .node-row > .node-main::before,
+  html body #mainTree.doc-view .node[data-kind="question"] > .node-row > .node-main::before{content:"Q:"; font-style:italic; color:var(--accent);}
+  html body.outline-style-classic #mainTree .node[data-kind="application"] > .node-row > .node-main::before,
+  html body #mainTree.doc-view .node[data-kind="application"] > .node-row > .node-main::before{content:"A:"; color:var(--apply);}
   /* Applications: their own colour and an "A:" marker, like questions get "Q:". */
   :root{--apply:#B45309;}
   html[data-theme="dark"]{--apply:#F2A65A;}
-  html body #mainTree .node[data-kind="application"] > .node-row > .node-number{font-size:0 !important; display:block !important; color:var(--apply) !important;}
-  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"]) > .node-row > .node-number::before{content:"A:" !important; font-size:.8rem !important; font-weight:700 !important; font-family:'Inter',sans-serif !important; color:var(--apply) !important; white-space:pre;}
   html body #mainTree .node[data-kind="application"] > .node-row :is(textarea,div).node-text,
   html body #brainstormList .node[data-kind="application"] :is(textarea,div).node-text{color:var(--apply) !important;}
-  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .node-row > .node-number::before{content:"• A:" !important;}
-  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .node-row > .node-number::before{content:"◦ A:" !important;}
-  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .node-row > .node-number::before{content:"▪ A:" !important;}
-  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .node-row > .node-number::before{content:"– A:" !important;}
-  html body.outline-style-classic #mainTree .node[data-kind="application"]:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .node-row > .node-number::before{content:"› A:" !important;}
   html body .p-node[data-kind="application"] > .p-node-row > .p-number{visibility:hidden;}
   html body .p-node[data-kind="application"] > .p-node-row > .p-text{color:#B45309 !important;}
   html body .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:"A: " !important; display:inline !important; font-weight:700 !important; font-size:.9em !important; text-transform:none !important; letter-spacing:0 !important;}
