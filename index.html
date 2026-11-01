@@ -1101,6 +1101,11 @@
     max-width:816px; min-height:1056px; padding:84px 92px 110px; border:none; border-radius:2px;
     box-shadow:0 1px 3px rgba(0,0,0,.12), 0 6px 20px rgba(0,0,0,.07);
   }
+  /* Spelling mistakes found by the app's own checker (Spell, in the script). */
+  ::highlight(spell-error){ text-decoration: underline wavy #E5484D; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }
+  #nodeContextMenu .spell-word{font-weight:700;}
+  #nodeContextMenu .spell-none{padding:6px 10px; font-size:.8rem; color:var(--text-faint);}
+  #nodeContextMenu button.spell-fix{font-weight:600;}
   /* An empty lesson: the whole page is a click target that starts the first section. */
   #mainTree.is-empty{cursor:text;}
   #mainTree.is-empty .empty-state{cursor:text; transition:border-color .12s ease, color .12s ease;}
@@ -1281,6 +1286,13 @@
   .ctx-section-label{font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); padding:6px 10px 2px; font-weight:700;}
   .ctx-divider{border-top:1px solid var(--border); margin:4px 2px;}
   .node-context-menu .format-row{padding:2px 6px 6px;}
+  /* B / I / U and the colour dots keep their own compact shapes here; the full-width menu-button
+     style above was stretching them into one row each. */
+  .node-context-menu .format-row .fmt-btn{width:32px; height:30px; padding:0; justify-content:center; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); font-size:.9rem;}
+  .node-context-menu .format-row .fmt-btn.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .node-context-menu .format-row .fmt-color{width:22px; height:22px; padding:0; flex:0 0 auto; border-radius:50%; border:2px solid var(--border);}
+  .node-context-menu .format-row .fmt-color.active{border-color:var(--accent); box-shadow:var(--shadow-focus);}
+  .node-context-menu .format-row .fmt-color.fmt-color-default{background: repeating-linear-gradient(45deg, #cfcfcf, #cfcfcf 3px, #efefef 3px, #efefef 6px);}
 
   [tabindex]:focus-visible, button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible{outline: 2px solid var(--accent); outline-offset: 2px;}
 
@@ -3981,10 +3993,12 @@ function icon(name, size){
   // questions, applications, and teacher's notes can be switched between each other;
   // verses and photos get neither, just formatting-free delete/insert options.
   let ctxMenuTargetId = null;
+  let ctxSpelling = null; // the misspelled word that was right-clicked, if any (see Spell)
   function closeNodeContextMenu(){
     const menu = document.getElementById('nodeContextMenu');
     menu.classList.remove('open');
     ctxMenuTargetId = null;
+    ctxSpelling = null;
   }
   function positionContextMenu(x, y){
     const menu = document.getElementById('nodeContextMenu');
@@ -4005,6 +4019,15 @@ function icon(name, size){
     const isFlow = FLOW_KINDS.includes(node.kind);
     const canFormat = isHeading || isFlow || node.kind === 'verse';
     let html = '';
+
+    // Right-clicked a misspelled word: suggestions first, like the browser's own menu.
+    if(ctxSpelling && ctxSpelling.el.dataset.id === nodeId){
+      html += `<div class="ctx-section-label">Spelling: <span class="spell-word">${escapeHtml(ctxSpelling.word)}</span></div>`;
+      html += ctxSpelling.suggestions.length
+        ? ctxSpelling.suggestions.map(sg=> `<button class="spell-fix" data-action="spell-fix" data-text="${escapeHtml(sg)}">${escapeHtml(sg)}</button>`).join('')
+        : `<div class="spell-none">No suggestions</div>`;
+      html += `<button data-action="spell-add">Add to dictionary</button><button data-action="spell-ignore">Ignore</button><div class="ctx-divider"></div>`;
+    }
 
     if(canFormat){
       const style = ensureStyle(node);
@@ -5298,6 +5321,7 @@ function icon(name, size){
     renderTimingControls();
     updateRibbonState();
     updateWordStatus();
+    Spell.refresh();
   }
 
   let brainstormFilter = 'all';
@@ -5420,7 +5444,7 @@ function icon(name, size){
           mainContent = `<div class="photo-placeholder"><button class="btn small brass" data-action="upload-photo" data-id="${node.id}">Upload Photo</button></div>`;
         }
       } else {
-        mainContent = `<div class="node-text full-only rt-edit" contenteditable="true" spellcheck="true" role="textbox" data-field="text" data-id="${node.id}" data-ph="${escapeHtml(placeholderFor(node.kind))}"${node.text ? '' : ' data-empty="1"'} style="${escapeHtml(styleObjToCssText(node.style))}">${runsToHtml(node.text, node.runs)}</div>`;
+        mainContent = `<div class="node-text full-only rt-edit" contenteditable="true" spellcheck="${Spell.active() ? 'false' : 'true'}" role="textbox" data-field="text" data-id="${node.id}" data-ph="${escapeHtml(placeholderFor(node.kind))}"${node.text ? '' : ' data-empty="1"'} style="${escapeHtml(styleObjToCssText(node.style))}">${runsToHtml(node.text, node.runs)}</div>`;
       }
 
       const photoExtra = isPhoto ? (cropEditingId === node.id ? `
@@ -8179,6 +8203,7 @@ function icon(name, size){
       const nctx = findContext(t.dataset.id);
       if(nctx){ nctx.node.text = rd.text; setNodeRuns(nctx.node, rd.runs); }
       if(rd.text) t.removeAttribute('data-empty'); else t.setAttribute('data-empty', '1');
+      Spell.refresh();
       scheduleAutosave();
       scheduleWordStatus();
     } else if(t.dataset && t.dataset.field){
@@ -8845,6 +8870,7 @@ function icon(name, size){
   mainTree.addEventListener('contextmenu', (e)=>{
     const row = e.target.closest('.node'); if(!row) return;
     e.preventDefault();
+    ctxSpelling = Spell.misspellingAt(e.clientX, e.clientY);
     openNodeContextMenu(row.dataset.id, e.clientX, e.clientY);
   });
   let longPressTimer = null, longPressId = null;
@@ -8920,6 +8946,16 @@ function icon(name, size){
   // Context menu internals: formatting, kind switching, promote/demote, insert, delete
   const nodeContextMenuEl = document.getElementById('nodeContextMenu');
   nodeContextMenuEl.addEventListener('click', async (e)=>{
+    const spellBtn = e.target.closest('[data-action="spell-fix"], [data-action="spell-add"], [data-action="spell-ignore"]');
+    if(spellBtn){
+      const info = ctxSpelling;
+      closeNodeContextMenu();
+      if(!info) return;
+      if(spellBtn.dataset.action === 'spell-fix'){ if(!Spell.replace(info, spellBtn.dataset.text)) showToast("That line changed; right-click the word again."); }
+      else if(spellBtn.dataset.action === 'spell-add'){ await Spell.addWord(info.word); showToast(`Added "${info.word}" to your dictionary.`); }
+      else Spell.ignoreWord(info.word);
+      return;
+    }
     const quickAdd = e.target.closest('[data-action="quick-add-kind"]');
     if(quickAdd){
       pushUndo();
@@ -9024,6 +9060,310 @@ function icon(name, size){
     wireModalFocusTrap(id);
   });
 
+  // ---------------- Spell check ----------------
+  // The app checks spelling itself, because the browser's own checker falls short here: it only marks
+  // the line you're typing in, the editor rebuilds lines as you work (losing its marks), and the app's
+  // right-click menu hides the browser's suggestions. Known words: spell/en_US.dic expanded with the
+  // prefix/suffix rules in spell/en_US.aff (the SCOWL / Hunspell US English list), spell/bible-words.txt,
+  // and the user's own "Add to dictionary" words. Mistakes are underlined with the CSS Custom Highlight
+  // API, which marks text without touching the page. Without that API, or if the word list can't be
+  // loaded (an old browser, or the page opened as a local file), lines keep the browser's own checker.
+  const Spell = (()=>{
+    const SUPPORTED = !!(window.CSS && CSS.highlights && typeof Highlight === 'function');
+    const LETTER = 'A-Za-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u00FF';
+    const WORD_RE = new RegExp(`[${LETTER}]+(?:['\\u2019][${LETTER}]+)*`, 'g');
+    const SKIP_RE = /(?:https?:\/\/|www\.)\S+|\S+@\S+\.\S+/gi; // links and e-mail addresses aren't words
+    let words = null;               // Set of known words, once loaded
+    let personal = new Set();       // "Add to dictionary" words (lower case, saved)
+    const ignored = new Set();      // "Ignore" (lower case, this session only)
+    const cache = new Map();        // word -> known?
+    let loadPromise = null, refreshTimer = null;
+
+    // --- Word list ---
+    function parseAff(text){
+      const rules = {};
+      const lines = text.split('\n');
+      for(let i = 0; i < lines.length; i++){
+        const p = lines[i].trim().split(/\s+/);
+        if((p[0] === 'PFX' || p[0] === 'SFX') && p.length === 4 && (p[2] === 'Y' || p[2] === 'N')){
+          const rule = { type: p[0], cross: p[2] === 'Y', entries: [] };
+          const n = parseInt(p[3], 10) || 0;
+          for(let k = 0; k < n && i + 1 < lines.length; k++){
+            const q = lines[++i].trim().split(/\s+/);
+            const strip = q[2] === '0' ? '' : (q[2] || '');
+            const add = (q[3] === '0' || !q[3]) ? '' : q[3].split('/')[0];
+            let cond = null;
+            try{ if(q[4] && q[4] !== '.') cond = new RegExp(p[0] === 'SFX' ? q[4] + '$' : '^' + q[4]); }catch(e){ continue; }
+            rule.entries.push({ strip, add, cond });
+          }
+          rules[p[1]] = rule;
+        }
+      }
+      return rules;
+    }
+    function applyRule(word, rule, out){
+      for(const e of rule.entries){
+        if(e.cond && !e.cond.test(word)) continue;
+        if(rule.type === 'SFX'){
+          if(e.strip && !word.endsWith(e.strip)) continue;
+          out.push(word.slice(0, word.length - e.strip.length) + e.add);
+        } else {
+          if(e.strip && !word.startsWith(e.strip)) continue;
+          out.push(e.add + word.slice(e.strip.length));
+        }
+      }
+    }
+    function expandInto(set, word, flags, rules){
+      set.add(word);
+      if(!flags) return;
+      const prefixes = [], suffixes = [];
+      for(const f of flags){ const r = rules[f]; if(r) (r.type === 'PFX' ? prefixes : suffixes).push(r); }
+      const crossable = [];
+      for(const r of suffixes){
+        const out = []; applyRule(word, r, out);
+        out.forEach(w=> set.add(w));
+        if(r.cross) crossable.push(...out);
+      }
+      for(const r of prefixes){
+        const out = []; applyRule(word, r, out);
+        if(r.cross) crossable.forEach(w=> applyRule(w, r, out));
+        out.forEach(w=> set.add(w));
+      }
+    }
+    // Builds the word set, yielding now and then so the page stays responsive while it loads.
+    async function buildWords(aff, dic, extra){
+      const rules = parseAff(aff);
+      const set = new Set();
+      const lines = dic.split('\n');
+      for(let i = 1; i < lines.length; i++){ // the first line is the entry count
+        const line = lines[i].trim();
+        if(!line) continue;
+        const slash = line.indexOf('/');
+        const w = slash < 0 ? line : line.slice(0, slash);
+        if(/\d/.test(w)) continue; // numbers aren't checked
+        expandInto(set, w, slash < 0 ? '' : line.slice(slash + 1), rules);
+        if(i % 5000 === 0) await new Promise(r=> setTimeout(r, 0));
+      }
+      (extra || '').split('\n').forEach(l=>{ l = l.trim(); if(l && l[0] !== '#') set.add(l); });
+      return set;
+    }
+
+    // --- Checking ---
+    function known1(w){
+      if(w.length < 2) return true;
+      const lower = w.toLowerCase();
+      if(personal.has(lower) || ignored.has(lower) || words.has(w)) return true;
+      const rest = w.slice(1);
+      const capitalised = w[0] !== w[0].toLowerCase() && rest === rest.toLowerCase();
+      const upper = w === w.toUpperCase();
+      if((capitalised || upper) && words.has(lower)) return true;               // "Grace", "GRACE"
+      if(upper && words.has(w[0] + rest.toLowerCase())) return true;            // "PETER"
+      return false;
+    }
+    function isKnown(raw){
+      const w = raw.replace(/’/g, "'");
+      if(cache.has(w)) return cache.get(w);
+      const ok = known1(w)
+        || (/'s$/i.test(w) && known1(w.slice(0, -2)))   // possessives of names: "Balaam's"
+        || (/s'$/i.test(w) && known1(w.slice(0, -1)));  // "disciples'"
+      cache.set(w, ok);
+      return ok;
+    }
+
+    // --- Suggestions ---
+    const ALPHABET = "abcdefghijklmnopqrstuvwxyz'";
+    function edits1(w){
+      const out = new Set();
+      for(let i = 0; i <= w.length; i++){
+        const a = w.slice(0, i), b = w.slice(i);
+        if(b) out.add(a + b.slice(1));                                  // delete
+        if(b.length > 1) out.add(a + b[1] + b[0] + b.slice(2));         // swap
+        for(const c of ALPHABET){
+          if(b) out.add(a + c + b.slice(1));                            // replace
+          out.add(a + c + b);                                           // insert
+        }
+      }
+      return out;
+    }
+    function suggest(raw, max){
+      if(!words) return [];
+      const w = raw.replace(/’/g, "'");
+      const lower = w.toLowerCase();
+      const found = new Map(); // dictionary form -> distance
+      const take = (cand, d)=>{
+        if(!cand || cand === lower) return;
+        const cap = cand[0].toUpperCase() + cand.slice(1);
+        const form = words.has(cand) ? cand : (words.has(cap) ? cap : null);
+        if(form && !found.has(form)) found.set(form, d);
+      };
+      const e1 = edits1(lower);
+      e1.forEach(c=> take(c, 1));
+      if(found.size < 3 && lower.length <= 10){
+        e1.forEach(c=>{ if(c) edits1(c).forEach(c2=> take(c2, 2)); });
+      }
+      const first = lower[0];
+      const ranked = Array.from(found.entries()).sort((a, b)=>
+        (a[1] - b[1])
+        || ((a[0][0].toLowerCase() === first ? 0 : 1) - (b[0][0].toLowerCase() === first ? 0 : 1))
+        || (Math.abs(a[0].length - lower.length) - Math.abs(b[0].length - lower.length))
+        || a[0].localeCompare(b[0]));
+      const upper = w.length > 1 && w === w.toUpperCase();
+      const capitalised = !upper && w[0] !== w[0].toLowerCase();
+      return ranked.slice(0, max || 5).map(([s])=> upper ? s.toUpperCase()
+        : (capitalised ? s[0].toUpperCase() + s.slice(1) : s));
+    }
+
+    // --- Text in an editable line: one string, mapped back to its text nodes ---
+    function textMap(el){
+      const parts = []; let text = '';
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      for(let n = walker.nextNode(); n; n = walker.nextNode()){
+        parts.push({ node: n, start: text.length });
+        text += n.nodeValue;
+      }
+      return { text, parts };
+    }
+    function pointAt(map, offset){
+      for(let i = map.parts.length - 1; i >= 0; i--){
+        const p = map.parts[i];
+        if(offset >= p.start) return { node: p.node, offset: Math.min(offset - p.start, p.node.nodeValue.length) };
+      }
+      return null;
+    }
+    function rangeFor(map, start, end){
+      const a = pointAt(map, start), b = pointAt(map, end);
+      if(!a || !b) return null;
+      const r = document.createRange();
+      r.setStart(a.node, a.offset); r.setEnd(b.node, b.offset);
+      return r;
+    }
+    function wordsIn(text){
+      const skip = [];
+      text.replace(SKIP_RE, (m, i)=>{ skip.push([i, i + m.length]); return m; });
+      const out = [];
+      WORD_RE.lastIndex = 0;
+      let m;
+      while((m = WORD_RE.exec(text))){
+        const s = m.index, e = s + m[0].length;
+        if(skip.some(([a, b])=> s < b && e > a)) continue;
+        if(/\d/.test(text[s - 1] || '') || /\d/.test(text[e] || '')) continue; // "3rd", "v12"
+        out.push({ word: m[0], start: s, end: e });
+      }
+      return out;
+    }
+    // The caret's position in this line, when the user is typing in it (that word isn't marked yet).
+    function caretIn(el, map){
+      const sel = window.getSelection();
+      if(!sel || !sel.rangeCount || !sel.isCollapsed || document.activeElement !== el) return -1;
+      const r = sel.getRangeAt(0);
+      const p = map.parts.find(x=> x.node === r.endContainer);
+      return p ? p.start + r.endOffset : -1;
+    }
+
+    // --- Underlines ---
+    function refreshNow(){
+      refreshTimer = null;
+      if(!active()) return;
+      const ranges = [];
+      document.querySelectorAll('#mainTree .rt-edit').forEach(el=>{
+        const map = textMap(el);
+        if(!map.text) return;
+        const caret = caretIn(el, map);
+        for(const t of wordsIn(map.text)){
+          if(caret >= t.start && caret <= t.end) continue; // still typing this word
+          if(isKnown(t.word)) continue;
+          const r = rangeFor(map, t.start, t.end);
+          if(r) ranges.push(r);
+        }
+      });
+      CSS.highlights.set('spell-error', new Highlight(...ranges));
+    }
+    function refresh(){ if(active() && !refreshTimer) refreshTimer = setTimeout(refreshNow, 250); }
+    function active(){ return SUPPORTED && !!words; }
+
+    // --- Right-click ---
+    function caretPointFromXY(x, y){
+      if(document.caretPositionFromPoint){
+        const p = document.caretPositionFromPoint(x, y);
+        return p ? { node: p.offsetNode, offset: p.offset } : null;
+      }
+      if(document.caretRangeFromPoint){
+        const r = document.caretRangeFromPoint(x, y);
+        return r ? { node: r.startContainer, offset: r.startOffset } : null;
+      }
+      return null;
+    }
+    // The misspelled word under the pointer, if any: { el, start, end, word, suggestions }.
+    function misspellingAt(x, y){
+      if(!active()) return null;
+      const pt = caretPointFromXY(x, y);
+      if(!pt || !pt.node || pt.node.nodeType !== 3) return null;
+      const el = pt.node.parentElement && pt.node.parentElement.closest('#mainTree .rt-edit');
+      if(!el) return null;
+      const map = textMap(el);
+      const part = map.parts.find(p=> p.node === pt.node);
+      if(!part) return null;
+      const at = part.start + pt.offset;
+      const hit = wordsIn(map.text).find(t=> at >= t.start && at <= t.end);
+      if(!hit || isKnown(hit.word)) return null;
+      return { el, start: hit.start, end: hit.end, word: hit.word, suggestions: suggest(hit.word, 5) };
+    }
+    // Swaps the word for a suggestion as if it were typed, so undo, saving and formatting all apply.
+    function replace(info, text){
+      const el = info.el;
+      if(!el.isConnected) return false;
+      const map = textMap(el);
+      if(map.text.slice(info.start, info.end) !== info.word) return false;
+      const r = rangeFor(map, info.start, info.end);
+      if(!r) return false;
+      el.focus();
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(r);
+      document.execCommand('insertText', false, text);
+      refresh();
+      return true;
+    }
+    async function addWord(word){
+      personal.add(word.replace(/’/g, "'").toLowerCase());
+      cache.clear();
+      try{ await safeSet('spell-personal-words', JSON.stringify(Array.from(personal).sort()), false); }catch(e){}
+      refreshNow();
+    }
+    function ignoreWord(word){ ignored.add(word.replace(/’/g, "'").toLowerCase()); cache.clear(); refreshNow(); }
+
+    // --- Loading ---
+    async function fetchText(path){
+      const res = await fetch(new URL(path, location.href));
+      if(!res.ok) throw new Error(path + ': ' + res.status);
+      return res.text();
+    }
+    function load(){
+      if(!SUPPORTED) return Promise.resolve(false);
+      if(loadPromise) return loadPromise;
+      loadPromise = (async ()=>{
+        try{
+          const [aff, dic, extra] = await Promise.all([
+            fetchText('spell/en_US.aff'), fetchText('spell/en_US.dic'), fetchText('spell/bible-words.txt').catch(()=> '')
+          ]);
+          try{ const saved = JSON.parse(await safeGet('spell-personal-words', false) || '[]'); if(Array.isArray(saved)) personal = new Set(saved); }catch(e){}
+          words = await buildWords(aff, dic, extra);
+          cache.clear();
+          // From now on the app marks mistakes, so the browser's own (focused-line-only) marks are turned off.
+          document.querySelectorAll('#mainTree .rt-edit').forEach(el=> el.setAttribute('spellcheck', 'false'));
+          refreshNow();
+          return true;
+        }catch(e){
+          console.warn('Spell check word list unavailable; using the browser\'s own spell check.', e);
+          return false;
+        }
+      })();
+      return loadPromise;
+    }
+
+    return { load, refresh, active, misspellingAt, replace, addWord, ignoreWord, isKnown, suggest, wordsIn };
+  })();
+  document.addEventListener('selectionchange', ()=> Spell.refresh());
+
   // ---------------- Init ----------------
   async function init(){
     initTheme();
@@ -9050,6 +9390,7 @@ function icon(name, size){
     await prefetchPhotos(lesson.brainstorm);
     renderShell();
     resumePublishSessionIfAny();
+    Spell.load();
   }
   window.addEventListener('pageshow', (e)=>{ if(e.persisted) resumePublishSessionIfAny(); });
   applyStaticIcons();
