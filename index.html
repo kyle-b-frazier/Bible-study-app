@@ -7604,6 +7604,16 @@ function icon(name, size){
     const insertBtn = e.target.closest('[data-action="insert-to-outline"]');
     if(insertBtn){ await insertBrainstormItemToOutline(insertBtn.dataset.id); return; }
   });
+  // Fits a Brainstorm box to its text. Some browsers (Safari) don't count an empty last line, so a box
+  // whose text ends in a new line could stay one line short and hide the cursor; that line is added here.
+  function growBrainstormBox(t, heightBefore){
+    t.style.height = 'auto';
+    let h = t.scrollHeight;
+    if(t.value.endsWith('\n') && heightBefore !== undefined && h <= heightBefore){
+      h += parseFloat(getComputedStyle(t).lineHeight) || 22;
+    }
+    t.style.height = h + 'px';
+  }
   brainstormList.addEventListener('input', (e)=>{
     const t = e.target;
     if(t.dataset && t.dataset.field){
@@ -7655,6 +7665,18 @@ function icon(name, size){
       }
     }
     if(!isTA(t) || !t.dataset || t.dataset.field !== 'text') return;
+    // Shift+Enter: a new line inside the same idea (e.g. "1. …" then "2. …"), handled here so it works
+    // the same in every browser. Typed as text, so the browser's own undo still covers it.
+    if(e.key === 'Enter' && e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && t.tagName === 'TEXTAREA' && !t.readOnly){
+      e.preventDefault();
+      const before = t.scrollHeight;
+      if(!document.execCommand('insertText', false, '\n')){
+        t.setRangeText('\n', t.selectionStart, t.selectionEnd, 'end');
+        t.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      growBrainstormBox(t, before);
+      return;
+    }
     if(e.key === 'Enter' && !e.shiftKey){
       e.preventDefault();
       const ctx = findContext(t.dataset.id, lesson.brainstorm || [], null);
@@ -9025,7 +9047,7 @@ function icon(name, size){
       if(!info) return;
       if(spellBtn.dataset.action === 'spell-fix'){ if(!Spell.replace(info, spellBtn.dataset.text)) showToast("That line changed; right-click the word again."); }
       else if(spellBtn.dataset.action === 'spell-add'){ await Spell.addWord(info.word); showToast(`Added "${info.word}" to your dictionary.`); }
-      else Spell.ignoreWord(info.word);
+      else await Spell.ignoreWord(info.word);
       return;
     }
     const quickAdd = e.target.closest('[data-action="quick-add-kind"]');
@@ -9154,7 +9176,8 @@ function icon(name, size){
     const SKIP_RE = /(?:https?:\/\/|www\.)\S+|\S+@\S+\.\S+/gi; // links and e-mail addresses aren't words
     let words = null;               // Set of known words, once loaded
     let personal = new Set();       // "Add to dictionary" words (lower case, saved)
-    const ignored = new Set();      // "Ignore" (lower case, this session only)
+    let ignored = new Set();        // "Ignore" (lower case): kept on the lesson (lesson.spellIgnore), so it lasts
+    let ignoredKey = null;          // which lesson / list the set above was built from
     const cache = new Map();        // word -> known?
     let loadPromise = null, refreshTimer = null;
 
@@ -9228,6 +9251,15 @@ function icon(name, size){
     }
 
     // --- Checking ---
+    // Picks up the open lesson's ignored words (they change when you switch lessons, or sync brings new ones).
+    function syncIgnored(){
+      const list = (lesson && Array.isArray(lesson.spellIgnore)) ? lesson.spellIgnore : [];
+      const key = (lesson ? lesson.id : '') + '|' + list.join('|');
+      if(key === ignoredKey) return;
+      ignoredKey = key;
+      ignored = new Set(list);
+      cache.clear();
+    }
     function known1(w){
       if(w.length < 2) return true;
       const lower = w.toLowerCase();
@@ -9343,6 +9375,7 @@ function icon(name, size){
     function refreshNow(){
       refreshTimer = null;
       if(!active()) return;
+      syncIgnored();
       const ranges = [];
       document.querySelectorAll('#mainTree .rt-edit').forEach(el=>{
         const map = textMap(el);
@@ -9375,6 +9408,7 @@ function icon(name, size){
     // The misspelled word under the pointer, if any: { el, start, end, word, suggestions }.
     function misspellingAt(x, y){
       if(!active()) return null;
+      syncIgnored();
       const pt = caretPointFromXY(x, y);
       if(!pt || !pt.node || pt.node.nodeType !== 3) return null;
       const el = pt.node.parentElement && pt.node.parentElement.closest('#mainTree .rt-edit');
@@ -9408,7 +9442,16 @@ function icon(name, size){
       try{ await safeSet('spell-personal-words', JSON.stringify(Array.from(personal).sort()), false); }catch(e){}
       refreshNow();
     }
-    function ignoreWord(word){ ignored.add(word.replace(/’/g, "'").toLowerCase()); cache.clear(); refreshNow(); }
+    // "Ignore" lasts for this lesson: the word is saved on it (and syncs with it), not just for this visit.
+    async function ignoreWord(word){
+      if(!lesson) return;
+      const w = word.replace(/’/g, "'").toLowerCase();
+      const list = Array.isArray(lesson.spellIgnore) ? lesson.spellIgnore : [];
+      if(!list.includes(w)) lesson.spellIgnore = list.concat(w).sort();
+      syncIgnored();
+      refreshNow();
+      await saveLesson();
+    }
 
     // --- Loading ---
     async function fetchText(path){
