@@ -943,8 +943,7 @@
     #printExportRoot .p-node[data-kind="verse"] > .p-node-row{ border-left:none !important; }
     #printExportRoot .p-node[data-kind="verse"] > .p-node-row{ margin-left:0 !important; padding-left:0 !important; }
     #printExportRoot .p-children{ padding-left:0 !important; margin-left:22px; }
-    #printExportRoot .p-node{ break-inside:avoid; }
-    #printExportRoot .p-node[data-kind="heading"]{ break-after:avoid; }
+    #printExportRoot .p-node-row{ break-inside:avoid; }
     #printExportRoot, #printExportRoot *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
   @page{ margin:0.7in; }
@@ -6170,13 +6169,19 @@ function icon(name, size){
     const filter = filterOverride || (publishPrefs ? publishPrefs.full : null);
     const nodes = filter ? filterNodesForPublish(lesson.outline || [], 0, filter) : (lesson.outline || []);
     const style = (filter && filter.style) || (publishPrefs && publishPrefs.style) || {};
+    return buildClipboardFromNodes(nodes, lesson.title || 'Untitled Lesson', style);
+  }
+  // title === null leaves the lesson title out (used when only some lines are selected).
+  function buildClipboardFromNodes(nodes, title, style){
+    style = style || {};
     const sched = computeScheduleStarts();
     const FONT = "font-family:Calibri,'Segoe UI',Arial,sans-serif;";
     const MUTED = 'color:#6E7469;';
     let html = '', text = '';
-    const title = lesson.title || 'Untitled Lesson';
-    html += `<h1 style="${FONT}font-size:20pt;font-weight:bold;margin:0 0 8pt;">${escapeHtml(title)}</h1>`;
-    text += title + '\n\n';
+    if(title){
+      html += `<h1 style="${FONT}font-size:20pt;font-weight:bold;margin:0 0 8pt;">${escapeHtml(title)}</h1>`;
+      text += title + '\n\n';
+    }
     const plain = n => (n.text || '').replace(/\s+/g, ' ').trim();
     function timeInfo(n){
       if(n.kind !== 'heading' || style.showTimeBadges === false) return '';
@@ -6189,7 +6194,7 @@ function icon(name, size){
     function itemHtml(n){
       const css = escapeHtml(styleObjToCssText(n.style));
       if(n.kind === 'verse'){
-        const ref = n.ref ? `<b style="font-size:10pt;">${escapeHtml(n.ref)}</b>` : '';
+        const ref = n.ref ? `<b style="font-size:9pt;color:#6E7469;text-transform:uppercase;letter-spacing:0.02em;">${escapeHtml(n.ref)}</b>` : '';
         const body = n.text ? `<i>${cleanRunsHtml(n.text, n.runs)}</i>` : '';
         return ref + (ref && body ? '<br>' : '') + body;
       }
@@ -6198,7 +6203,7 @@ function icon(name, size){
         return (url ? `<img src="${url}" style="max-width:220px;max-height:170px;"><br>` : '') + escapeHtml(n.caption || '');
       }
       const inner = n.text ? `<span style="${css}">${cleanRunsHtml(n.text, n.runs)}</span>` : '';
-      if(n.kind === 'teachernote') return `<i style="${MUTED}"><b style="font-style:normal;">Note — </b>${inner}</i>`;
+      if(n.kind === 'teachernote') return `<i style="${MUTED}font-size:11pt;"><b style="font-style:normal;">Note — </b>${inner}</i>`;
       return inner;
     }
     function itemText(n){
@@ -6208,7 +6213,8 @@ function icon(name, size){
     }
     // A run of non-heading siblings becomes one <ul>; headings break out of it.
     function list(items, depth, headingDepth){
-      let h = '<ul style="margin:0 0 6pt;padding-left:22pt;' + FONT + 'font-size:11pt;line-height:1.35;">';
+      const bullet = ['disc','circle','square'][Math.min(depth, 2)];
+      let h = `<ul style="margin:0 0 6pt;padding-left:24pt;list-style-type:${bullet};${FONT}font-size:12pt;line-height:1.5;">`;
       items.forEach(n=>{
         const pad = '\t'.repeat(depth);
         text += pad + '• ' + itemText(n) + '\n';
@@ -6226,7 +6232,7 @@ function icon(name, size){
         if(n.kind === 'heading' && !inList){
           flush();
           const lvl = Math.min(headingDepth + 2, 4);
-          const size = [14, 12.5, 11.5][Math.min(headingDepth, 2)];
+          const size = [17, 14, 12.7][Math.min(headingDepth, 2)];
           const label = plain(n) + timeInfo(n);
           out += `<h${lvl} style="${FONT}font-size:${size}pt;font-weight:bold;margin:12pt 0 4pt;">${cleanRunsHtml(n.text, n.runs)}${n.text ? '' : '(empty)'}<span style="${MUTED}font-weight:normal;font-size:10pt;">${escapeHtml(timeInfo(n))}</span></h${lvl}>`;
           text += '\n' + (headingDepth === 0 ? label.toUpperCase() : label) + '\n';
@@ -8325,16 +8331,55 @@ function icon(name, size){
       setBlockSel(container, row.dataset.id, ids[j]);
     }
   }, true);
+  // The selected lines as formatted content (headings, bullets, bold/italic...) so pasting into
+  // Pages or Word keeps the look. Lines that aren't selected are dropped; their selected
+  // children move up to take their place. Only the lesson outline can be formatted this way.
+  function blockSelectionClipboard(){
+    if(!blockSel || blockSel.container !== mainTree || !lesson) return null;
+    const ids = blockSelectedIds(); if(!ids.length) return null;
+    const set = new Set(ids);
+    const prune = (nodes)=>{
+      let out = [];
+      (nodes || []).forEach(n=>{
+        const kids = prune(n.children);
+        if(set.has(n.id)) out.push(Object.assign({}, n, {children: kids}));
+        else out = out.concat(kids);
+      });
+      return out;
+    };
+    const nodes = prune(lesson.outline);
+    if(!nodes.length) return null;
+    const all = blockVisibleNodes(mainTree).length === ids.length;
+    return buildClipboardFromNodes(nodes, all ? (lesson.title || 'Untitled Lesson') : null, publishPrefs ? publishPrefs.style : {});
+  }
+  function putBlockSelectionOnClipboard(e){
+    let rich = null;
+    try{ rich = blockSelectionClipboard(); }catch(err){ rich = null; }
+    e.clipboardData.setData('text/plain', rich ? rich.text : blockSelectionText());
+    if(rich) e.clipboardData.setData('text/html', rich.html);
+  }
   document.addEventListener('copy', (e)=>{
     if(!blockSel || !e.clipboardData) return;
     e.preventDefault();
-    e.clipboardData.setData('text/plain', blockSelectionText());
+    putBlockSelectionOnClipboard(e);
   });
   document.addEventListener('cut', async (e)=>{
     if(!blockSel || !e.clipboardData) return;
     e.preventDefault();
-    e.clipboardData.setData('text/plain', blockSelectionText());
+    putBlockSelectionOnClipboard(e);
     await deleteBlockSelection();
+  });
+  // Cmd/Ctrl+A anywhere on the page (not typing in a box) selects the whole document, not the whole webpage.
+  document.addEventListener('keydown', (e)=>{
+    if(!((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'a')) return;
+    const t = e.target;
+    if(t && t.closest && (t.closest('textarea, input, select, [contenteditable="true"], [contenteditable=""]'))) return;
+    if(document.querySelector('.modal-overlay.open, .palette-overlay.open')) return;
+    if(!mainTree || mainTree.offsetParent === null) return;
+    const ids = blockVisibleNodes(mainTree).map(n=>n.dataset.id);
+    if(!ids.length) return;
+    e.preventDefault();
+    setBlockSel(mainTree, ids[0], ids[ids.length - 1]);
   });
 
   // Pasting several lines of text into a line: one new line per row, nested by indentation.
