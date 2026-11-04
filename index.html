@@ -937,8 +937,17 @@
        sibling of .app-shell, not a descendant of it, so this can't happen again. */
     body > *:not(#printExportRoot){ display:none !important; }
     #printExportRoot{ display:block !important; max-width:100%; }
-    #printExportRoot .preview-surface{ box-shadow:none; border:none; max-height:none !important; overflow:visible !important; }
+    #printExportRoot .preview-surface{ box-shadow:none; border:none; max-height:none !important; overflow:visible !important; max-width:none !important; }
+    /* Same plain look as the screen: no vertical guide lines or quote bars */
+    #printExportRoot .p-children,
+    #printExportRoot .p-node[data-kind="verse"] > .p-node-row{ border-left:none !important; }
+    #printExportRoot .p-node[data-kind="verse"] > .p-node-row{ margin-left:0 !important; padding-left:0 !important; }
+    #printExportRoot .p-children{ padding-left:0 !important; margin-left:22px; }
+    #printExportRoot .p-node{ break-inside:avoid; }
+    #printExportRoot .p-node[data-kind="heading"]{ break-after:avoid; }
+    #printExportRoot, #printExportRoot *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
+  @page{ margin:0.7in; }
   @media (max-width: 900px){
     .sidebar{position:fixed; z-index:35; height:100vh; box-shadow:0 0 0 100vw rgba(0,0,0,.001);}
   }
@@ -1137,38 +1146,38 @@
      Presenting should read like the Word-style editor page: white sheet, one family of
      type, bullets and indentation only. No frames, rules, pills, badges or quote bars.
      Scoped to the presenter overlay, so printed output keeps its own design. */
-  #previewModalOverlay .preview-surface{
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface{
     border:none !important; border-radius:0 !important; box-shadow:none !important; background:#FFFFFF; color:#1F2320;
     font-family:'Calibri','Segoe UI','Inter',sans-serif; max-width:816px; margin-left:auto; margin-right:auto;
   }
-  #previewModalOverlay .preview-surface .ms-band{border:none !important; padding-bottom:6px;}
-  #previewModalOverlay .preview-surface .ms-kicker{display:none;}
-  #previewModalOverlay .preview-surface .ms-band h1{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:700; font-size:1.6rem; letter-spacing:-.01em; color:#1F2320;}
-  #previewModalOverlay .preview-surface .p-node-row{border:none !important; background:transparent !important; box-shadow:none !important; flex-wrap:nowrap; gap:8px;}
-  #previewModalOverlay .preview-surface .p-node-row > .p-text{flex:1 1 auto; min-width:0;}
-  #previewModalOverlay .preview-surface .p-text{border:none !important; font-family:'Calibri','Segoe UI','Inter',sans-serif; color:#1F2320; line-height:1.55;}
-  #previewModalOverlay .preview-surface .p-text span{font-family:inherit;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .ms-band{border:none !important; padding-bottom:6px;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .ms-kicker{display:none;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .ms-band h1{font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:700; font-size:1.6rem; letter-spacing:-.01em; color:#1F2320;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node-row{border:none !important; background:transparent !important; box-shadow:none !important; flex-wrap:nowrap; gap:8px;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node-row > .p-text{flex:1 1 auto; min-width:0;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-text{border:none !important; font-family:'Calibri','Segoe UI','Inter',sans-serif; color:#1F2320; line-height:1.55;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-text span{font-family:inherit;}
   /* bullets instead of numbered badges */
-  #previewModalOverlay .preview-surface .p-number{background:transparent !important; color:#8A8F86; font-size:0; width:16px; min-width:16px; text-align:center; padding-top:3px; box-shadow:none; border:none;}
-  #previewModalOverlay .preview-surface .p-number::before{content:"●"; font-size:0.42rem;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-number{background:transparent !important; color:#8A8F86; font-size:0; width:16px; min-width:16px; text-align:center; padding-top:3px; box-shadow:none; border:none;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-number::before{content:"●"; font-size:0.42rem;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-number{display:none;}
   /* section headings: bold, top level in capitals, like the editor */
-  #previewModalOverlay .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="heading"][style*="margin-left:0px"] .p-text{text-transform:uppercase; font-size:1.2rem; letter-spacing:.01em;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="heading"] > .p-node-row > .p-text{font-weight:700; font-style:normal; font-size:1.1rem; padding-top:14px;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="heading"][style*="margin-left:0px"] .p-text{text-transform:uppercase; font-size:1.2rem; letter-spacing:.01em;}
   /* timing: quiet grey text after the heading instead of a pill */
-  #previewModalOverlay .preview-surface .time-badge{background:transparent !important; border:none !important; padding:0 0 0 8px; color:#8A8F86; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:400; font-size:.8rem; text-transform:none; letter-spacing:0;}
-  #previewModalOverlay .preview-surface .time-badge svg{display:none;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .time-badge{background:transparent !important; border:none !important; padding:0 0 0 8px; color:#8A8F86; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-weight:400; font-size:.8rem; text-transform:none; letter-spacing:0;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .time-badge svg{display:none;}
   /* verses: small grey reference, italic text, no side bar */
-  #previewModalOverlay .preview-surface .p-verse-ref{display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.02em; color:#6E7469; background:none; border:none; padding:0; margin-bottom:2px;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text::before,
-  #previewModalOverlay .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:none;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="statement"] > .p-node-row > .p-text,
-  #previewModalOverlay .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text,
-  #previewModalOverlay .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-style:italic; color:#6E7469;}
-  #previewModalOverlay .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
-  html[data-theme="dark"] #previewModalOverlay .preview-surface{background:#FFFFFF; color:#1F2320;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-verse-ref{display:block; font-family:'Calibri','Segoe UI','Inter',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.02em; color:#6E7469; background:none; border:none; padding:0; margin-bottom:2px;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="verse"] > .p-node-row > .p-text{font-style:italic;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text::before,
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text::before{content:none;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="statement"] > .p-node-row > .p-text,
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="question"] > .p-node-row > .p-text,
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="application"] > .p-node-row > .p-text{font-style:normal;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text{font-style:italic; color:#6E7469;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node[data-kind="teachernote"] > .p-node-row > .p-text::before{content:"Note — "; font-style:normal; font-weight:600; color:#8A8F86;}
+  html[data-theme="dark"] :is(#previewModalOverlay, #printExportRoot) .preview-surface{background:#FFFFFF; color:#1F2320;}
   #previewModalOverlay .publish-body{background:#FFFFFF;}
 
   /* Phones/small tablets: keep the three main steps on screen as a compact row
@@ -1356,15 +1365,15 @@
   body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="3"] > .node-row > .node-number::before{content:"–" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
   body.outline-style-classic #mainTree .node:not([data-kind="heading"])[data-bl="4"] > .node-row > .node-number::before{content:"›" !important; font-size:.95rem !important; color:var(--text-dim) !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before,
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.5rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.5rem !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before,
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.62rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.62rem !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before,
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.42rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.42rem !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before,
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:.95rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:.95rem !important;}
   body.outline-style-classic .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before,
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:.95rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:.95rem !important;}
   /* Statements are never italic (overrides any leftover per-line italic formatting). */
   html body #mainTree .node[data-kind="statement"] > .node-row :is(textarea,div).node-text,
   html body #brainstormList .node[data-kind="statement"] > .node-row :is(textarea,div).node-text{font-style:normal !important;}
@@ -1431,12 +1440,12 @@
     .word-status{bottom:var(--dock-b, 0px);}
   }
   /* Presenter: no guide lines, calmer bullets. */
-  #previewModalOverlay .preview-surface .p-children{border-left:none !important; padding-left:0 !important; margin-left:22px;}
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.62rem !important;}
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.7rem !important;}
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.5rem !important;}
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:1rem !important;}
-  #previewModalOverlay .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:1rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-children{border-left:none !important; padding-left:0 !important; margin-left:22px;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="0"] > .p-node-row > .p-number::before{content:"●" !important; font-size:.62rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="1"] > .p-node-row > .p-number::before{content:"○" !important; font-size:.7rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="2"] > .p-node-row > .p-number::before{content:"■" !important; font-size:.5rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="3"] > .p-node-row > .p-number::before{content:"–" !important; font-size:1rem !important;}
+  :is(#previewModalOverlay, #printExportRoot) .preview-surface .p-node:not([data-kind="heading"]):not([data-kind="question"])[data-bl="4"] > .p-node-row > .p-number::before{content:"›" !important; font-size:1rem !important;}
   /* Zoom (editor page) */
   #panel-outline #mainTree{zoom:var(--page-zoom, 1);}
   /* The whole page (box and text) scales together; when it grows wider than the window it scrolls sideways. */
@@ -1844,6 +1853,7 @@
           <button data-mode="pageflip" class="active" title="Turn one page at a time">Page-flip</button>
           <button data-mode="scroll" title="Scroll continuously">Scroll</button>
         </div>
+        <button class="btn" id="btnCopyPreview" title="Copy this lesson to paste into Word, Pages or Google Docs">Copy for Word / Pages</button>
         <button class="btn icon" id="btnTogglePresenter" title="Hide these controls"></button>
         <span class="awake-status" id="awakeStatus" title=""></span>
       </div>
@@ -2228,8 +2238,12 @@
 <div class="modal-overlay" id="publishChooserOverlay">
   <div class="modal" style="max-width:460px;">
     <button class="modal-x" id="xClosePublishChooser" title="Close">✕</button>
-    <h3>Print</h3>
-    <p class="hint" style="margin-top:0;">What would you like to print or save as PDF?</p>
+    <h3 id="publishChooserTitle">Print</h3>
+    <div class="segmented" id="publishActionSegmented" style="margin-bottom:12px;">
+      <button data-action="print" class="active" title="Print or save as PDF">Print / PDF</button>
+      <button data-action="copy" title="Copy to paste into Word, Pages or Google Docs">Copy for Word / Pages</button>
+    </div>
+    <p class="hint" id="publishChooserHint" style="margin-top:0;">What would you like to print or save as PDF?</p>
     <div class="publish-choice-list">
       <button class="publish-choice" data-choice="full">
         <b>Full Lesson</b>
@@ -3295,11 +3309,11 @@ function icon(name, size){
   function goPublish(choice){
     closePublishChooser();
     if(choice === 'full'){
-      printLessonPdf(JSON.parse(JSON.stringify(publishPrefs.full)));
+      runPublishAction(JSON.parse(JSON.stringify(publishPrefs.full)));
     } else if(choice === 'handout'){
       const f = JSON.parse(JSON.stringify(publishPrefs.handout));
       f.types.teacherNotes = false; // hard rule regardless of saved prefs
-      printLessonPdf(f);
+      runPublishAction(f);
     } else if(choice === 'custom'){
       openCustomPublishModal();
     }
@@ -3324,7 +3338,7 @@ function icon(name, size){
     await savePublishPrefs();
     const f = JSON.parse(JSON.stringify(customPublishDraft));
     closeCustomPublishModal();
-    printLessonPdf(f);
+    runPublishAction(f);
   }
 
   // keepTime: saves that aren't a user edit (opening, migrations) must not look like "newest" to cloud sync,
@@ -6133,6 +6147,130 @@ function icon(name, size){
     if(root) root.innerHTML = '';
   });
 
+
+  // ---------------- Copy for Word / Pages ----------------
+  // Puts the lesson on the clipboard as real headings and nested bullet lists with inline
+  // styles (Word and Pages ignore this page's CSS, and CSS-drawn bullets don't copy), plus a
+  // tab-indented plain-text version for apps that only take text.
+  let publishAction = 'print';
+  function setPublishAction(a){
+    publishAction = (a === 'copy') ? 'copy' : 'print';
+    document.querySelectorAll('#publishActionSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.action === publishAction));
+    const t = document.getElementById('publishChooserTitle'); if(t) t.textContent = publishAction === 'copy' ? 'Copy' : 'Print';
+    const h = document.getElementById('publishChooserHint'); if(h) h.textContent = publishAction === 'copy' ? 'What would you like to copy? Paste it into Word, Pages or Google Docs.' : 'What would you like to print or save as PDF?';
+    const b = document.getElementById('btnApplyCustomPublish'); if(b) b.textContent = publishAction === 'copy' ? 'Copy' : 'Print';
+  }
+  function runPublishAction(filter){
+    if(publishAction === 'copy') copyLessonForDocs(filter); else printLessonPdf(filter);
+  }
+  function cleanRunsHtml(text, runs){
+    return runsToHtml(text, runs).replace(/ data-r="[^"]*"/g, '').replace(/ class="rt-run"/g, '');
+  }
+  function buildLessonClipboard(filterOverride){
+    const filter = filterOverride || (publishPrefs ? publishPrefs.full : null);
+    const nodes = filter ? filterNodesForPublish(lesson.outline || [], 0, filter) : (lesson.outline || []);
+    const style = (filter && filter.style) || (publishPrefs && publishPrefs.style) || {};
+    const sched = computeScheduleStarts();
+    const FONT = "font-family:Calibri,'Segoe UI',Arial,sans-serif;";
+    const MUTED = 'color:#6E7469;';
+    let html = '', text = '';
+    const title = lesson.title || 'Untitled Lesson';
+    html += `<h1 style="${FONT}font-size:20pt;font-weight:bold;margin:0 0 8pt;">${escapeHtml(title)}</h1>`;
+    text += title + '\n\n';
+    const plain = n => (n.text || '').replace(/\s+/g, ' ').trim();
+    function timeInfo(n){
+      if(n.kind !== 'heading' || style.showTimeBadges === false) return '';
+      const s = sched[n.id]; if(!s) return '';
+      const parts = [];
+      if(n.minutes) parts.push(n.minutes + ' min');
+      if(s.clock) parts.push('starts ' + s.clock);
+      return parts.length ? ' (' + parts.join(' · ') + ')' : '';
+    }
+    function itemHtml(n){
+      const css = escapeHtml(styleObjToCssText(n.style));
+      if(n.kind === 'verse'){
+        const ref = n.ref ? `<b style="font-size:10pt;">${escapeHtml(n.ref)}</b>` : '';
+        const body = n.text ? `<i>${cleanRunsHtml(n.text, n.runs)}</i>` : '';
+        return ref + (ref && body ? '<br>' : '') + body;
+      }
+      if(n.kind === 'photo'){
+        const url = n.photoRef ? photoCache[n.photoRef] : null;
+        return (url ? `<img src="${url}" style="max-width:220px;max-height:170px;"><br>` : '') + escapeHtml(n.caption || '');
+      }
+      const inner = n.text ? `<span style="${css}">${cleanRunsHtml(n.text, n.runs)}</span>` : '';
+      if(n.kind === 'teachernote') return `<i style="${MUTED}"><b style="font-style:normal;">Note — </b>${inner}</i>`;
+      return inner;
+    }
+    function itemText(n){
+      if(n.kind === 'verse') return [n.ref, plain(n)].filter(Boolean).join(' — ');
+      if(n.kind === 'photo') return n.caption || '(photo)';
+      return (n.kind === 'teachernote' ? 'Note — ' : '') + plain(n);
+    }
+    // A run of non-heading siblings becomes one <ul>; headings break out of it.
+    function list(items, depth, headingDepth){
+      let h = '<ul style="margin:0 0 6pt;padding-left:22pt;' + FONT + 'font-size:11pt;line-height:1.35;">';
+      items.forEach(n=>{
+        const pad = '\t'.repeat(depth);
+        text += pad + '• ' + itemText(n) + '\n';
+        h += '<li style="margin:0 0 3pt;">' + itemHtml(n);
+        const kids = n.children || [];
+        if(kids.length) h += walk(kids, depth + 1, headingDepth, true);
+        h += '</li>';
+      });
+      return h + '</ul>';
+    }
+    function walk(nodes, depth, headingDepth, inList){
+      let out = '', run = [];
+      const flush = ()=>{ if(run.length){ out += list(run, depth, headingDepth); run = []; } };
+      nodes.forEach(n=>{
+        if(n.kind === 'heading' && !inList){
+          flush();
+          const lvl = Math.min(headingDepth + 2, 4);
+          const size = [14, 12.5, 11.5][Math.min(headingDepth, 2)];
+          const label = plain(n) + timeInfo(n);
+          out += `<h${lvl} style="${FONT}font-size:${size}pt;font-weight:bold;margin:12pt 0 4pt;">${cleanRunsHtml(n.text, n.runs)}${n.text ? '' : '(empty)'}<span style="${MUTED}font-weight:normal;font-size:10pt;">${escapeHtml(timeInfo(n))}</span></h${lvl}>`;
+          text += '\n' + (headingDepth === 0 ? label.toUpperCase() : label) + '\n';
+          if(n.children && n.children.length) out += walk(n.children, 0, headingDepth + 1, false);
+        } else {
+          run.push(n);
+        }
+      });
+      flush();
+      return out;
+    }
+    if(!nodes.length){ html += '<p>Nothing in the outline yet.</p>'; }
+    else html += walk(nodes, 0, 0, false);
+    return { html: `<div style="${FONT}">${html}</div>`, text: text.replace(/\n{3,}/g, '\n\n').trim() + '\n' };
+  }
+  async function copyLessonForDocs(filterOverride){
+    if(!lesson) return;
+    const { html, text } = buildLessonClipboard(filterOverride);
+    try{
+      if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+        await navigator.clipboard.write([new ClipboardItem({
+          'text/html': new Blob([html], {type:'text/html'}),
+          'text/plain': new Blob([text], {type:'text/plain'})
+        })]);
+      } else {
+        throw new Error('no async clipboard');
+      }
+    }catch(err){
+      // Fallback: select a hidden copy of the formatted content and use the browser's copy command.
+      const holder = document.createElement('div');
+      holder.contentEditable = 'true';
+      holder.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+      holder.innerHTML = html;
+      document.body.appendChild(holder);
+      const range = document.createRange(); range.selectNodeContents(holder);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      let ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){}
+      sel.removeAllRanges(); holder.remove();
+      if(!ok){ showToast('Could not copy. Your browser blocked clipboard access.', true); return; }
+    }
+    showToast('Copied. Paste it into Word, Pages or Google Docs.');
+  }
+
   // ---------------- Scripture modal (every verse currently in the lesson) ----------------
   function collectAllVerseNodes(){
     const out = [];
@@ -7286,6 +7424,8 @@ function icon(name, size){
   // Publish chooser
   document.getElementById('xClosePublishChooser').addEventListener('click', closePublishChooser);
   document.getElementById('publishChooserOverlay').addEventListener('click', (e)=>{ if(e.target.id==='publishChooserOverlay') closePublishChooser(); });
+  document.querySelectorAll('#publishActionSegmented button').forEach(b=> b.addEventListener('click', ()=> setPublishAction(b.dataset.action)));
+  document.getElementById('btnCopyPreview').addEventListener('click', ()=> copyLessonForDocs(activePublishFilter ? JSON.parse(JSON.stringify(activePublishFilter)) : undefined));
   document.querySelectorAll('.publish-choice').forEach(btn=>{
     btn.addEventListener('click', ()=> goPublish(btn.dataset.choice));
   });
