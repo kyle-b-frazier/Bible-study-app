@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bible Lesson Builder</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232F5D50'/%3E%3Cg transform='translate(8 8) scale(2)' fill='none' stroke='white' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7.6c-2.2-1.5-5.4-1.8-8.5-1.2v12c3.1-.5 6.3-.2 8.5 1.4 2.2-1.6 5.4-1.9 8.5-1.4v-12c-3.1-.6-6.3-.3-8.5 1.2zM12 7.6v12.2M12 1.6v4M10.2 3.3h3.6'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232F5D50'/%3E%3Cg transform='translate(8 8) scale(2)' fill='none' stroke='white' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7.6c-2.2-1.5-5.4-1.8-8.5-1.2v12c3.1-.5 6.3-.2 8.5 1.4 2.2-1.6 5.4-1.9 8.5-1.4v-12c-3.1-.6-6.3-.3-8.5 1.2zM12 7.6v12.2M12 1.6v4M10.2 3.3h3.6'/%3E%3C/g%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap');
 
@@ -426,7 +428,7 @@
      replaces the roman/alpha node numbering with plain nested bullets, so Statement/
      Question/Application content dropped in from Brainstorming reads as ordinary bulleted
      lines. Verse, Photo, and Teacher's Note keep light distinguishing treatment since
-     they're structurally different from plain text. Applied via a class on <body> so one
+     they're structurally different from plain text. Applied via a class on <body class="outline-style-classic"> so one
      toggle reaches both the live editor (#mainTree) and Field Notes output (#previewSurface). */
   body.outline-style-classic #mainTree{
     background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-lg);
@@ -965,6 +967,7 @@
     position:sticky; top:0; z-index:25;
   }
   .app-header-mark{width:24px; height:24px; border-radius:6px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.74rem; flex-shrink:0;}
+  .app-header-mark svg{width:16px; height:16px; display:block;}
   .app-header b{font-size:.86rem; font-weight:700; letter-spacing:-.01em; color:var(--text-dim);}
 
   /* ---------------- Mobile header + drawer (phones and small tablets, ≤900px) ----------------
@@ -1140,6 +1143,23 @@
     #panel-outline #mainTree.doc-view,
     body.outline-style-classic #panel-outline #mainTree{min-height:0; padding:28px 20px 60px;}
     .word-status .ws-hint{display:none;}
+  }
+  /* Phones: the document is the screen. It stretches down to the All / Sections / Subsections bar,
+     which is the bottom edge of the page, with no empty panel underneath. */
+  @media (max-width: 900px){
+    .app-shell{min-height:calc(100vh - 55px); min-height:calc(100dvh - 55px);}
+    main{flex:1 1 auto; display:flex; flex-direction:column; padding:0 !important;}
+    #panel-outline{flex:1 1 auto; display:flex; flex-direction:column; min-height:0;}
+    .word-ribbon{margin:0 !important;}
+    .page-scroller{flex:1 1 auto; display:flex; flex-direction:column; overflow-y:visible;}
+    #panel-outline #mainTree, body.outline-style-classic #panel-outline #mainTree{
+      flex:1 1 auto; max-width:none !important; width:100%; box-sizing:border-box; border-radius:0 !important; box-shadow:none !important; min-height:0; padding:22px 18px 40px;
+    }
+    .word-status{gap:10px; padding:6px 12px calc(6px + env(safe-area-inset-bottom, 0px));}
+    .word-status .ws-zoom{display:none;}
+    .word-status .ws-view{flex:1 1 auto; margin-left:8px;}
+    .word-status .ws-view .segmented{display:flex; width:100%;}
+    .word-status .ws-view .segmented button{flex:1; padding:4px 6px; font-size:.78rem;}
   }
   /* ================= Presenter Mode: plain document look =================
      Presenting should read like the Word-style editor page: white sheet, one family of
@@ -1602,7 +1622,7 @@
 </div>
 
 <div class="app-header no-print">
-  <div class="app-header-mark">B</div>
+  <div class="app-header-mark"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7.6c-2.2-1.5-5.4-1.8-8.5-1.2v12c3.1-.5 6.3-.2 8.5 1.4 2.2-1.6 5.4-1.9 8.5-1.4v-12c-3.1-.6-6.3-.3-8.5 1.2z"/><path d="M12 7.6v12.2"/><path d="M12 1.6v4M10.2 3.3h3.6"/></svg></div>
   <b>Bible Lesson Builder</b>
   <div class="mobile-header-actions">
     <button class="btn icon mobile-only" id="mBtnAuth" title="Sign in"></button>
@@ -2102,24 +2122,6 @@
         <div class="prefs-section">
           <h4>Account</h4>
           <div id="prefsAccountBody"></div>
-        </div>
-
-        <div class="prefs-section">
-          <h4>Outline Style</h4>
-          <p class="hint" style="margin-top:0;">Studio is the original card-based editor. Classic Outline restyles both the editor and your published Field Notes as a plain nested bulleted outline — closer to what you'd get typing in Word — so items dropped in from Brainstorming just read as ordinary lines, without type labels or colored borders.</p>
-          <div class="segmented" id="outlineStyleSegmented">
-            <button data-style="studio">Studio</button>
-            <button data-style="classic">Classic Outline</button>
-          </div>
-        </div>
-
-        <div class="prefs-section" id="editorViewPrefsSection">
-          <h4>Editor View</h4>
-          <p class="hint" style="margin-top:0;">How the outline you're editing looks on screen — same sections, subsections, and tools either way.</p>
-          <div class="segmented" id="editorViewSegmented">
-            <button data-view="builder">Builder</button>
-            <button data-view="document">Document</button>
-          </div>
         </div>
 
         <div class="prefs-section">
@@ -4509,39 +4511,12 @@ function icon(name, size){
   function applyEditorViewMode(mode){
     const mt = document.getElementById('mainTree');
     if(mt) mt.classList.toggle('doc-view', mode === 'document');
-    document.querySelectorAll('#editorViewSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.view === mode));
     try{ localStorage.setItem(lsKey('editor-view-mode'), mode); }catch(e){}
   }
   function initEditorViewMode(){
     let saved = null;
     try{ saved = localStorage.getItem(lsKey('editor-view-mode')); }catch(e){}
-    applyEditorViewMode(saved === 'builder' ? 'builder' : 'document');
-  }
-
-  // ---------------- Outline Style: Studio (default cards) vs Classic Outline ----------------
-  // A higher-level style than the Builder/Document toggle above: Classic Outline
-  // restyles both the live editor (#mainTree) and the published Field Notes output
-  // (#previewSurface) as a plain nested bulleted outline — bullets instead of type
-  // labels/colored borders, so Statement/Question/Application content is visually
-  // indistinguishable (just plain bulleted lines), while Verse, Photo, and Teacher's
-  // Note keep light distinguishing treatment since they're structurally different
-  // (a citation, an image, an aside). Applied via a class on <body> so it reaches
-  // both surfaces from one toggle, and so it's never clobbered by code elsewhere
-  // that reassigns #previewSurface's className wholesale.
-  function applyOutlineStyleMode(mode){
-    const m = mode === 'studio' ? 'studio' : 'classic';
-    document.body.classList.toggle('outline-style-classic', m === 'classic');
-    document.querySelectorAll('#outlineStyleSegmented button').forEach(b=> b.classList.toggle('active', b.dataset.style === m));
-    const evSection = document.getElementById('editorViewPrefsSection');
-    if(evSection) evSection.style.display = (m === 'classic') ? 'none' : '';
-    try{ localStorage.setItem(lsKey('outline-style'), m); }catch(e){}
-  }
-  function initOutlineStyleMode(){
-    let saved = null;
-    try{ saved = localStorage.getItem(lsKey('outline-style')); }catch(e){}
-    // Defaults to 'classic' — the Word-like bulleted outline is the main experience
-    // Kyle wants to try; Studio remains one click away in Preferences.
-    applyOutlineStyleMode(saved === 'studio' ? 'studio' : 'classic');
+    applyEditorViewMode('document');
   }
 
   // ---------------- Keyboard shortcuts cheatsheet ----------------
@@ -7374,14 +7349,6 @@ function icon(name, size){
     URL.revokeObjectURL(url);
   });
   document.getElementById('btnOpenAdvancedPublish').addEventListener('click', openAdvancedPublishModal);
-  document.getElementById('editorViewSegmented').addEventListener('click', (e)=>{
-    const btn = e.target.closest('button[data-view]'); if(!btn) return;
-    applyEditorViewMode(btn.dataset.view);
-  });
-  document.getElementById('outlineStyleSegmented').addEventListener('click', (e)=>{
-    const btn = e.target.closest('button[data-style]'); if(!btn) return;
-    applyOutlineStyleMode(btn.dataset.style);
-  });
   document.getElementById('xCloseAdvancedPublish').addEventListener('click', closeAdvancedPublishModal);
   document.getElementById('advancedPublishModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='advancedPublishModalOverlay') closeAdvancedPublishModal(); });
   document.getElementById('btnResetAdvancedPublish').addEventListener('click', resetAdvancedPublishSettings);
@@ -9810,7 +9777,6 @@ function icon(name, size){
   // ---------------- Init ----------------
   async function init(){
     initTheme();
-    initOutlineStyleMode();
     initPublishViewMode();
     initEditorViewMode();
     await loadPublishPrefs();
