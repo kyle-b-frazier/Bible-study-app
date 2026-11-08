@@ -4429,6 +4429,7 @@ function icon(name, size){
       { type:'command', id:'toggle-brainstorm', label:'Toggle Brainstorm' },
       { type:'command', id:'open-series', label:'Manage Series & Folders' },
       { type:'command', id:'open-library', label:'Open My Lessons' },
+      { type:'command', id:'load-file', label:'Open a lesson file from this computer' },
       { type:'command', id:'go-preview', label:'Presenter Mode (full screen for teaching)' },
       { type:'command', id:'export-pdf', label:'Print / Save as PDF' },
       { type:'command', id:'export-slides', label:'Export to Slides' },
@@ -4464,6 +4465,7 @@ function icon(name, size){
       case 'toggle-brainstorm': toggleBrainstormDrawer(); break;
       case 'open-series': openFolderModal(); break;
       case 'open-library': openLibraryModal(); break;
+      case 'load-file': { const f = document.getElementById('lessonFileInput'); f.value = ''; f.click(); break; }
       case 'go-preview': viewLesson(); break;
       case 'export-pdf': openPublishChooser(); break;
       case 'export-slides': exportToSlides(); break;
@@ -4543,7 +4545,7 @@ function icon(name, size){
     { keys: 'Ctrl Option N', label: 'Add a new line after the current one (a Statement; use the keys above to change it)' },
     { keys: 'Ctrl Option V', label: 'Add a Verse (replaces the current line if it\'s empty)' },
     { keys: 'Ctrl Option P', label: 'Add a Photo' },
-    { keys: 'Ctrl Option O / L / B', label: 'New Lesson, My Lessons, Brainstorm' },
+    { keys: 'Ctrl Option O / L / F / B', label: 'New Lesson, My Lessons, Open a lesson file, Brainstorm' },
     { keys: 'Ctrl Option M / D', label: 'Presenter Mode, Dark Mode' },
     { keys: '← / →', label: 'Turn pages in Presenter Mode (page-flip mode)' },
     { keys: '?', label: 'Show this shortcuts list' },
@@ -8959,7 +8961,7 @@ function icon(name, size){
   // replaces the current line when that line is still empty.
   const QUICK_LINE_KEYS = { KeyS:'statement', KeyQ:'question', KeyV:'verse', KeyA:'application', KeyT:'teachernote', KeyH:'heading', KeyP:'photo', KeyN:'add' };
   // Ctrl+Option keys for command-palette commands, so a key press runs them directly.
-  const QUICK_COMMAND_KEYS = { KeyO:'new-lesson', KeyL:'open-library', KeyB:'toggle-brainstorm', KeyM:'go-preview', KeyD:'toggle-theme' };
+  const QUICK_COMMAND_KEYS = { KeyO:'new-lesson', KeyL:'open-library', KeyF:'load-file', KeyB:'toggle-brainstorm', KeyM:'go-preview', KeyD:'toggle-theme' };
   function isEmptyTextLine(node){
     return !!node && (node.kind === 'heading' || FLOW_KINDS.includes(node.kind)) && !(node.text || '').trim()
       && !(node.children && node.children.length);
